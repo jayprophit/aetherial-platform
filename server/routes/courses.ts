@@ -1,47 +1,138 @@
 import { Router } from "express";
 import type { Request, Response } from "express";
+import { eq, like, and, or, desc, asc, sql } from "drizzle-orm";
+import { getDb } from "../db";
+import { courses, users, enrollments, lessons, reviews } from "../../drizzle/schema";
 
 const router = Router();
 
-// GET /api/courses - Get courses list
+// GET /api/courses - Get courses list with filtering
 router.get("/", async (req: Request, res: Response) => {
   try {
-    const { q, category, level, sort = "popular", page = 1, limit = 20 } = req.query;
-    
-    // TODO: Search/filter courses in database
-    
+    const {
+      q,
+      category,
+      level,
+      sort = "newest",
+      page = "1",
+      limit = "20",
+    } = req.query;
+    const pageNum = parseInt(page as string);
+    const limitNum = parseInt(limit as string);
+    const offset = (pageNum - 1) * limitNum;
+
+    const db = await getDb();
+    if (!db) {
+      return res.status(503).json({
+        success: false,
+        message: "Database not available",
+      });
+    }
+
+    // Build where conditions
+    const conditions = [eq(courses.isPublished, true)];
+
+    if (q && typeof q === "string") {
+      conditions.push(
+        or(
+          like(courses.title, `%${q}%`),
+          like(courses.description, `%${q}%`)
+        )!
+      );
+    }
+
+    if (category && typeof category === "string") {
+      conditions.push(eq(courses.category, category));
+    }
+
+    if (level && typeof level === "string") {
+      conditions.push(eq(courses.level, level as "beginner" | "intermediate" | "advanced"));
+    }
+
+    // Build order by clause
+    let orderByClause;
+    switch (sort) {
+      case "popular":
+        orderByClause = desc(courses.enrollmentsCount);
+        break;
+      case "rating":
+        orderByClause = desc(courses.rating);
+        break;
+      case "price-low":
+        orderByClause = asc(courses.price);
+        break;
+      case "price-high":
+        orderByClause = desc(courses.price);
+        break;
+      default: // newest
+        orderByClause = desc(courses.createdAt);
+    }
+
+    // Get courses with instructor info
+    const courseResults = await db
+      .select({
+        id: courses.id,
+        title: courses.title,
+        description: courses.description,
+        thumbnail: courses.thumbnail,
+        price: courses.price,
+        category: courses.category,
+        level: courses.level,
+        enrollmentsCount: courses.enrollmentsCount,
+        rating: courses.rating,
+        reviewsCount: courses.reviewsCount,
+        createdAt: courses.createdAt,
+        instructorId: users.id,
+        instructorName: users.displayName,
+        instructorAvatar: users.avatar,
+        instructorIsVerified: users.isVerified,
+      })
+      .from(courses)
+      .innerJoin(users, eq(courses.instructorId, users.id))
+      .where(and(...conditions))
+      .orderBy(orderByClause)
+      .limit(limitNum)
+      .offset(offset);
+
+    // Get total count
+    const totalResult = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(courses)
+      .where(and(...conditions));
+    const total = Number(totalResult[0]?.count || 0);
+
+    const coursesWithInstructor = courseResults.map((course) => ({
+      id: course.id,
+      title: course.title,
+      description: course.description,
+      thumbnail: course.thumbnail,
+      price: parseFloat(course.price),
+      category: course.category,
+      level: course.level,
+      enrollmentsCount: course.enrollmentsCount,
+      rating: course.rating ? parseFloat(course.rating) : 0,
+      reviewsCount: course.reviewsCount,
+      instructor: {
+        id: course.instructorId,
+        name: course.instructorName,
+        avatar: course.instructorAvatar,
+        isVerified: course.instructorIsVerified,
+      },
+      createdAt: course.createdAt,
+    }));
+
     res.json({
       success: true,
-      courses: [
-        {
-          id: "1",
-          title: "Web Development Bootcamp",
-          description: "Learn full-stack web development from scratch",
-          thumbnail: "/placeholder-course.jpg",
-          instructor: {
-            id: "1",
-            name: "John Instructor",
-            avatar: null,
-            rating: 4.9,
-          },
-          price: 99.99,
-          rating: 4.7,
-          students: 12500,
-          duration: "40 hours",
-          level: "Beginner",
-          category: "Programming",
-          lessons: 120,
-          certificate: true,
-        },
-      ],
+      courses: coursesWithInstructor,
       pagination: {
-        page: Number(page),
-        limit: Number(limit),
-        total: 1,
-        pages: 1,
+        page: pageNum,
+        limit: limitNum,
+        total,
+        pages: Math.ceil(total / limitNum),
       },
     });
   } catch (error) {
+    console.error("Error getting courses:", error);
     res.status(500).json({
       success: false,
       message: "Failed to get courses",
@@ -50,30 +141,158 @@ router.get("/", async (req: Request, res: Response) => {
   }
 });
 
-// POST /api/courses - Create course
-router.post("/", async (req: Request, res: Response) => {
+// GET /api/courses/:id - Get single course with lessons
+router.get("/:id", async (req: Request, res: Response) => {
   try {
-    const { title, description, thumbnail, price, category, level, syllabus } = req.body;
-    
-    // TODO: Get current user from JWT (instructor)
-    // TODO: Validate input
-    // TODO: Create course in database
-    
-    res.status(201).json({
+    const courseId = parseInt(req.params.id);
+
+    if (isNaN(courseId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid course ID",
+      });
+    }
+
+    const db = await getDb();
+    if (!db) {
+      return res.status(503).json({
+        success: false,
+        message: "Database not available",
+      });
+    }
+
+    // Get course with instructor
+    const courseResult = await db
+      .select({
+        id: courses.id,
+        title: courses.title,
+        description: courses.description,
+        thumbnail: courses.thumbnail,
+        price: courses.price,
+        category: courses.category,
+        level: courses.level,
+        enrollmentsCount: courses.enrollmentsCount,
+        rating: courses.rating,
+        reviewsCount: courses.reviewsCount,
+        isPublished: courses.isPublished,
+        createdAt: courses.createdAt,
+        updatedAt: courses.updatedAt,
+        instructorId: users.id,
+        instructorName: users.displayName,
+        instructorAvatar: users.avatar,
+        instructorBio: users.bio,
+        instructorIsVerified: users.isVerified,
+      })
+      .from(courses)
+      .innerJoin(users, eq(courses.instructorId, users.id))
+      .where(eq(courses.id, courseId))
+      .limit(1);
+
+    if (courseResult.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found",
+      });
+    }
+
+    const course = courseResult[0];
+
+    // Get lessons
+    const courseLessons = await db
+      .select({
+        id: lessons.id,
+        title: lessons.title,
+        content: lessons.content,
+        videoUrl: lessons.videoUrl,
+        duration: lessons.duration,
+        order: lessons.order,
+      })
+      .from(lessons)
+      .where(eq(lessons.courseId, courseId))
+      .orderBy(asc(lessons.order));
+
+    res.json({
       success: true,
-      message: "Course created successfully",
       course: {
-        id: "new-course-id",
-        title,
-        description,
-        thumbnail,
-        price,
-        category,
-        level,
-        createdAt: new Date().toISOString(),
+        id: course.id,
+        title: course.title,
+        description: course.description,
+        thumbnail: course.thumbnail,
+        price: parseFloat(course.price),
+        category: course.category,
+        level: course.level,
+        enrollmentsCount: course.enrollmentsCount,
+        rating: course.rating ? parseFloat(course.rating) : 0,
+        reviewsCount: course.reviewsCount,
+        isPublished: course.isPublished,
+        instructor: {
+          id: course.instructorId,
+          name: course.instructorName,
+          avatar: course.instructorAvatar,
+          bio: course.instructorBio,
+          isVerified: course.instructorIsVerified,
+        },
+        lessons: courseLessons,
+        createdAt: course.createdAt,
+        updatedAt: course.updatedAt,
       },
     });
   } catch (error) {
+    console.error("Error getting course:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to get course",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+});
+
+// POST /api/courses - Create new course
+router.post("/", async (req: Request, res: Response) => {
+  try {
+    const { title, description, thumbnail, price = 0, category, level } = req.body;
+
+    if (!title) {
+      return res.status(400).json({
+        success: false,
+        message: "Title is required",
+      });
+    }
+
+    // TODO: Get current user ID from JWT
+    const currentUserId = 1; // Mock user ID
+
+    const db = await getDb();
+    if (!db) {
+      return res.status(503).json({
+        success: false,
+        message: "Database not available",
+      });
+    }
+
+    const result = await db.insert(courses).values({
+      instructorId: currentUserId,
+      title,
+      description: description || null,
+      thumbnail: thumbnail || null,
+      price: price.toString(),
+      category: category || null,
+      level: level || null,
+      enrollmentsCount: 0,
+      rating: "0",
+      reviewsCount: 0,
+      isPublished: false,
+    });
+
+    const courseId = Number(result[0].insertId);
+
+    res.status(201).json({
+      success: true,
+      message: "Course created successfully",
+      courseId,
+    });
+  } catch (error) {
+    console.error("Error creating course:", error);
     res.status(500).json({
       success: false,
       message: "Failed to create course",
@@ -82,92 +301,76 @@ router.post("/", async (req: Request, res: Response) => {
   }
 });
 
-// GET /api/courses/:id - Get course details
-router.get("/:id", async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    
-    // TODO: Get course from database
-    // TODO: Check if user is enrolled
-    
-    res.json({
-      success: true,
-      course: {
-        id,
-        title: "Web Development Bootcamp",
-        description: "Learn full-stack web development from scratch",
-        thumbnail: "/placeholder-course.jpg",
-        instructor: {
-          id: "1",
-          name: "John Instructor",
-          avatar: null,
-          rating: 4.9,
-          students: 25000,
-          courses: 15,
-        },
-        price: 99.99,
-        rating: 4.7,
-        reviews: 3200,
-        students: 12500,
-        duration: "40 hours",
-        level: "Beginner",
-        category: "Programming",
-        language: "English",
-        certificate: true,
-        lastUpdated: new Date().toISOString(),
-        syllabus: [
-          {
-            section: "Introduction",
-            lessons: [
-              { id: "1", title: "Welcome", duration: "5:00", preview: true },
-              { id: "2", title: "Course Overview", duration: "10:00", preview: true },
-            ],
-          },
-          {
-            section: "HTML & CSS Basics",
-            lessons: [
-              { id: "3", title: "HTML Fundamentals", duration: "30:00", preview: false },
-              { id: "4", title: "CSS Styling", duration: "45:00", preview: false },
-            ],
-          },
-        ],
-        requirements: ["Basic computer skills", "Internet connection"],
-        whatYouLearn: [
-          "Build modern websites",
-          "Master HTML, CSS, JavaScript",
-          "Create full-stack applications",
-        ],
-        isEnrolled: false,
-        progress: 0,
-      },
-    });
-  } catch (error) {
-    res.status(404).json({
-      success: false,
-      message: "Course not found",
-      error: error instanceof Error ? error.message : "Unknown error",
-    });
-  }
-});
-
 // PUT /api/courses/:id - Update course
 router.put("/:id", async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
-    const updates = req.body;
-    
-    // TODO: Verify user is instructor
-    // TODO: Update course in database
-    
+    const courseId = parseInt(req.params.id);
+    const { title, description, thumbnail, price, category, level, isPublished } = req.body;
+
+    if (isNaN(courseId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid course ID",
+      });
+    }
+
+    // TODO: Verify user owns this course via JWT
+    const currentUserId = 1; // Mock user ID
+
+    const db = await getDb();
+    if (!db) {
+      return res.status(503).json({
+        success: false,
+        message: "Database not available",
+      });
+    }
+
+    // Check if course exists and belongs to user
+    const existingCourse = await db
+      .select()
+      .from(courses)
+      .where(eq(courses.id, courseId))
+      .limit(1);
+
+    if (existingCourse.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found",
+      });
+    }
+
+    if (existingCourse[0].instructorId !== currentUserId) {
+      return res.status(403).json({
+        success: false,
+        message: "You don't have permission to edit this course",
+      });
+    }
+
+    // Build update object
+    const updateData: any = {};
+    if (title !== undefined) updateData.title = title;
+    if (description !== undefined) updateData.description = description;
+    if (thumbnail !== undefined) updateData.thumbnail = thumbnail;
+    if (price !== undefined) updateData.price = price.toString();
+    if (category !== undefined) updateData.category = category;
+    if (level !== undefined) updateData.level = level;
+    if (isPublished !== undefined) updateData.isPublished = isPublished;
+
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No fields to update",
+      });
+    }
+
+    await db.update(courses).set(updateData).where(eq(courses.id, courseId));
+
     res.json({
       success: true,
       message: "Course updated successfully",
-      course: {
-        id,
-        ...updates,
-      },
     });
   } catch (error) {
+    console.error("Error updating course:", error);
     res.status(500).json({
       success: false,
       message: "Failed to update course",
@@ -179,17 +382,59 @@ router.put("/:id", async (req: Request, res: Response) => {
 // DELETE /api/courses/:id - Delete course
 router.delete("/:id", async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
-    
-    // TODO: Verify user is instructor
-    // TODO: Check for enrolled students
-    // TODO: Delete course from database
-    
+    const courseId = parseInt(req.params.id);
+
+    if (isNaN(courseId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid course ID",
+      });
+    }
+
+    // TODO: Verify user owns this course via JWT
+    const currentUserId = 1; // Mock user ID
+
+    const db = await getDb();
+    if (!db) {
+      return res.status(503).json({
+        success: false,
+        message: "Database not available",
+      });
+    }
+
+    // Check if course exists and belongs to user
+    const existingCourse = await db
+      .select()
+      .from(courses)
+      .where(eq(courses.id, courseId))
+      .limit(1);
+
+    if (existingCourse.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found",
+      });
+    }
+
+    if (existingCourse[0].instructorId !== currentUserId) {
+      return res.status(403).json({
+        success: false,
+        message: "You don't have permission to delete this course",
+      });
+    }
+
+    // Soft delete by unpublishing
+    await db
+      .update(courses)
+      .set({ isPublished: false })
+      .where(eq(courses.id, courseId));
+
     res.json({
       success: true,
       message: "Course deleted successfully",
     });
   } catch (error) {
+    console.error("Error deleting course:", error);
     res.status(500).json({
       success: false,
       message: "Failed to delete course",
@@ -201,109 +446,89 @@ router.delete("/:id", async (req: Request, res: Response) => {
 // POST /api/courses/:id/enroll - Enroll in course
 router.post("/:id/enroll", async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
-    
-    // TODO: Get current user from JWT
-    // TODO: Check if already enrolled
-    // TODO: Process payment if not free
-    // TODO: Create enrollment in database
-    
+    const courseId = parseInt(req.params.id);
+
+    if (isNaN(courseId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid course ID",
+      });
+    }
+
+    // TODO: Get current user ID from JWT
+    const currentUserId = 1; // Mock user ID
+
+    const db = await getDb();
+    if (!db) {
+      return res.status(503).json({
+        success: false,
+        message: "Database not available",
+      });
+    }
+
+    // Check if course exists
+    const course = await db
+      .select()
+      .from(courses)
+      .where(eq(courses.id, courseId))
+      .limit(1);
+
+    if (course.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found",
+      });
+    }
+
+    if (!course[0].isPublished) {
+      return res.status(400).json({
+        success: false,
+        message: "Course is not published",
+      });
+    }
+
+    // Check if already enrolled
+    const existing = await db
+      .select()
+      .from(enrollments)
+      .where(
+        and(eq(enrollments.userId, currentUserId), eq(enrollments.courseId, courseId))
+      )
+      .limit(1);
+
+    if (existing.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Already enrolled in this course",
+      });
+    }
+
+    // Create enrollment
+    await db.insert(enrollments).values({
+      userId: currentUserId,
+      courseId,
+      progress: 0,
+      completedAt: null,
+      certificateId: null,
+    });
+
+    // Update course enrollment count
+    await db
+      .update(courses)
+      .set({
+        enrollmentsCount: sql`${courses.enrollmentsCount} + 1`,
+      })
+      .where(eq(courses.id, courseId));
+
     res.status(201).json({
       success: true,
       message: "Enrolled successfully",
-      enrollment: {
-        courseId: id,
-        enrolledAt: new Date().toISOString(),
-        progress: 0,
-      },
     });
   } catch (error) {
+    console.error("Error enrolling in course:", error);
     res.status(500).json({
       success: false,
-      message: "Failed to enroll",
-      error: error instanceof Error ? error.message : "Unknown error",
-    });
-  }
-});
-
-// GET /api/courses/:id/progress - Get course progress
-router.get("/:id/progress", async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    
-    // TODO: Get current user from JWT
-    // TODO: Get progress from database
-    
-    res.json({
-      success: true,
-      progress: {
-        courseId: id,
-        completedLessons: ["1", "2", "3"],
-        totalLessons: 120,
-        percentage: 2.5,
-        lastAccessed: new Date().toISOString(),
-      },
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to get progress",
-      error: error instanceof Error ? error.message : "Unknown error",
-    });
-  }
-});
-
-// POST /api/courses/:id/lessons/:lessonId/complete - Mark lesson complete
-router.post("/:id/lessons/:lessonId/complete", async (req: Request, res: Response) => {
-  try {
-    const { id, lessonId } = req.params;
-    
-    // TODO: Get current user from JWT
-    // TODO: Mark lesson as complete
-    // TODO: Update progress
-    // TODO: Check if course completed (issue certificate)
-    
-    res.json({
-      success: true,
-      message: "Lesson marked as complete",
-      progress: {
-        completedLessons: ["1", "2", "3", lessonId],
-        percentage: 3.3,
-      },
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to mark lesson complete",
-      error: error instanceof Error ? error.message : "Unknown error",
-    });
-  }
-});
-
-// GET /api/courses/:id/certificate - Get course certificate
-router.get("/:id/certificate", async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    
-    // TODO: Get current user from JWT
-    // TODO: Verify course completed
-    // TODO: Generate or retrieve certificate
-    
-    res.json({
-      success: true,
-      certificate: {
-        id: "cert-id",
-        courseId: id,
-        courseName: "Web Development Bootcamp",
-        studentName: "John Doe",
-        completedAt: new Date().toISOString(),
-        certificateUrl: "/certificates/cert-id.pdf",
-      },
-    });
-  } catch (error) {
-    res.status(404).json({
-      success: false,
-      message: "Certificate not available",
+      message: "Failed to enroll in course",
       error: error instanceof Error ? error.message : "Unknown error",
     });
   }
@@ -312,55 +537,69 @@ router.get("/:id/certificate", async (req: Request, res: Response) => {
 // GET /api/courses/:id/reviews - Get course reviews
 router.get("/:id/reviews", async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
-    const { page = 1, limit = 20 } = req.query;
-    
-    // TODO: Get reviews from database
-    
+    const courseId = parseInt(req.params.id);
+    const { page = "1", limit = "20" } = req.query;
+    const pageNum = parseInt(page as string);
+    const limitNum = parseInt(limit as string);
+    const offset = (pageNum - 1) * limitNum;
+
+    if (isNaN(courseId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid course ID",
+      });
+    }
+
+    const db = await getDb();
+    if (!db) {
+      return res.status(503).json({
+        success: false,
+        message: "Database not available",
+      });
+    }
+
+    const reviewResults = await db
+      .select({
+        id: reviews.id,
+        rating: reviews.rating,
+        comment: reviews.comment,
+        createdAt: reviews.createdAt,
+        userId: users.id,
+        userName: users.displayName,
+        userAvatar: users.avatar,
+      })
+      .from(reviews)
+      .innerJoin(users, eq(reviews.userId, users.id))
+      .where(
+        and(eq(reviews.targetType, "course"), eq(reviews.targetId, courseId))
+      )
+      .orderBy(desc(reviews.createdAt))
+      .limit(limitNum)
+      .offset(offset);
+
+    const totalResult = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(reviews)
+      .where(
+        and(eq(reviews.targetType, "course"), eq(reviews.targetId, courseId))
+      );
+    const total = Number(totalResult[0]?.count || 0);
+
     res.json({
       success: true,
-      reviews: [],
+      reviews: reviewResults,
       pagination: {
-        page: Number(page),
-        limit: Number(limit),
-        total: 0,
-        pages: 0,
+        page: pageNum,
+        limit: limitNum,
+        total,
+        pages: Math.ceil(total / limitNum),
       },
     });
   } catch (error) {
+    console.error("Error getting course reviews:", error);
     res.status(500).json({
       success: false,
-      message: "Failed to get reviews",
-      error: error instanceof Error ? error.message : "Unknown error",
-    });
-  }
-});
-
-// POST /api/courses/:id/reviews - Add course review
-router.post("/:id/reviews", async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    const { rating, comment } = req.body;
-    
-    // TODO: Get current user from JWT
-    // TODO: Verify user completed course
-    // TODO: Create review in database
-    
-    res.status(201).json({
-      success: true,
-      message: "Review added successfully",
-      review: {
-        id: "new-review-id",
-        courseId: id,
-        rating,
-        comment,
-        createdAt: new Date().toISOString(),
-      },
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to add review",
+      message: "Failed to get course reviews",
       error: error instanceof Error ? error.message : "Unknown error",
     });
   }
