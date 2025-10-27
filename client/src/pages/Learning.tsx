@@ -1,121 +1,245 @@
-import { useState } from 'react';
-import { GraduationCap, Search, Filter, Star, Clock, Users, Play, BookOpen } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { BookOpen, Search, Filter, Star, Clock, Users, Award, Loader2, Play } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import { api } from '../lib/api';
+
+interface Course {
+  id: number;
+  instructorId: number;
+  title: string;
+  description: string;
+  category: string;
+  level: string;
+  price: string;
+  duration: number;
+  thumbnail: string;
+  rating: string;
+  enrollmentCount: number;
+  createdAt: string;
+}
 
 export default function Learning() {
-  const [activeTab, setActiveTab] = useState('all-courses');
+  const { user } = useAuth();
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState('all');
+  const [error, setError] = useState('');
 
-  const courses = Array.from({ length: 9 }, (_, i) => ({
-    id: i + 1,
-    title: `Course ${i + 1}: Advanced Topics`,
-    instructor: `Instructor ${i + 1}`,
-    rating: (Math.random() * 2 + 3).toFixed(1),
-    students: Math.floor(Math.random() * 10000),
-    duration: `${Math.floor(Math.random() * 20 + 5)}h`,
-    lessons: Math.floor(Math.random() * 50 + 10),
-    price: i % 3 === 0 ? 'Free' : `$${(Math.random() * 100 + 20).toFixed(2)}`,
-    image: `https://api.dicebear.com/7.x/shapes/svg?seed=course${i}`,
-    progress: i < 3 ? Math.floor(Math.random() * 100) : null,
-  }));
+  const categories = ['All', 'Programming', 'Design', 'Business', 'Marketing', 'Data Science'];
+
+  useEffect(() => {
+    fetchCourses();
+  }, [activeCategory, searchQuery]);
+
+  const fetchCourses = async () => {
+    try {
+      setLoading(true);
+      const params: any = { limit: 20 };
+      if (activeCategory !== 'all') {
+        params.category = activeCategory;
+      }
+      if (searchQuery) {
+        params.search = searchQuery;
+      }
+      const data = await api.courses.getAll(params);
+      setCourses(data);
+    } catch (err) {
+      setError('Failed to load courses');
+      console.error('Error fetching courses:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEnroll = async (courseId: number) => {
+    if (!user) {
+      setError('Please login to enroll in courses');
+      return;
+    }
+
+    try {
+      await api.courses.enroll(courseId);
+      setError('');
+      alert('Successfully enrolled in course!');
+    } catch (err) {
+      setError('Failed to enroll in course');
+      console.error('Error enrolling:', err);
+    }
+  };
+
+  const formatDuration = (minutes: number) => {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
+  };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+    <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
+      {/* Header */}
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold flex items-center gap-3">
-              <GraduationCap className="w-8 h-8 text-indigo-600" />
-              E-Learning
+            <h1 className="text-3xl font-bold flex items-center gap-3 text-slate-800">
+              <BookOpen className="w-8 h-8 text-blue-600" />
+              Learning Hub
             </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">Learn new skills, advance your career</p>
+            <p className="text-slate-600 mt-1">Expand your skills with expert-led courses</p>
           </div>
-          <button className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:shadow-lg">
-            Become Instructor
-          </button>
+          {user && (
+            <button className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-lg transition-all">
+              My Learning
+            </button>
+          )}
         </div>
 
+        {/* Search Bar */}
         <div className="flex gap-4 mt-6">
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
             <input
               type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search courses..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700"
+              className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
-          <button className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2">
+          <button className="px-4 py-3 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors flex items-center gap-2">
             <Filter className="w-5 h-5" />
             Filters
           </button>
         </div>
+
+        {error && (
+          <p className="text-red-500 text-sm mt-3">{error}</p>
+        )}
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-        <div className="border-b border-gray-200 dark:border-gray-700 flex">
-          {['all-courses', 'my-courses', 'certificates'].map((tab) => (
+      {/* Categories */}
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200">
+        <div className="border-b border-slate-200 flex overflow-x-auto">
+          {categories.map((cat) => (
             <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-6 py-4 font-medium border-b-2 ${
-                activeTab === tab ? 'border-indigo-600 text-indigo-600' : 'border-transparent'
+              key={cat}
+              onClick={() => setActiveCategory(cat.toLowerCase())}
+              className={`px-6 py-4 font-medium border-b-2 whitespace-nowrap transition-colors ${
+                activeCategory === cat.toLowerCase()
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-slate-600 hover:text-slate-800'
               }`}
             >
-              {tab.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+              {cat}
             </button>
           ))}
         </div>
 
-        <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {courses.map((course) => (
-            <div key={course.id} className="border rounded-lg overflow-hidden hover:shadow-lg transition">
-              <div className="relative">
-                <img src={course.image} alt={course.title} className="w-full h-40 object-cover" />
-                <div className="absolute top-2 right-2 bg-white px-2 py-1 rounded-full text-sm font-bold text-indigo-600">
-                  {course.price}
-                </div>
-                {course.progress !== null && (
-                  <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 p-2">
-                    <div className="w-full bg-gray-300 rounded-full h-2">
-                      <div 
-                        className="bg-indigo-600 h-2 rounded-full" 
-                        style={{ width: `${course.progress}%` }}
-                      />
+        {/* Loading State */}
+        {loading && (
+          <div className="flex justify-center items-center py-12">
+            <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!loading && courses.length === 0 && (
+          <div className="p-12 text-center">
+            <BookOpen className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-slate-800 mb-2">No courses found</h3>
+            <p className="text-slate-600">Try adjusting your search or filters</p>
+          </div>
+        )}
+
+        {/* Courses Grid */}
+        {!loading && courses.length > 0 && (
+          <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {courses.map((course) => (
+              <div
+                key={course.id}
+                className="border border-slate-200 rounded-xl overflow-hidden hover:shadow-lg transition-all group"
+              >
+                {/* Course Thumbnail */}
+                <div className="relative h-48 bg-gradient-to-br from-blue-500 to-purple-600 overflow-hidden">
+                  {course.thumbnail ? (
+                    <img
+                      src={course.thumbnail}
+                      alt={course.title}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <BookOpen className="w-16 h-16 text-white opacity-50" />
                     </div>
-                    <p className="text-white text-xs mt-1">{course.progress}% complete</p>
+                  )}
+                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all flex items-center justify-center">
+                    <Play className="w-16 h-16 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
-                )}
-              </div>
-              <div className="p-4">
-                <h3 className="font-semibold mb-2">{course.title}</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{course.instructor}</p>
-                <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mb-3">
-                  <div className="flex items-center gap-1">
-                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                    <span>{course.rating}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Users className="w-4 h-4" />
-                    <span>{course.students.toLocaleString()}</span>
+                  {/* Level Badge */}
+                  <div className="absolute top-3 left-3 px-3 py-1 bg-white rounded-full text-sm font-medium">
+                    {course.level}
                   </div>
                 </div>
-                <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mb-4">
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-4 h-4" />
-                    <span>{course.duration}</span>
+
+                {/* Course Info */}
+                <div className="p-5">
+                  <h3 className="font-bold text-lg text-slate-800 mb-2 line-clamp-2">
+                    {course.title}
+                  </h3>
+                  <p className="text-sm text-slate-600 mb-4 line-clamp-2">
+                    {course.description}
+                  </p>
+
+                  {/* Stats */}
+                  <div className="flex items-center gap-4 mb-4 text-sm text-slate-600">
+                    <div className="flex items-center gap-1">
+                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                      <span className="font-medium">{course.rating || '0.0'}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Users className="w-4 h-4" />
+                      <span>{course.enrollmentCount || 0}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-4 h-4" />
+                      <span>{formatDuration(course.duration)}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <BookOpen className="w-4 h-4" />
-                    <span>{course.lessons} lessons</span>
+
+                  {/* Price and Action */}
+                  <div className="flex items-center justify-between pt-4 border-t border-slate-200">
+                    <div>
+                      {parseFloat(course.price) > 0 ? (
+                        <p className="text-2xl font-bold text-blue-600">
+                          ${parseFloat(course.price).toFixed(2)}
+                        </p>
+                      ) : (
+                        <p className="text-2xl font-bold text-green-600">Free</p>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => handleEnroll(course.id)}
+                      disabled={!user}
+                      className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                    >
+                      Enroll Now
+                    </button>
                   </div>
+
+                  {/* Category Badge */}
+                  {course.category && (
+                    <div className="mt-3">
+                      <span className="text-xs px-3 py-1 bg-blue-100 text-blue-600 rounded-full font-medium">
+                        {course.category}
+                      </span>
+                    </div>
+                  )}
                 </div>
-                <button className="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center justify-center gap-2">
-                  <Play className="w-4 h-4" />
-                  {course.progress !== null ? 'Continue Learning' : 'Enroll Now'}
-                </button>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
 }
+
