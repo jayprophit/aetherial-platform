@@ -977,3 +977,222 @@ export type SkillEquivalency = typeof skillEquivalencies.$inferSelect;
 export type InternationalWageStandard = typeof internationalWageStandards.$inferSelect;
 export type ProductCourseLink = typeof productCourseLinks.$inferSelect;
 
+
+
+
+// ============================================================================
+// AI CONVERSATIONS & TRAINING DATA
+// ============================================================================
+
+/**
+ * AI Conversations - stores all AI chat sessions
+ * Used for history and training data collection
+ */
+export const aiConversations = mysqlTable('ai_conversations', {
+  id: int('id').autoincrement().primaryKey(),
+  userId: int('user_id').notNull(),
+  
+  // Conversation metadata
+  title: text('title'),
+  context: varchar('context', { length: 50 }).notNull(), // admin, user, product, course, support
+  
+  // Status
+  isActive: boolean('is_active').default(true),
+  isArchived: boolean('is_archived').default(false),
+  
+  // Timestamps
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+  lastMessageAt: timestamp('last_message_at').defaultNow().notNull(),
+  
+  // Metadata
+  metadata: json('metadata'),
+}, (table) => ({
+  userIdx: index('ai_conversations_user_idx').on(table.userId),
+  contextIdx: index('ai_conversations_context_idx').on(table.context),
+}));
+
+/**
+ * AI Messages - individual messages in conversations
+ * Stores both user queries and AI responses
+ */
+export const aiMessages = mysqlTable('ai_messages', {
+  id: int('id').autoincrement().primaryKey(),
+  conversationId: int('conversation_id').notNull(),
+  
+  // Message content
+  role: varchar('role', { length: 20 }).notNull(), // user, assistant, system
+  content: text('content').notNull(),
+  
+  // AI model info (for assistant messages)
+  model: varchar('model', { length: 50 }), // gpt-4o, claude-sonnet-4-5, aetherial-ai
+  taskType: varchar('task_type', { length: 50 }),
+  
+  // Token usage
+  inputTokens: int('input_tokens'),
+  outputTokens: int('output_tokens'),
+  totalTokens: int('total_tokens'),
+  
+  // Cost tracking (in USD)
+  inputCost: decimal('input_cost', { precision: 10, scale: 6 }),
+  outputCost: decimal('output_cost', { precision: 10, scale: 6 }),
+  totalCost: decimal('total_cost', { precision: 10, scale: 6 }),
+  
+  // Performance
+  latencyMs: int('latency_ms'),
+  
+  // Timestamps
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  
+  // Metadata
+  metadata: json('metadata'),
+}, (table) => ({
+  conversationIdx: index('ai_messages_conversation_idx').on(table.conversationId),
+  modelIdx: index('ai_messages_model_idx').on(table.model),
+  createdIdx: index('ai_messages_created_idx').on(table.createdAt),
+}));
+
+/**
+ * AI Feedback - user ratings and feedback
+ * CRITICAL for training AETHERIAL AI!
+ */
+export const aiFeedback = mysqlTable('ai_feedback', {
+  id: int('id').autoincrement().primaryKey(),
+  messageId: int('message_id').notNull(),
+  userId: int('user_id').notNull(),
+  
+  // Feedback type
+  type: varchar('type', { length: 20 }).notNull(), // thumbs_up, thumbs_down, rating
+  rating: int('rating'), // 1-5 stars
+  comment: text('comment'),
+  
+  // Tags for categorization
+  tags: json('tags'), // ["helpful", "accurate", "creative", "incorrect"]
+  
+  // Timestamps
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => ({
+  messageIdx: index('ai_feedback_message_idx').on(table.messageId),
+  userIdx: index('ai_feedback_user_idx').on(table.userId),
+  typeIdx: index('ai_feedback_type_idx').on(table.type),
+}));
+
+/**
+ * AI Training Data - curated examples for training AETHERIAL AI
+ * Only high-quality interactions with positive feedback
+ */
+export const aiTrainingData = mysqlTable('ai_training_data', {
+  id: int('id').autoincrement().primaryKey(),
+  conversationId: int('conversation_id'),
+  messageId: int('message_id'),
+  
+  // Training example
+  instruction: text('instruction').notNull(), // User query
+  input: text('input'), // Context
+  output: text('output').notNull(), // AI response
+  
+  // Source
+  sourceModel: varchar('source_model', { length: 50 }).notNull(), // Which model generated this
+  taskType: varchar('task_type', { length: 50 }).notNull(),
+  context: varchar('context', { length: 50 }).notNull(),
+  
+  // Quality
+  rating: int('rating'),
+  feedbackScore: decimal('feedback_score', { precision: 5, scale: 2 }),
+  isVerified: boolean('is_verified').default(false),
+  
+  // Training status
+  usedForTraining: boolean('used_for_training').default(false),
+  trainingEpoch: int('training_epoch'),
+  
+  // Timestamps
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  
+  // Metadata
+  metadata: json('metadata'),
+}, (table) => ({
+  sourceModelIdx: index('ai_training_data_source_model_idx').on(table.sourceModel),
+  taskTypeIdx: index('ai_training_data_task_type_idx').on(table.taskType),
+  ratingIdx: index('ai_training_data_rating_idx').on(table.rating),
+  verifiedIdx: index('ai_training_data_verified_idx').on(table.isVerified),
+}));
+
+/**
+ * AI Model Benchmarks - compare AETHERIAL AI vs other models
+ * Track performance improvements over time
+ */
+export const aiModelBenchmarks = mysqlTable('ai_model_benchmarks', {
+  id: int('id').autoincrement().primaryKey(),
+  
+  // Test info
+  testQuery: text('test_query').notNull(),
+  taskType: varchar('task_type', { length: 50 }).notNull(),
+  
+  // Model responses
+  aetherialResponse: text('aetherial_response'),
+  gpt4oResponse: text('gpt4o_response'),
+  claudeResponse: text('claude_response'),
+  deepseekResponse: text('deepseek_response'),
+  
+  // Performance metrics
+  aetherialLatencyMs: int('aetherial_latency_ms'),
+  gpt4oLatencyMs: int('gpt4o_latency_ms'),
+  claudeLatencyMs: int('claude_latency_ms'),
+  deepseekLatencyMs: int('deepseek_latency_ms'),
+  
+  // Quality scores (1-5)
+  aetherialScore: decimal('aetherial_score', { precision: 3, scale: 2 }),
+  gpt4oScore: decimal('gpt4o_score', { precision: 3, scale: 2 }),
+  claudeScore: decimal('claude_score', { precision: 3, scale: 2 }),
+  deepseekScore: decimal('deepseek_score', { precision: 3, scale: 2 }),
+  
+  // Winner
+  bestModel: varchar('best_model', { length: 50 }),
+  
+  // Timestamps
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  
+  // Metadata
+  metadata: json('metadata'),
+}, (table) => ({
+  taskTypeIdx: index('ai_model_benchmarks_task_type_idx').on(table.taskType),
+  createdIdx: index('ai_model_benchmarks_created_idx').on(table.createdAt),
+}));
+
+/**
+ * AI Model Usage - track usage and costs per model
+ */
+export const aiModelUsage = mysqlTable('ai_model_usage', {
+  id: int('id').autoincrement().primaryKey(),
+  
+  // Model info
+  model: varchar('model', { length: 50 }).notNull(),
+  taskType: varchar('task_type', { length: 50 }),
+  
+  // Usage stats
+  requestCount: int('request_count').default(0),
+  totalInputTokens: int('total_input_tokens').default(0),
+  totalOutputTokens: int('total_output_tokens').default(0),
+  totalCost: decimal('total_cost', { precision: 10, scale: 2 }).default('0'),
+  
+  // Performance stats
+  avgLatencyMs: int('avg_latency_ms'),
+  minLatencyMs: int('min_latency_ms'),
+  maxLatencyMs: int('max_latency_ms'),
+  
+  // Quality stats
+  avgRating: decimal('avg_rating', { precision: 3, scale: 2 }),
+  thumbsUpCount: int('thumbs_up_count').default(0),
+  thumbsDownCount: int('thumbs_down_count').default(0),
+  
+  // Time period (daily aggregation)
+  date: timestamp('date').notNull(),
+  
+  // Timestamps
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  modelIdx: index('ai_model_usage_model_idx').on(table.model),
+  dateIdx: index('ai_model_usage_date_idx').on(table.date),
+}));
+
