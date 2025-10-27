@@ -167,6 +167,7 @@ const mainMenuItems: MenuItem[] = [
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [aiAssistantOpen, setAiAssistantOpen] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState<string[]>(['home']);
   const [darkMode, setDarkMode] = useState(false);
@@ -187,43 +188,41 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     return location === path;
   };
 
-  const leftSidebarWidth = sidebarOpen ? 'w-72' : 'w-20';
-  const rightSidebarWidth = aiAssistantOpen ? 'w-80' : 'w-0';
+  const activeMenu = mainMenuItems.find(item => item.id === activeMainMenu);
 
   return (
     <div className={`min-h-screen ${darkMode ? 'dark bg-gray-900' : 'bg-gray-50'}`}>
-      {/* Left Sidebar - Full Height */}
+      {/* Left Sidebar - Desktop/Tablet */}
       <aside
-        className={`fixed left-0 top-0 bottom-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 overflow-y-auto z-50 transition-all duration-300 ${leftSidebarWidth}`}
+        className={`fixed left-0 top-0 bottom-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 overflow-y-auto z-50 transition-all duration-300 hidden md:block ${
+          sidebarOpen ? 'w-72' : 'w-20'
+        }`}
       >
         {/* Logo & Toggle */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
           {sidebarOpen ? (
-            <Link to="/" className="flex items-center gap-2">
+            <>
+              <Link to="/" className="flex items-center gap-2">
+                <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-blue-600 rounded-lg flex items-center justify-center">
+                  <Zap className="w-6 h-6 text-white" />
+                </div>
+                <span className="text-xl font-bold">AETHERIAL</span>
+              </Link>
+              <button
+                onClick={() => setSidebarOpen(false)}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="w-full flex justify-center"
+            >
               <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-blue-600 rounded-lg flex items-center justify-center">
                 <Zap className="w-6 h-6 text-white" />
               </div>
-              <span className="text-xl font-bold">AETHERIAL</span>
-            </Link>
-          ) : (
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-blue-600 rounded-lg flex items-center justify-center mx-auto">
-              <Zap className="w-6 h-6 text-white" />
-            </div>
-          )}
-          {sidebarOpen && (
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-          )}
-          {!sidebarOpen && (
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="absolute top-4 left-1/2 transform -translate-x-1/2 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-            >
-              <Menu className="w-5 h-5" />
             </button>
           )}
         </div>
@@ -239,13 +238,13 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                 }`}
                 title={item.label}
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 min-w-0">
                   <item.icon className="w-5 h-5 flex-shrink-0" />
                   {sidebarOpen && (
                     <>
-                      <span className="font-medium">{item.label}</span>
+                      <span className="font-medium truncate">{item.label}</span>
                       {item.badge && (
-                        <span className="ml-auto px-2 py-0.5 text-xs bg-red-500 text-white rounded-full">
+                        <span className="ml-auto px-2 py-0.5 text-xs bg-red-500 text-white rounded-full flex-shrink-0">
                           {item.badge}
                         </span>
                       )}
@@ -267,10 +266,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                           isActive(child.path) ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 font-medium' : 'text-gray-700 dark:text-gray-300'
                         }`}
                       >
-                        <child.icon className="w-4 h-4" />
-                        <span>{child.label}</span>
+                        <child.icon className="w-4 h-4 flex-shrink-0" />
+                        <span className="truncate">{child.label}</span>
                         {child.badge && (
-                          <span className="ml-auto px-2 py-0.5 text-xs bg-red-500 text-white rounded-full">
+                          <span className="ml-auto px-2 py-0.5 text-xs bg-red-500 text-white rounded-full flex-shrink-0">
                             {child.badge}
                           </span>
                         )}
@@ -284,27 +283,121 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         </nav>
       </aside>
 
+      {/* Mobile Sidebar Overlay */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 md:hidden" onClick={() => setMobileMenuOpen(false)}>
+          <aside className="fixed left-0 top-0 bottom-0 w-72 bg-white dark:bg-gray-800 overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+              <Link to="/" className="flex items-center gap-2" onClick={() => setMobileMenuOpen(false)}>
+                <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-blue-600 rounded-lg flex items-center justify-center">
+                  <Zap className="w-6 h-6 text-white" />
+                </div>
+                <span className="text-xl font-bold">AETHERIAL</span>
+              </Link>
+              <button onClick={() => setMobileMenuOpen(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <nav className="p-2 space-y-1">
+              {mainMenuItems.map((item) => (
+                <div key={item.id}>
+                  <button
+                    onClick={() => toggleMenu(item.id)}
+                    className={`w-full flex items-center justify-between p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
+                      activeMainMenu === item.id ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-600' : ''
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <item.icon className="w-5 h-5" />
+                      <span className="font-medium">{item.label}</span>
+                      {item.badge && (
+                        <span className="ml-auto px-2 py-0.5 text-xs bg-red-500 text-white rounded-full">
+                          {item.badge}
+                        </span>
+                      )}
+                    </div>
+                    {item.children && (
+                      expandedMenus.includes(item.id) ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />
+                    )}
+                  </button>
+                  {item.children && expandedMenus.includes(item.id) && (
+                    <div className="ml-8 mt-1 space-y-1">
+                      {item.children.map((child) => (
+                        <Link key={child.id} to={child.path || '#'} onClick={() => setMobileMenuOpen(false)}>
+                          <button
+                            className={`w-full flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-sm ${
+                              isActive(child.path) ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 font-medium' : 'text-gray-700 dark:text-gray-300'
+                            }`}
+                          >
+                            <child.icon className="w-4 h-4" />
+                            <span>{child.label}</span>
+                            {child.badge && (
+                              <span className="ml-auto px-2 py-0.5 text-xs bg-red-500 text-white rounded-full">
+                                {child.badge}
+                              </span>
+                            )}
+                          </button>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </nav>
+          </aside>
+        </div>
+      )}
+
       {/* Top Bar - Shifts between sidebars */}
       <header
         className={`fixed top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 z-40 transition-all duration-300 ${
-          sidebarOpen ? 'left-72' : 'left-20'
-        } ${aiAssistantOpen ? 'right-80' : 'right-0'}`}
+          sidebarOpen ? 'md:left-72' : 'md:left-20'
+        } ${aiAssistantOpen ? 'md:right-80' : 'md:right-0'} left-0 right-0`}
       >
         <div className="flex items-center justify-between h-16 px-4">
+          {/* Mobile Hamburger */}
+          <button
+            onClick={() => setMobileMenuOpen(true)}
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg md:hidden"
+          >
+            <Menu className="w-6 h-6" />
+          </button>
+
+          {/* Submenu Icons (Desktop/Tablet) */}
+          <div className="hidden md:flex items-center gap-2">
+            {activeMenu?.children?.slice(0, 4).map((submenu) => (
+              <Link key={submenu.id} to={submenu.path || '#'}>
+                <button
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors relative ${
+                    isActive(submenu.path) ? 'text-purple-600 bg-purple-50 dark:bg-purple-900/20' : 'text-gray-700 dark:text-gray-300'
+                  }`}
+                  title={submenu.label}
+                >
+                  <submenu.icon className="w-5 h-5" />
+                  {submenu.badge && (
+                    <span className="absolute -top-1 -right-1 px-1.5 py-0.5 bg-red-500 text-white text-xs rounded-full">
+                      {submenu.badge}
+                    </span>
+                  )}
+                </button>
+              </Link>
+            ))}
+          </div>
+
           {/* Search */}
-          <div className="flex-1 max-w-2xl">
+          <div className="flex-1 max-w-md mx-4">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search anything..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700"
+                placeholder="Search..."
+                className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700"
               />
             </div>
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-2 ml-4">
+          <div className="flex items-center gap-2">
             <button
               onClick={() => setDarkMode(!darkMode)}
               className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
@@ -320,47 +413,26 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                 <User className="w-5 h-5" />
               </button>
             </Link>
-            <button
-              onClick={() => setAiAssistantOpen(!aiAssistantOpen)}
-              className={`p-2 rounded-lg ${aiAssistantOpen ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-600' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}
-            >
-              <Bot className="w-5 h-5" />
-            </button>
           </div>
-        </div>
-
-        {/* Dynamic Submenu Tabs */}
-        <div className="flex items-center gap-1 px-4 py-2 border-t border-gray-100 dark:border-gray-700 overflow-x-auto">
-          {mainMenuItems.find(item => item.id === activeMainMenu)?.children?.map((submenu) => (
-            <Link key={submenu.id} to={submenu.path || '#'}>
-              <button className={`flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors whitespace-nowrap ${
-                location === submenu.path ? 'text-purple-600 bg-purple-50 dark:bg-purple-900/20 font-semibold' : 'text-gray-700 dark:text-gray-300'
-              }`}>
-                <submenu.icon className="w-4 h-4" />
-                <span className="text-sm">{submenu.label}</span>
-                {submenu.badge && (
-                  <span className="ml-1 px-2 py-0.5 bg-red-500 text-white text-xs rounded-full">{submenu.badge}</span>
-                )}
-              </button>
-            </Link>
-          ))}
         </div>
       </header>
 
       {/* Main Content Area */}
       <main
-        className={`transition-all duration-300 pt-32 ${
-          sidebarOpen ? 'ml-72' : 'ml-20'
-        } ${aiAssistantOpen ? 'mr-80' : 'mr-0'}`}
+        className={`transition-all duration-300 pt-16 ${
+          sidebarOpen ? 'md:ml-72' : 'md:ml-20'
+        } ${aiAssistantOpen ? 'md:mr-80' : 'md:mr-0'}`}
       >
-        <div className="p-6">
+        <div className="p-4 md:p-6">
           {children}
         </div>
       </main>
 
       {/* Right AI Assistant Sidebar */}
       <aside
-        className={`fixed right-0 top-0 bottom-0 bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 overflow-y-auto z-50 transition-all duration-300 ${rightSidebarWidth}`}
+        className={`fixed right-0 top-0 bottom-0 bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 overflow-y-auto z-50 transition-all duration-300 ${
+          aiAssistantOpen ? 'w-80' : 'w-0'
+        } hidden md:block`}
       >
         {aiAssistantOpen && (
           <>
@@ -387,9 +459,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                   <input
                     type="text"
                     placeholder="Ask me anything..."
-                    className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700"
+                    className="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700"
                   />
-                  <button className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+                  <button className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm">
                     Send
                   </button>
                 </div>
@@ -398,6 +470,26 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           </>
         )}
       </aside>
+
+      {/* AI Assistant Toggle Button (Floating on Mobile) */}
+      <button
+        onClick={() => setAiAssistantOpen(!aiAssistantOpen)}
+        className={`fixed bottom-4 right-4 p-4 rounded-full shadow-lg z-40 md:hidden ${
+          aiAssistantOpen ? 'bg-purple-600' : 'bg-gradient-to-br from-purple-600 to-blue-600'
+        } text-white`}
+      >
+        <Bot className="w-6 h-6" />
+      </button>
+
+      {/* Desktop AI Toggle */}
+      <button
+        onClick={() => setAiAssistantOpen(!aiAssistantOpen)}
+        className={`fixed bottom-4 right-4 p-3 rounded-lg shadow-lg z-40 hidden md:block ${
+          aiAssistantOpen ? 'bg-purple-600' : 'bg-gradient-to-br from-purple-600 to-blue-600'
+        } text-white hover:shadow-xl transition-all`}
+      >
+        <Bot className="w-5 h-5" />
+      </button>
     </div>
   );
 }
