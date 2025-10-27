@@ -1,57 +1,98 @@
 import { Router } from "express";
 import type { Request, Response } from "express";
+import { eq, desc, sql, and } from "drizzle-orm";
+import { getDb } from "../db";
+import { productOrders, products, users, cartItems } from "../../drizzle/schema";
 
 const router = Router();
 
 // GET /api/orders - Get user's orders
 router.get("/", async (req: Request, res: Response) => {
   try {
-    const { status, page = 1, limit = 20 } = req.query;
-    
-    // TODO: Get current user from JWT
-    // TODO: Get orders from database
-    
+    const { status, page = "1", limit = "20" } = req.query;
+    const pageNum = parseInt(page as string);
+    const limitNum = parseInt(limit as string);
+    const offset = (pageNum - 1) * limitNum;
+
+    // TODO: Get current user ID from JWT
+    const currentUserId = 1; // Mock user ID
+
+    const db = await getDb();
+    if (!db) {
+      return res.status(503).json({
+        success: false,
+        message: "Database not available",
+      });
+    }
+
+    // Build where conditions
+    const conditions = [eq(productOrders.buyerId, currentUserId)];
+    if (status && typeof status === "string") {
+      conditions.push(eq(productOrders.status, status as "pending" | "completed" | "cancelled"));
+    }
+
+    // Get orders with product and seller info
+    const orders = await db
+      .select({
+        id: productOrders.id,
+        quantity: productOrders.quantity,
+        totalPrice: productOrders.totalPrice,
+        status: productOrders.status,
+        createdAt: productOrders.createdAt,
+        completedAt: productOrders.completedAt,
+        productId: products.id,
+        productTitle: products.title,
+        productPrice: products.price,
+        productImages: products.images,
+        sellerId: users.id,
+        sellerName: users.displayName,
+      })
+      .from(productOrders)
+      .innerJoin(products, eq(productOrders.productId, products.id))
+      .innerJoin(users, eq(productOrders.sellerId, users.id))
+      .where(and(...conditions))
+      .orderBy(desc(productOrders.createdAt))
+      .limit(limitNum)
+      .offset(offset);
+
+    // Get total count
+    const totalResult = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(productOrders)
+      .where(and(...conditions));
+    const total = Number(totalResult[0]?.count || 0);
+
+    const ordersFormatted = orders.map((order) => ({
+      id: order.id,
+      product: {
+        id: order.productId,
+        title: order.productTitle,
+        price: parseFloat(order.productPrice),
+        images: order.productImages,
+      },
+      seller: {
+        id: order.sellerId,
+        name: order.sellerName,
+      },
+      quantity: order.quantity,
+      totalPrice: parseFloat(order.totalPrice),
+      status: order.status,
+      createdAt: order.createdAt,
+      completedAt: order.completedAt,
+    }));
+
     res.json({
       success: true,
-      orders: [
-        {
-          id: "1",
-          orderNumber: "ORD-1234567890",
-          items: [
-            {
-              product: {
-                id: "1",
-                name: "Wireless Headphones",
-                image: "/placeholder-product.jpg",
-              },
-              quantity: 1,
-              price: 199.99,
-            },
-          ],
-          subtotal: 199.99,
-          tax: 19.99,
-          shipping: 0,
-          total: 219.98,
-          status: "delivered",
-          shippingAddress: {
-            street: "123 Main St",
-            city: "San Francisco",
-            state: "CA",
-            zip: "94102",
-            country: "USA",
-          },
-          createdAt: new Date().toISOString(),
-          deliveredAt: new Date().toISOString(),
-        },
-      ],
+      orders: ordersFormatted,
       pagination: {
-        page: Number(page),
-        limit: Number(limit),
-        total: 1,
-        pages: 1,
+        page: pageNum,
+        limit: limitNum,
+        total,
+        pages: Math.ceil(total / limitNum),
       },
     });
   } catch (error) {
+    console.error("Error getting orders:", error);
     res.status(500).json({
       success: false,
       message: "Failed to get orders",
@@ -63,240 +104,265 @@ router.get("/", async (req: Request, res: Response) => {
 // GET /api/orders/:id - Get order details
 router.get("/:id", async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
-    
-    // TODO: Get current user from JWT
-    // TODO: Get order from database
-    // TODO: Verify user owns this order
-    
+    const orderId = parseInt(req.params.id);
+
+    if (isNaN(orderId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid order ID",
+      });
+    }
+
+    // TODO: Get current user ID from JWT
+    const currentUserId = 1; // Mock user ID
+
+    const db = await getDb();
+    if (!db) {
+      return res.status(503).json({
+        success: false,
+        message: "Database not available",
+      });
+    }
+
+    const order = await db
+      .select({
+        id: productOrders.id,
+        buyerId: productOrders.buyerId,
+        quantity: productOrders.quantity,
+        totalPrice: productOrders.totalPrice,
+        status: productOrders.status,
+        createdAt: productOrders.createdAt,
+        completedAt: productOrders.completedAt,
+        productId: products.id,
+        productTitle: products.title,
+        productDescription: products.description,
+        productPrice: products.price,
+        productImages: products.images,
+        sellerId: users.id,
+        sellerName: users.displayName,
+        sellerAvatar: users.avatar,
+      })
+      .from(productOrders)
+      .innerJoin(products, eq(productOrders.productId, products.id))
+      .innerJoin(users, eq(productOrders.sellerId, users.id))
+      .where(eq(productOrders.id, orderId))
+      .limit(1);
+
+    if (order.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    if (order[0].buyerId !== currentUserId) {
+      return res.status(403).json({
+        success: false,
+        message: "You don't have permission to view this order",
+      });
+    }
+
     res.json({
       success: true,
       order: {
-        id,
-        orderNumber: "ORD-1234567890",
-        items: [
-          {
-            product: {
-              id: "1",
-              name: "Wireless Headphones",
-              image: "/placeholder-product.jpg",
-              price: 199.99,
-            },
-            quantity: 1,
-            subtotal: 199.99,
-          },
-        ],
-        subtotal: 199.99,
-        tax: 19.99,
-        shipping: 0,
-        discount: 0,
-        total: 219.98,
-        status: "delivered",
-        paymentMethod: "Credit Card",
-        paymentStatus: "paid",
-        shippingAddress: {
-          name: "John Doe",
-          street: "123 Main St",
-          city: "San Francisco",
-          state: "CA",
-          zip: "94102",
-          country: "USA",
-          phone: "+1234567890",
+        id: order[0].id,
+        product: {
+          id: order[0].productId,
+          title: order[0].productTitle,
+          description: order[0].productDescription,
+          price: parseFloat(order[0].productPrice),
+          images: order[0].productImages,
         },
-        tracking: {
-          number: "TRACK123456",
-          carrier: "UPS",
-          url: "https://ups.com/track/TRACK123456",
+        seller: {
+          id: order[0].sellerId,
+          name: order[0].sellerName,
+          avatar: order[0].sellerAvatar,
         },
-        timeline: [
-          {
-            status: "pending",
-            timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-          },
-          {
-            status: "processing",
-            timestamp: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
-          },
-          {
-            status: "shipped",
-            timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-          },
-          {
-            status: "delivered",
-            timestamp: new Date().toISOString(),
-          },
-        ],
-        createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-        deliveredAt: new Date().toISOString(),
+        quantity: order[0].quantity,
+        totalPrice: parseFloat(order[0].totalPrice),
+        status: order[0].status,
+        createdAt: order[0].createdAt,
+        completedAt: order[0].completedAt,
       },
     });
   } catch (error) {
-    res.status(404).json({
+    console.error("Error getting order:", error);
+    res.status(500).json({
       success: false,
-      message: "Order not found",
+      message: "Failed to get order",
       error: error instanceof Error ? error.message : "Unknown error",
     });
   }
 });
 
-// POST /api/orders/:id/cancel - Cancel order
-router.post("/:id/cancel", async (req: Request, res: Response) => {
+// POST /api/orders - Create order (checkout)
+router.post("/", async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
-    const { reason } = req.body;
-    
-    // TODO: Get current user from JWT
-    // TODO: Verify user owns this order
-    // TODO: Check if order can be cancelled
-    // TODO: Process refund
-    // TODO: Update order status
-    // TODO: Send notification
-    
+    const { items } = req.body; // items: [{ productId, quantity }]
+
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Items are required",
+      });
+    }
+
+    // TODO: Get current user ID from JWT
+    const currentUserId = 1; // Mock user ID
+
+    const db = await getDb();
+    if (!db) {
+      return res.status(503).json({
+        success: false,
+        message: "Database not available",
+      });
+    }
+
+    // Process each item
+    const orderIds = [];
+    for (const item of items) {
+      const { productId, quantity } = item;
+
+      // Get product details
+      const product = await db
+        .select()
+        .from(products)
+        .where(eq(products.id, productId))
+        .limit(1);
+
+      if (product.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: `Product ${productId} not found`,
+        });
+      }
+
+      // Check stock
+      if (product[0].stock < quantity) {
+        return res.status(400).json({
+          success: false,
+          message: `Insufficient stock for product ${product[0].title}`,
+        });
+      }
+
+      // Calculate total
+      const totalPrice = parseFloat(product[0].price) * quantity;
+
+      // Create order
+      const result = await db.insert(productOrders).values({
+        buyerId: currentUserId,
+        sellerId: product[0].sellerId,
+        productId,
+        quantity,
+        totalPrice: totalPrice.toString(),
+        status: "pending",
+      });
+
+      orderIds.push(Number(result[0].insertId));
+
+      // Update product stock and sales count
+      await db
+        .update(products)
+        .set({
+          stock: sql`${products.stock} - ${quantity}`,
+          salesCount: sql`${products.salesCount} + ${quantity}`,
+        })
+        .where(eq(products.id, productId));
+    }
+
+    // Clear cart
+    await db.delete(cartItems).where(eq(cartItems.userId, currentUserId));
+
+    res.status(201).json({
+      success: true,
+      message: "Orders created successfully",
+      orderIds,
+    });
+  } catch (error) {
+    console.error("Error creating order:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to create order",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+});
+
+// PUT /api/orders/:id/cancel - Cancel order
+router.put("/:id/cancel", async (req: Request, res: Response) => {
+  try {
+    const orderId = parseInt(req.params.id);
+
+    if (isNaN(orderId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid order ID",
+      });
+    }
+
+    // TODO: Get current user ID from JWT
+    const currentUserId = 1; // Mock user ID
+
+    const db = await getDb();
+    if (!db) {
+      return res.status(503).json({
+        success: false,
+        message: "Database not available",
+      });
+    }
+
+    // Get order
+    const order = await db
+      .select()
+      .from(productOrders)
+      .where(eq(productOrders.id, orderId))
+      .limit(1);
+
+    if (order.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    if (order[0].buyerId !== currentUserId) {
+      return res.status(403).json({
+        success: false,
+        message: "You don't have permission to cancel this order",
+      });
+    }
+
+    if (order[0].status !== "pending") {
+      return res.status(400).json({
+        success: false,
+        message: "Only pending orders can be cancelled",
+      });
+    }
+
+    // Cancel order
+    await db
+      .update(productOrders)
+      .set({ status: "cancelled" })
+      .where(eq(productOrders.id, orderId));
+
+    // Restore product stock
+    await db
+      .update(products)
+      .set({
+        stock: sql`${products.stock} + ${order[0].quantity}`,
+        salesCount: sql`GREATEST(${products.salesCount} - ${order[0].quantity}, 0)`,
+      })
+      .where(eq(products.id, order[0].productId));
+
     res.json({
       success: true,
       message: "Order cancelled successfully",
-      order: {
-        id,
-        status: "cancelled",
-        cancelledAt: new Date().toISOString(),
-        refundStatus: "processing",
-      },
     });
   } catch (error) {
+    console.error("Error cancelling order:", error);
     res.status(500).json({
       success: false,
       message: "Failed to cancel order",
-      error: error instanceof Error ? error.message : "Unknown error",
-    });
-  }
-});
-
-// POST /api/orders/:id/return - Request return
-router.post("/:id/return", async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    const { reason, items } = req.body;
-    
-    // TODO: Get current user from JWT
-    // TODO: Verify user owns this order
-    // TODO: Check if order can be returned
-    // TODO: Create return request
-    // TODO: Send notification to seller
-    
-    res.status(201).json({
-      success: true,
-      message: "Return request submitted",
-      returnRequest: {
-        id: "return-id",
-        orderId: id,
-        reason,
-        items,
-        status: "pending",
-        createdAt: new Date().toISOString(),
-      },
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to request return",
-      error: error instanceof Error ? error.message : "Unknown error",
-    });
-  }
-});
-
-// POST /api/orders/:id/review - Add order review
-router.post("/:id/review", async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    const { productId, rating, comment, images } = req.body;
-    
-    // TODO: Get current user from JWT
-    // TODO: Verify user owns this order and received it
-    // TODO: Create review
-    
-    res.status(201).json({
-      success: true,
-      message: "Review added successfully",
-      review: {
-        id: "review-id",
-        orderId: id,
-        productId,
-        rating,
-        comment,
-        images,
-        createdAt: new Date().toISOString(),
-      },
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to add review",
-      error: error instanceof Error ? error.message : "Unknown error",
-    });
-  }
-});
-
-// GET /api/orders/:id/invoice - Get order invoice
-router.get("/:id/invoice", async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    
-    // TODO: Get current user from JWT
-    // TODO: Verify user owns this order
-    // TODO: Generate or retrieve invoice PDF
-    
-    res.json({
-      success: true,
-      invoice: {
-        orderId: id,
-        invoiceNumber: "INV-1234567890",
-        invoiceUrl: "/invoices/INV-1234567890.pdf",
-        createdAt: new Date().toISOString(),
-      },
-    });
-  } catch (error) {
-    res.status(404).json({
-      success: false,
-      message: "Invoice not found",
-      error: error instanceof Error ? error.message : "Unknown error",
-    });
-  }
-});
-
-// GET /api/orders/:id/tracking - Get tracking info
-router.get("/:id/tracking", async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    
-    // TODO: Get current user from JWT
-    // TODO: Verify user owns this order
-    // TODO: Get tracking info from carrier API
-    
-    res.json({
-      success: true,
-      tracking: {
-        number: "TRACK123456",
-        carrier: "UPS",
-        status: "delivered",
-        estimatedDelivery: new Date().toISOString(),
-        updates: [
-          {
-            status: "Delivered",
-            location: "San Francisco, CA",
-            timestamp: new Date().toISOString(),
-          },
-          {
-            status: "Out for delivery",
-            location: "San Francisco, CA",
-            timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-          },
-        ],
-      },
-    });
-  } catch (error) {
-    res.status(404).json({
-      success: false,
-      message: "Tracking info not found",
       error: error instanceof Error ? error.message : "Unknown error",
     });
   }
