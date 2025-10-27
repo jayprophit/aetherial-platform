@@ -2,6 +2,7 @@ import express from "express";
 import { createServer } from "http";
 import path from "path";
 import { fileURLToPath } from "url";
+import cors from "cors";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -9,6 +10,30 @@ const __dirname = path.dirname(__filename);
 async function startServer() {
   const app = express();
   const server = createServer(app);
+
+  // Middleware
+  app.use(cors());
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
+
+  // API Routes
+  app.use("/api/auth", (await import("./routes/auth.js")).default);
+  app.use("/api/users", (await import("./routes/users.js")).default);
+  app.use("/api/posts", (await import("./routes/posts.js")).default);
+  app.use("/api/comments", (await import("./routes/comments.js")).default);
+  app.use("/api/friends", (await import("./routes/friends.js")).default);
+  app.use("/api/groups", (await import("./routes/groups.js")).default);
+  app.use("/api/messages", (await import("./routes/messages.js")).default);
+  app.use("/api/products", (await import("./routes/products.js")).default);
+  app.use("/api/courses", (await import("./routes/courses.js")).default);
+  app.use("/api/jobs", (await import("./routes/jobs.js")).default);
+  app.use("/api/ai", (await import("./routes/ai.js")).default);
+  app.use("/api/upload", (await import("./routes/upload.js")).default);
+
+  // Health check
+  app.get("/api/health", (_req, res) => {
+    res.json({ status: "ok", timestamp: new Date().toISOString() });
+  });
 
   // Serve static files from dist/public in production
   const staticPath =
@@ -26,8 +51,10 @@ async function startServer() {
   const port = process.env.PORT || 3000;
 
   server.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}/`);
+    console.log(`✅ Server running on http://localhost:${port}/`);
+    console.log(`✅ API available at http://localhost:${port}/api`);
   });
 }
 
 startServer().catch(console.error);
+
