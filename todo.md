@@ -942,3 +942,20 @@ Layer 7: Light Circuits
 
 **Priority:** HIGH - Fix before continuing with more pages
 
+
+
+
+---
+
+## 🎨 CORRECTED LAYOUT DESIGN (USER CLARIFICATION)
+
+**Requirements:**
+- [x] Keep top bar with submenus
+- [x] Left sidebar goes to TOP of screen (full height, uninterrupted)
+- [x] When left sidebar opens → top bar shifts right
+- [x] When right sidebar opens → top bar shifts left
+- [x] Top bar "squeezes" between sidebars dynamically
+- [x] Clean, professional appearance
+
+**Priority:** HIGH - Fix immediately
+

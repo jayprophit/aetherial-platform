@@ -3,7 +3,7 @@ import { Link, useLocation } from 'wouter';
 import {
   Home, Users, UsersRound, MessageSquare, ShoppingCart, GraduationCap,
   Briefcase, Bot, Wallet, TrendingUp, Image, Cpu, Factory, Zap,
-  Vote, Settings, Bell, Menu, X, ChevronDown, ChevronRight,
+  Vote, Settings, Bell, Menu, X, ChevronDown, ChevronRight, ChevronLeft,
   Search, User, LogOut, Moon, Sun
 } from 'lucide-react';
 
@@ -171,6 +171,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const [expandedMenus, setExpandedMenus] = useState<string[]>(['home']);
   const [darkMode, setDarkMode] = useState(false);
   const [location] = useLocation();
+  const [activeMainMenu, setActiveMainMenu] = useState<string>('home');
 
   const toggleMenu = (menuId: string) => {
     setExpandedMenus(prev =>
@@ -178,6 +179,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         ? prev.filter(id => id !== menuId)
         : [...prev, menuId]
     );
+    setActiveMainMenu(menuId);
   };
 
   const isActive = (path?: string) => {
@@ -185,45 +187,46 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     return location === path;
   };
 
+  const leftSidebarWidth = sidebarOpen ? 'w-72' : 'w-20';
+  const rightSidebarWidth = aiAssistantOpen ? 'w-80' : 'w-0';
+
   return (
-    <div className={`min-h-screen flex ${darkMode ? 'dark bg-gray-900' : 'bg-gray-50'}`}>
-      {/* Left Sidebar */}
+    <div className={`min-h-screen ${darkMode ? 'dark bg-gray-900' : 'bg-gray-50'}`}>
+      {/* Left Sidebar - Full Height */}
       <aside
-        className={`fixed left-0 top-0 bottom-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 overflow-y-auto z-40 transition-all duration-300 ${
-          sidebarOpen ? 'w-72' : 'w-20'
-        }`}
+        className={`fixed left-0 top-0 bottom-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 overflow-y-auto z-50 transition-all duration-300 ${leftSidebarWidth}`}
       >
         {/* Logo & Toggle */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-          {sidebarOpen && (
+          {sidebarOpen ? (
             <Link to="/" className="flex items-center gap-2">
               <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-blue-600 rounded-lg flex items-center justify-center">
                 <Zap className="w-6 h-6 text-white" />
               </div>
               <span className="text-xl font-bold">AETHERIAL</span>
             </Link>
-          )}
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-          >
-            {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
-        </div>
-
-        {/* Search (when expanded) */}
-        {sidebarOpen && (
-          <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search..."
-                className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700"
-              />
+          ) : (
+            <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-blue-600 rounded-lg flex items-center justify-center mx-auto">
+              <Zap className="w-6 h-6 text-white" />
             </div>
-          </div>
-        )}
+          )}
+          {sidebarOpen && (
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+          )}
+          {!sidebarOpen && (
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="absolute top-4 left-1/2 transform -translate-x-1/2 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+          )}
+        </div>
 
         {/* Main Navigation */}
         <nav className="p-2 space-y-1">
@@ -232,7 +235,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               <button
                 onClick={() => toggleMenu(item.id)}
                 className={`w-full flex items-center justify-between p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
-                  expandedMenus.includes(item.id) ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-600' : ''
+                  activeMainMenu === item.id ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-600' : ''
                 }`}
                 title={item.label}
               >
@@ -279,44 +282,74 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             </div>
           ))}
         </nav>
+      </aside>
 
-        {/* Bottom Actions (when expanded) */}
-        {sidebarOpen && (
-          <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 space-y-2">
-            <button
-              onClick={() => setAiAssistantOpen(!aiAssistantOpen)}
-              className={`w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
-                aiAssistantOpen ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-600' : ''
-              }`}
-            >
-              <Bot className="w-5 h-5" />
-              <span className="font-medium">AI Assistant</span>
-            </button>
+      {/* Top Bar - Shifts between sidebars */}
+      <header
+        className={`fixed top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 z-40 transition-all duration-300 ${
+          sidebarOpen ? 'left-72' : 'left-20'
+        } ${aiAssistantOpen ? 'right-80' : 'right-0'}`}
+      >
+        <div className="flex items-center justify-between h-16 px-4">
+          {/* Search */}
+          <div className="flex-1 max-w-2xl">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search anything..."
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700"
+              />
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center gap-2 ml-4">
             <button
               onClick={() => setDarkMode(!darkMode)}
-              className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
             >
               {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-              <span className="font-medium">{darkMode ? 'Light Mode' : 'Dark Mode'}</span>
             </button>
-            <button className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors relative">
+            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg relative">
               <Bell className="w-5 h-5" />
-              <span className="font-medium">Notifications</span>
-              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
+              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
             </button>
             <Link to="/profile">
-              <button className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+              <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
                 <User className="w-5 h-5" />
-                <span className="font-medium">Profile</span>
               </button>
             </Link>
+            <button
+              onClick={() => setAiAssistantOpen(!aiAssistantOpen)}
+              className={`p-2 rounded-lg ${aiAssistantOpen ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-600' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}
+            >
+              <Bot className="w-5 h-5" />
+            </button>
           </div>
-        )}
-      </aside>
+        </div>
+
+        {/* Dynamic Submenu Tabs */}
+        <div className="flex items-center gap-1 px-4 py-2 border-t border-gray-100 dark:border-gray-700 overflow-x-auto">
+          {mainMenuItems.find(item => item.id === activeMainMenu)?.children?.map((submenu) => (
+            <Link key={submenu.id} to={submenu.path || '#'}>
+              <button className={`flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors whitespace-nowrap ${
+                location === submenu.path ? 'text-purple-600 bg-purple-50 dark:bg-purple-900/20 font-semibold' : 'text-gray-700 dark:text-gray-300'
+              }`}>
+                <submenu.icon className="w-4 h-4" />
+                <span className="text-sm">{submenu.label}</span>
+                {submenu.badge && (
+                  <span className="ml-1 px-2 py-0.5 bg-red-500 text-white text-xs rounded-full">{submenu.badge}</span>
+                )}
+              </button>
+            </Link>
+          ))}
+        </div>
+      </header>
 
       {/* Main Content Area */}
       <main
-        className={`flex-1 transition-all duration-300 ${
+        className={`transition-all duration-300 pt-32 ${
           sidebarOpen ? 'ml-72' : 'ml-20'
         } ${aiAssistantOpen ? 'mr-80' : 'mr-0'}`}
       >
@@ -326,41 +359,45 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       </main>
 
       {/* Right AI Assistant Sidebar */}
-      {aiAssistantOpen && (
-        <aside className="fixed right-0 top-0 bottom-0 w-80 bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 overflow-y-auto z-40 transition-transform">
-          <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-            <h3 className="font-bold text-lg flex items-center gap-2">
-              <Bot className="w-5 h-5 text-purple-600" />
-              AI Assistant
-            </h3>
-            <button
-              onClick={() => setAiAssistantOpen(false)}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-          <div className="p-4">
-            <div className="space-y-4">
-              <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
-                <p className="text-sm text-gray-700 dark:text-gray-300">
-                  👋 Hi! I'm your AI assistant. How can I help you today?
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="Ask me anything..."
-                  className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700"
-                />
-                <button className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
-                  Send
-                </button>
+      <aside
+        className={`fixed right-0 top-0 bottom-0 bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 overflow-y-auto z-50 transition-all duration-300 ${rightSidebarWidth}`}
+      >
+        {aiAssistantOpen && (
+          <>
+            <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+              <h3 className="font-bold text-lg flex items-center gap-2">
+                <Bot className="w-5 h-5 text-purple-600" />
+                AI Assistant
+              </h3>
+              <button
+                onClick={() => setAiAssistantOpen(false)}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-4">
+              <div className="space-y-4">
+                <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
+                  <p className="text-sm text-gray-700 dark:text-gray-300">
+                    👋 Hi! I'm your AI assistant. How can I help you today?
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Ask me anything..."
+                    className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700"
+                  />
+                  <button className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+                    Send
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        </aside>
-      )}
+          </>
+        )}
+      </aside>
     </div>
   );
 }
