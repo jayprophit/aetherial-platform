@@ -201,6 +201,19 @@ export const messagesApi = {
   markAsRead: (senderId: number) => api.put("/messages/read", { senderId }),
 };
 
+// Admin API
+export const adminApi = {
+  getStats: () => api.get("/admin/stats"),
+  getUsers: (params: string) => api.get(`/admin/users?${params}`),
+  updateUser: (id: number, data: any) => api.put(`/admin/users/${id}`, data),
+  deleteUser: (id: number) => api.delete(`/admin/users/${id}`),
+  getPosts: (params: string) => api.get(`/admin/posts?${params}`),
+  deletePost: (id: number) => api.delete(`/admin/posts/${id}`),
+  getOrders: (params: string) => api.get(`/admin/orders?${params}`),
+  updateOrder: (id: number, data: any) => api.put(`/admin/orders/${id}`, data),
+  getAnalytics: (params: string) => api.get(`/admin/analytics?${params}`),
+};
+
 // Groups API
 export const groupsApi = {
   getGroups: (params?: { q?: string; category?: string; page?: number }) => {
