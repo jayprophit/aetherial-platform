@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'wouter';
+import NotificationBell from './NotificationBell';
 import {
   Home, Users, UsersRound, MessageSquare, ShoppingCart, GraduationCap,
   Briefcase, Bot, Wallet, TrendingUp, Image, Cpu, Factory, Zap,
@@ -580,10 +581,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             >
               {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
-            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg relative">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-            </button>
+            <NotificationBell />
             <Link to="/profile">
               <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
                 <User className="w-5 h-5" />
