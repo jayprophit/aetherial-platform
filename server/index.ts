@@ -27,8 +27,8 @@ async function startServer() {
   app.use("/api/products", (await import("./routes/products.js")).default);
   app.use("/api/courses", (await import("./routes/courses.js")).default);
   app.use("/api/jobs", (await import("./routes/jobs.js")).default);
+  app.use("/api/upload", (await import("./routes/upload.js")).default);
   // AI routes handled by tRPC
-  // Upload routes handled by tRPC
 
   // Health check
   app.get("/api/health", (_req, res) => {
@@ -42,6 +42,10 @@ async function startServer() {
       : path.resolve(__dirname, "..", "dist", "public");
 
   app.use(express.static(staticPath));
+  
+  // Serve uploaded files
+  const uploadsPath = path.resolve(process.cwd(), "uploads");
+  app.use("/uploads", express.static(uploadsPath));
 
   // Handle client-side routing - serve index.html for all routes
   app.get("*", (_req, res) => {
