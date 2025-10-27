@@ -1,159 +1,116 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Heart, MessageCircle, Share2, MoreHorizontal, Image as ImageIcon,
-  Video, Smile, MapPin, Users, TrendingUp, Award, Zap
+  Video, Smile, MapPin, Users, TrendingUp, Award, Zap, Loader2
 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import { api } from '../lib/api';
 
 interface Post {
-  id: string;
-  author: {
-    name: string;
-    avatar: string;
-    verified: boolean;
-  };
+  id: number;
+  userId: number;
   content: string;
-  image?: string;
-  likes: number;
-  comments: number;
-  shares: number;
-  timestamp: string;
+  mediaUrl?: string;
+  mediaType?: string;
+  likesCount: number;
+  commentsCount: number;
+  sharesCount: number;
+  createdAt: string;
+  user?: {
+    id: number;
+    fullName: string;
+    email: string;
+  };
   liked?: boolean;
 }
 
-const mockPosts: Post[] = [
-  {
-    id: '1',
-    author: {
-      name: 'Sarah Johnson',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah',
-      verified: true
-    },
-    content: 'Just completed my first blockchain development course! 🎉 Earned 500 AETH tokens and unlocked a premium AI course. This platform is amazing!',
-    likes: 234,
-    comments: 45,
-    shares: 12,
-    timestamp: '2 hours ago',
-    liked: false
-  },
-  {
-    id: '2',
-    author: {
-      name: 'Michael Chen',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Michael',
-      verified: false
-    },
-    content: 'Check out my new IoT device setup! Automated my entire home with the robotics marketplace. Who else is into smart home automation?',
-    image: 'https://images.unsplash.com/photo-1558002038-1055907df827?w=800',
-    likes: 567,
-    comments: 89,
-    shares: 34,
-    timestamp: '5 hours ago',
-    liked: true
-  },
-  {
-    id: '3',
-    author: {
-      name: 'Emma Davis',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Emma',
-      verified: true
-    },
-    content: 'My trading bot just hit 94% win rate! 🚀 Thanks to the AI agents marketplace. Anyone want to collaborate on a new trading strategy?',
-    likes: 891,
-    comments: 156,
-    shares: 67,
-    timestamp: '1 day ago',
-    liked: false
-  },
-];
-
 export default function Home() {
-  const [posts, setPosts] = useState<Post[]>(mockPosts);
+  const { user } = useAuth();
+  const [posts, setPosts] = useState<Post[]>([]);
   const [newPost, setNewPost] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [posting, setPosting] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleLike = (postId: string) => {
-    setPosts(posts.map(post =>
-      post.id === postId
-        ? { ...post, liked: !post.liked, likes: post.liked ? post.likes - 1 : post.likes + 1 }
-        : post
-    ));
+  // Fetch posts on mount
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
+  const fetchPosts = async () => {
+    try {
+      setLoading(true);
+      const data = await api.posts.getAll({ limit: 20 });
+      setPosts(data);
+    } catch (err) {
+      setError('Failed to load posts');
+      console.error('Error fetching posts:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handlePost = () => {
+  const handlePost = async () => {
     if (!newPost.trim()) return;
+    if (!user) {
+      setError('Please login to create posts');
+      return;
+    }
 
-    const post: Post = {
-      id: Date.now().toString(),
-      author: {
-        name: 'You',
-        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=You',
-        verified: false
-      },
-      content: newPost,
-      likes: 0,
-      comments: 0,
-      shares: 0,
-      timestamp: 'Just now',
-      liked: false
-    };
+    try {
+      setPosting(true);
+      setError('');
+      const post = await api.posts.create({ content: newPost });
+      setPosts([post, ...posts]);
+      setNewPost('');
+    } catch (err) {
+      setError('Failed to create post');
+      console.error('Error creating post:', err);
+    } finally {
+      setPosting(false);
+    }
+  };
 
-    setPosts([post, ...posts]);
-    setNewPost('');
+  const handleLike = async (postId: number) => {
+    if (!user) {
+      setError('Please login to like posts');
+      return;
+    }
+
+    try {
+      await api.posts.like(postId);
+      setPosts(posts.map(post =>
+        post.id === postId
+          ? { ...post, liked: !post.liked, likesCount: post.liked ? post.likesCount - 1 : post.likesCount + 1 }
+          : post
+      ));
+    } catch (err) {
+      console.error('Error liking post:', err);
+    }
+  };
+
+  const formatTimestamp = (timestamp: string) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+
+    if (minutes < 1) return 'Just now';
+    if (minutes < 60) return `${minutes}m ago`;
+    if (hours < 24) return `${hours}h ago`;
+    if (days < 7) return `${days}d ago`;
+    return date.toLocaleDateString();
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">AETH Balance</p>
-              <p className="text-2xl font-bold">15,420</p>
-            </div>
-            <Zap className="w-8 h-8 text-purple-600" />
-          </div>
-          <p className="text-xs text-green-600 mt-2">+12.5% growth</p>
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Friends</p>
-              <p className="text-2xl font-bold">1,234</p>
-            </div>
-            <Users className="w-8 h-8 text-blue-600" />
-          </div>
-          <p className="text-xs text-green-600 mt-2">+8.3% new</p>
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Courses</p>
-              <p className="text-2xl font-bold">47</p>
-            </div>
-            <Award className="w-8 h-8 text-green-600" />
-          </div>
-          <p className="text-xs text-green-600 mt-2">+15.2% completed</p>
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Rank</p>
-              <p className="text-2xl font-bold">Diamond</p>
-            </div>
-            <TrendingUp className="w-8 h-8 text-yellow-600" />
-          </div>
-          <p className="text-xs text-gray-600 mt-2">Level 12</p>
-        </div>
-      </div>
-
-      {/* Create Post */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow">
+    <div className="max-w-4xl mx-auto px-4 py-6">
+      {/* Create Post Card */}
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-6">
         <div className="flex gap-3">
           <img
-            src="https://api.dicebear.com/7.x/avataaars/svg?seed=You"
+            src={user ? `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.email}` : 'https://api.dicebear.com/7.x/avataaars/svg?seed=guest'}
             alt="Your avatar"
             className="w-10 h-10 rounded-full"
           />
@@ -161,115 +118,155 @@ export default function Home() {
             <textarea
               value={newPost}
               onChange={(e) => setNewPost(e.target.value)}
-              placeholder="What's on your mind?"
-              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700"
+              placeholder={user ? "What's on your mind?" : "Please login to post..."}
+              disabled={!user || posting}
+              className="w-full px-4 py-3 bg-slate-50 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent resize-none"
               rows={3}
             />
+            {error && (
+              <p className="text-red-500 text-sm mt-2">{error}</p>
+            )}
             <div className="flex items-center justify-between mt-3">
               <div className="flex gap-2">
-                <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                  <ImageIcon className="w-5 h-5 text-green-600" />
+                <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors" title="Add image">
+                  <ImageIcon className="w-5 h-5 text-slate-600" />
                 </button>
-                <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                  <Video className="w-5 h-5 text-red-600" />
+                <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors" title="Add video">
+                  <Video className="w-5 h-5 text-slate-600" />
                 </button>
-                <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                  <Smile className="w-5 h-5 text-yellow-600" />
+                <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors" title="Add emoji">
+                  <Smile className="w-5 h-5 text-slate-600" />
                 </button>
-                <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                  <MapPin className="w-5 h-5 text-blue-600" />
+                <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors" title="Add location">
+                  <MapPin className="w-5 h-5 text-slate-600" />
                 </button>
               </div>
               <button
                 onClick={handlePost}
-                disabled={!newPost.trim()}
-                className="px-6 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                disabled={!newPost.trim() || !user || posting}
+                className="px-6 py-2 bg-gradient-to-r from-cyan-500 to-purple-600 text-white rounded-lg font-semibold hover:from-cyan-600 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
-                Post
+                {posting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Posting...
+                  </>
+                ) : (
+                  'Post'
+                )}
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Activity Feed */}
-      <div className="space-y-4">
-        {posts.map((post) => (
-          <div key={post.id} className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow">
-            {/* Post Header */}
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex gap-3">
-                <img
-                  src={post.author.avatar}
-                  alt={post.author.name}
-                  className="w-12 h-12 rounded-full"
-                />
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-semibold">{post.author.name}</h3>
-                    {post.author.verified && (
-                      <span className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs">
-                        ✓
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">{post.timestamp}</p>
-                </div>
-              </div>
-              <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                <MoreHorizontal className="w-5 h-5" />
-              </button>
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-xl p-4 text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-cyan-100 text-sm">AETH Balance</p>
+              <p className="text-2xl font-bold">2,450</p>
             </div>
-
-            {/* Post Content */}
-            <p className="mb-4 whitespace-pre-wrap">{post.content}</p>
-
-            {/* Post Image */}
-            {post.image && (
-              <img
-                src={post.image}
-                alt="Post content"
-                className="w-full rounded-lg mb-4 max-h-96 object-cover"
-              />
-            )}
-
-            {/* Post Stats */}
-            <div className="flex items-center gap-6 text-sm text-gray-600 dark:text-gray-400 mb-4 pb-4 border-b border-gray-200 dark:border-gray-700">
-              <span>{post.likes} likes</span>
-              <span>{post.comments} comments</span>
-              <span>{post.shares} shares</span>
-            </div>
-
-            {/* Post Actions */}
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => handleLike(post.id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
-                  post.liked ? 'text-red-600' : ''
-                }`}
-              >
-                <Heart className={`w-5 h-5 ${post.liked ? 'fill-current' : ''}`} />
-                <span>Like</span>
-              </button>
-              <button className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
-                <MessageCircle className="w-5 h-5" />
-                <span>Comment</span>
-              </button>
-              <button className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
-                <Share2 className="w-5 h-5" />
-                <span>Share</span>
-              </button>
-            </div>
+            <Zap className="w-8 h-8 text-cyan-200" />
           </div>
-        ))}
+        </div>
+        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-4 text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-purple-100 text-sm">Friends</p>
+              <p className="text-2xl font-bold">342</p>
+            </div>
+            <Users className="w-8 h-8 text-purple-200" />
+          </div>
+        </div>
+        <div className="bg-gradient-to-br from-pink-500 to-pink-600 rounded-xl p-4 text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-pink-100 text-sm">Rank</p>
+              <p className="text-2xl font-bold">#127</p>
+            </div>
+            <Award className="w-8 h-8 text-pink-200" />
+          </div>
+        </div>
       </div>
 
-      {/* Load More */}
-      <div className="text-center">
-        <button className="px-6 py-3 bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-lg transition-shadow">
-          Load More Posts
-        </button>
-      </div>
+      {/* Loading State */}
+      {loading && (
+        <div className="flex justify-center items-center py-12">
+          <Loader2 className="w-8 h-8 text-cyan-500 animate-spin" />
+        </div>
+      )}
+
+      {/* Posts Feed */}
+      {!loading && posts.length === 0 && (
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-12 text-center">
+          <TrendingUp className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-slate-800 mb-2">No posts yet</h3>
+          <p className="text-slate-600">Be the first to share something!</p>
+        </div>
+      )}
+
+      {!loading && posts.map((post) => (
+        <div key={post.id} className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-4">
+          {/* Post Header */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <img
+                src={post.user ? `https://api.dicebear.com/7.x/avataaars/svg?seed=${post.user.email}` : 'https://api.dicebear.com/7.x/avataaars/svg?seed=user'}
+                alt={post.user?.fullName || 'User'}
+                className="w-12 h-12 rounded-full"
+              />
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-semibold text-slate-800">
+                    {post.user?.fullName || 'Unknown User'}
+                  </h3>
+                </div>
+                <p className="text-sm text-slate-500">{formatTimestamp(post.createdAt)}</p>
+              </div>
+            </div>
+            <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
+              <MoreHorizontal className="w-5 h-5 text-slate-600" />
+            </button>
+          </div>
+
+          {/* Post Content */}
+          <p className="text-slate-800 mb-4 whitespace-pre-wrap">{post.content}</p>
+
+          {/* Post Image */}
+          {post.mediaUrl && post.mediaType === 'image' && (
+            <img
+              src={post.mediaUrl}
+              alt="Post content"
+              className="w-full rounded-lg mb-4"
+            />
+          )}
+
+          {/* Post Actions */}
+          <div className="flex items-center gap-6 pt-4 border-t border-slate-200">
+            <button
+              onClick={() => handleLike(post.id)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                post.liked
+                  ? 'text-red-500 bg-red-50 hover:bg-red-100'
+                  : 'text-slate-600 hover:bg-slate-100'
+              }`}
+            >
+              <Heart className={`w-5 h-5 ${post.liked ? 'fill-current' : ''}`} />
+              <span className="font-medium">{post.likesCount}</span>
+            </button>
+            <button className="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors">
+              <MessageCircle className="w-5 h-5" />
+              <span className="font-medium">{post.commentsCount}</span>
+            </button>
+            <button className="flex items-center gap-2 px-4 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors">
+              <Share2 className="w-5 h-5" />
+              <span className="font-medium">{post.sharesCount}</span>
+            </button>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
