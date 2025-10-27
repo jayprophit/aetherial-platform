@@ -1774,3 +1774,37 @@ Layer 7: Light Circuits
 - [ ] Controls and navigation
 - [ ] Auto-detect file type
 
+
+---
+
+## 🎓 BLOCKCHAIN CERTIFICATES & JOB MATCHING
+
+**Platform Certificates:**
+- [ ] Blockchain storage (immutable)
+- [ ] Smart contract validation
+- [ ] Auto-issued on course completion
+- [ ] NFT-based certificates
+- [ ] Shareable verification links
+
+**External Certificates:**
+- [ ] Upload interface
+- [ ] KYC verification process
+- [ ] Cross-check with official databases
+- [ ] Manual review workflow
+- [ ] Blockchain storage after verification
+
+**Job Matching Algorithm:**
+- [ ] Skills extraction from certificates
+- [ ] Match score calculation (0-100%)
+- [ ] Weight platform vs external certs
+- [ ] Experience level matching
+- [ ] Auto-suggest jobs
+
+**KYC Integration:**
+- [ ] Identity verification
+- [ ] Document verification
+- [ ] Liveness check
+- [ ] Address verification
+- [ ] Background checks
+- [ ] Integration with KYC providers (Onfido, Jumio, etc.)
+
