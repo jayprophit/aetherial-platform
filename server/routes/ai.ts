@@ -6,6 +6,11 @@ import {
   textAnalysisService,
   smartSearchService,
 } from '../services/ai';
+import {
+  aiAnalyticsService,
+  personalizationEngine,
+  predictiveModelingService,
+} from '../services/aiAnalytics';
 
 const router = express.Router();
 
@@ -204,6 +209,78 @@ router.post('/search/rank', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('Search ranking error:', error);
     res.status(500).json({ error: 'Failed to rank search results' });
+  }
+});
+
+// POST /api/ai/analytics/behavior - Analyze user behavior
+router.post('/analytics/behavior', authenticateToken, async (req, res) => {
+  try {
+    const { userId, activities } = req.body;
+
+    if (!userId || !activities) {
+      return res.status(400).json({ error: 'User ID and activities are required' });
+    }
+
+    const insights = await aiAnalyticsService.analyzeUserBehavior(userId, activities);
+
+    res.json({ insights });
+  } catch (error) {
+    console.error('Behavior analysis error:', error);
+    res.status(500).json({ error: 'Failed to analyze behavior' });
+  }
+});
+
+// POST /api/ai/analytics/churn - Predict churn risk
+router.post('/analytics/churn', authenticateToken, async (req, res) => {
+  try {
+    const { userId, userMetrics } = req.body;
+
+    if (!userId || !userMetrics) {
+      return res.status(400).json({ error: 'User ID and metrics are required' });
+    }
+
+    const prediction = await aiAnalyticsService.predictChurnRisk(userId, userMetrics);
+
+    res.json({ prediction });
+  } catch (error) {
+    console.error('Churn prediction error:', error);
+    res.status(500).json({ error: 'Failed to predict churn' });
+  }
+});
+
+// POST /api/ai/personalize/homepage - Personalize homepage
+router.post('/personalize/homepage', authenticateToken, async (req, res) => {
+  try {
+    const { userId, userProfile } = req.body;
+
+    if (!userId || !userProfile) {
+      return res.status(400).json({ error: 'User ID and profile are required' });
+    }
+
+    const layout = await personalizationEngine.personalizeHomepage(userId, userProfile);
+
+    res.json({ layout });
+  } catch (error) {
+    console.error('Homepage personalization error:', error);
+    res.status(500).json({ error: 'Failed to personalize homepage' });
+  }
+});
+
+// POST /api/ai/predict/demand - Predict product demand
+router.post('/predict/demand', authenticateToken, async (req, res) => {
+  try {
+    const { productId, historicalSales } = req.body;
+
+    if (!productId || !historicalSales) {
+      return res.status(400).json({ error: 'Product ID and historical sales are required' });
+    }
+
+    const prediction = await predictiveModelingService.predictProductDemand(productId, historicalSales);
+
+    res.json({ prediction });
+  } catch (error) {
+    console.error('Demand prediction error:', error);
+    res.status(500).json({ error: 'Failed to predict demand' });
   }
 });
 
