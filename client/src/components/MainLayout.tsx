@@ -166,9 +166,10 @@ const mainMenuItems: MenuItem[] = [
 ];
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false); // Start collapsed
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [aiAssistantOpen, setAiAssistantOpen] = useState(false);
+  const [aiAssistantMode, setAiAssistantMode] = useState<'full' | 'minimized' | 'floating'>('full');
   const [expandedMenus, setExpandedMenus] = useState<string[]>(['home']);
   const [darkMode, setDarkMode] = useState(false);
   const [location] = useLocation();
@@ -233,10 +234,12 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             <div key={item.id}>
               <button
                 onClick={() => {
-                  if (sidebarOpen) {
-                    toggleMenu(item.id);
-                  } else if (item.children && item.children[0]?.path) {
+                  // When collapsed: navigate to first child
+                  // When expanded: toggle submenu
+                  if (!sidebarOpen && item.children && item.children[0]?.path) {
                     window.location.href = item.children[0].path;
+                  } else if (sidebarOpen) {
+                    toggleMenu(item.id);
                   }
                 }}
                 className={`w-full flex items-center justify-between p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
@@ -481,25 +484,61 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         )}
       </aside>
 
-      {/* AI Assistant Toggle Button (Floating on Mobile) */}
-      <button
-        onClick={() => setAiAssistantOpen(!aiAssistantOpen)}
-        className={`fixed bottom-4 right-4 p-4 rounded-full shadow-lg z-40 md:hidden ${
-          aiAssistantOpen ? 'bg-purple-600' : 'bg-gradient-to-br from-purple-600 to-blue-600'
-        } text-white`}
-      >
-        <Bot className="w-6 h-6" />
-      </button>
+      {/* AI Assistant Floating Widget (when minimized) */}
+      {aiAssistantOpen && aiAssistantMode === 'minimized' && (
+        <div className="fixed bottom-4 right-4 z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden w-80">
+            {/* Mini Header */}
+            <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-3 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Bot className="w-5 h-5 text-white" />
+                <span className="text-white font-semibold text-sm">AI Assistant</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setAiAssistantMode('full')}
+                  className="p-1 hover:bg-white/20 rounded transition-colors"
+                  title="Expand"
+                >
+                  <ChevronRight className="w-4 h-4 text-white" />
+                </button>
+                <button
+                  onClick={() => setAiAssistantOpen(false)}
+                  className="p-1 hover:bg-white/20 rounded transition-colors"
+                >
+                  <X className="w-4 h-4 text-white" />
+                </button>
+              </div>
+            </div>
+            {/* Quick Chat */}
+            <div className="p-3">
+              <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg mb-2">
+                <p className="text-xs text-gray-700 dark:text-gray-300">
+                  👋 Quick question?
+                </p>
+              </div>
+              <input
+                type="text"
+                placeholder="Ask me anything..."
+                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700"
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
-      {/* Desktop AI Toggle */}
-      <button
-        onClick={() => setAiAssistantOpen(!aiAssistantOpen)}
-        className={`fixed bottom-4 right-4 p-3 rounded-lg shadow-lg z-40 hidden md:block ${
-          aiAssistantOpen ? 'bg-purple-600' : 'bg-gradient-to-br from-purple-600 to-blue-600'
-        } text-white hover:shadow-xl transition-all`}
-      >
-        <Bot className="w-5 h-5" />
-      </button>
+      {/* AI Assistant Toggle Button */}
+      {!aiAssistantOpen && (
+        <button
+          onClick={() => {
+            setAiAssistantOpen(true);
+            setAiAssistantMode('minimized');
+          }}
+          className="fixed bottom-4 right-4 p-4 rounded-full shadow-lg z-40 bg-gradient-to-br from-purple-600 to-blue-600 text-white hover:shadow-xl transition-all"
+        >
+          <Bot className="w-6 h-6" />
+        </button>
+      )}
     </div>
   );
 }
