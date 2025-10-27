@@ -9,7 +9,13 @@ import {
   Video, FileText, Briefcase as BriefcaseIcon, Building, Heart, Clock,
   Shield, HelpCircle, Globe, Repeat, Download, Upload, Eye, Lock, Unlock, UserPlus
 } from 'lucide-react';
-// Custom dropdown implementation
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface MenuItem {
   id: string;
@@ -269,35 +275,14 @@ const mainMenuItems: MenuItem[] = [
   },
 ];
 
-export default function MainLayout({ children }: { children: React.ReactNode }) {
+export default function MainLayoutEnhanced({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [aiAssistantOpen, setAiAssistantOpen] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState<string[]>(['home']);
   const [darkMode, setDarkMode] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [location] = useLocation();
-  
-  // Determine active menu based on current route
-  const getActiveMenuFromPath = (path: string): string => {
-    if (path === '/' || path.startsWith('/trending') || path.startsWith('/following') || path.startsWith('/saved')) return 'home';
-    if (path.startsWith('/friends')) return 'friends';
-    if (path.startsWith('/groups')) return 'groups';
-    if (path.startsWith('/messages')) return 'messages';
-    if (path.startsWith('/marketplace')) return 'marketplace';
-    if (path.startsWith('/learning')) return 'learning';
-    if (path.startsWith('/jobs')) return 'jobs';
-    if (path.startsWith('/ai-agents')) return 'ai-agents';
-    if (path.startsWith('/wallet')) return 'wallet';
-    if (path.startsWith('/trading')) return 'trading';
-    if (path.startsWith('/nft')) return 'nfts';
-    if (path.startsWith('/iot')) return 'iot';
-    if (path.startsWith('/robotics')) return 'robotics';
-    if (path.startsWith('/governance')) return 'governance';
-    return 'home';
-  };
-  
-  const activeMainMenu = getActiveMenuFromPath(location);
+  const [activeMainMenu, setActiveMainMenu] = useState<string>('home');
 
   const toggleMenu = (menuId: string) => {
     setExpandedMenus(prev =>
@@ -305,6 +290,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         ? prev.filter(id => id !== menuId)
         : [...prev, menuId]
     );
+    setActiveMainMenu(menuId);
   };
 
   const isActive = (path?: string) => {
@@ -522,41 +508,26 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             
             {/* Three-Dot Menu for More Actions */}
             {activeMenu?.moreActions && activeMenu.moreActions.length > 0 && (
-              <div className="relative ml-2">
-                <button 
-                  onClick={() => setDropdownOpen(!dropdownOpen)}
-                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                >
-                  <MoreVertical className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                </button>
-                {dropdownOpen && (
-                  <>
-                    <div 
-                      className="fixed inset-0 z-40" 
-                      onClick={() => setDropdownOpen(false)}
-                    />
-                    <div className="absolute left-0 top-full mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50">
-                      {activeMenu.moreActions.map((action, index) => (
-                        <div key={index}>
-                          <button
-                            onClick={() => {
-                              action.action();
-                              setDropdownOpen(false);
-                            }}
-                            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left"
-                          >
-                            <action.icon className="w-4 h-4" />
-                            <span>{action.label}</span>
-                          </button>
-                          {index === 2 && index < activeMenu.moreActions!.length - 1 && (
-                            <div className="my-1 border-t border-gray-200 dark:border-gray-700" />
-                          )}
-                        </div>
-                      ))}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors ml-2">
+                    <MoreVertical className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-56">
+                  {activeMenu.moreActions.map((action, index) => (
+                    <div key={index}>
+                      <DropdownMenuItem onClick={action.action} className="cursor-pointer">
+                        <action.icon className="w-4 h-4 mr-2" />
+                        <span>{action.label}</span>
+                      </DropdownMenuItem>
+                      {index < activeMenu.moreActions!.length - 1 && index === 2 && (
+                        <DropdownMenuSeparator />
+                      )}
                     </div>
-                  </>
-                )}
-              </div>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
           </div>
 
