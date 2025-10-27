@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
-import { MessageCircle, Send, Search, MoreVertical, Loader2, User } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { MessageCircle, Send, Search, MoreVertical, Loader2, User, Circle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../lib/api';
+import { useWebSocket } from '../hooks/useWebSocket';
 
 interface Message {
   id: number;
@@ -35,6 +36,44 @@ export default function Messages() {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
+  const [typingUsers, setTypingUsers] = useState<Set<number>>(new Set());
+  const typingTimeoutRef = useRef<NodeJS.Timeout>();
+  
+  // WebSocket for real-time messaging
+  const token = localStorage.getItem('token');
+  const { isConnected, sendMessage: wsSendMessage, sendTypingIndicator, isUserOnline } = useWebSocket(token, {
+    onMessage: (message) => {
+      if (message.type === 'message') {
+        // Add incoming message to chat
+        const newMsg = message.payload;
+        if (newMsg.senderId === selectedUserId || newMsg.recipientId === selectedUserId) {
+          setMessages(prev => [...prev, {
+            id: Date.now(),
+            senderId: newMsg.senderId,
+            receiverId: newMsg.recipientId,
+            content: newMsg.content,
+            read: false,
+            createdAt: newMsg.timestamp,
+            sender: { id: newMsg.senderId, fullName: 'User', email: '' }
+          }]);
+        }
+        // Update conversations list
+        fetchMessages();
+      } else if (message.type === 'typing') {
+        // Handle typing indicator
+        const { userId, isTyping } = message.payload;
+        setTypingUsers(prev => {
+          const newSet = new Set(prev);
+          if (isTyping) {
+            newSet.add(userId);
+          } else {
+            newSet.delete(userId);
+          }
+          return newSet;
+        });
+      }
+    }
+  });
 
   useEffect(() => {
     if (user) {
@@ -99,12 +138,25 @@ export default function Messages() {
 
     try {
       setSending(true);
+      
+      // Send via WebSocket for real-time delivery
+      if (isConnected) {
+        wsSendMessage(selectedUserId, newMessage);
+      }
+      
+      // Also save to database via API
       const message = await api.messages.send({
         receiverId: selectedUserId,
         content: newMessage
       });
       setMessages([...messages, message]);
       setNewMessage('');
+      
+      // Stop typing indicator
+      if (isConnected) {
+        sendTypingIndicator(selectedUserId, false);
+      }
+      
       fetchMessages();
     } catch (err) {
       setError('Failed to send message');
@@ -179,8 +231,13 @@ export default function Messages() {
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <User className="w-6 h-6 text-white" />
+                    <div className="relative">
+                      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <User className="w-6 h-6 text-white" />
+                      </div>
+                      {isUserOnline(conv.userId) && (
+                        <Circle className="absolute bottom-0 right-0 w-3 h-3 text-green-500 fill-green-500 border-2 border-white rounded-full" />
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
