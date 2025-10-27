@@ -3,6 +3,7 @@ import type { Request, Response } from "express";
 import { eq, desc, sql, and } from "drizzle-orm";
 import { getDb } from "../db";
 import { posts, users, likes, comments } from "../../drizzle/schema";
+import { createNotification } from "./notifications";
 
 const router = Router();
 
@@ -462,7 +463,33 @@ router.post("/:id/like", async (req: Request, res: Response) => {
       .set({ likesCount: sql`${posts.likesCount} + 1` })
       .where(eq(posts.id, postId));
 
-    // TODO: Send notification to post author
+    // Get post author to send notification
+    const post = await db
+      .select({ userId: posts.userId })
+      .from(posts)
+      .where(eq(posts.id, postId))
+      .limit(1);
+
+    if (post.length > 0 && post[0].userId !== currentUserId) {
+      // Get liker's info
+      const liker = await db
+        .select({ displayName: users.displayName })
+        .from(users)
+        .where(eq(users.id, currentUserId))
+        .limit(1);
+
+      const likerName = liker[0]?.displayName || 'Someone';
+      
+      // Send notification to post author
+      await createNotification(
+        post[0].userId,
+        'like',
+        'New Like',
+        `${likerName} liked your post`,
+        `/posts/${postId}`,
+        (req as any).app?.locals?.wsManager
+      );
+    }
 
     res.json({
       success: true,
