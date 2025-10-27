@@ -44,6 +44,7 @@ async function startServer() {
   app.use("/api/platform", (await import("./routes/platform.js")).default);
   app.use("/api/ai", (await import("./routes/ai.js")).default);
   app.use("/api/blockchain", (await import("./routes/blockchain.js")).default);
+  app.use("/api/iot", (await import("./routes/iot.js")).default);
   // AI routes handled by tRPC
 
   // Health check
