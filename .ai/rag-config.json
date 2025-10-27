@@ -1,0 +1,91 @@
+{
+  "name": "aetherial-rag-system",
+  "version": "1.0.0",
+  "description": "Retrieval-Augmented Generation configuration for intelligent code and documentation search",
+  "embedding_model": {
+    "provider": "openai",
+    "model": "text-embedding-3-small",
+    "dimensions": 1536
+  },
+  "vector_store": {
+    "type": "in-memory",
+    "fallback": "file-system",
+    "path": ".ai/vectors/"
+  },
+  "indexing": {
+    "sources": [
+      {
+        "type": "documentation",
+        "paths": ["README.md", "CHANGELOG.md", "PROGRESS.md", "docs/**/*.md"],
+        "chunk_size": 1000,
+        "overlap": 200
+      },
+      {
+        "type": "code",
+        "paths": ["client/src/**/*.{ts,tsx}", "server/**/*.ts"],
+        "chunk_size": 500,
+        "overlap": 100,
+        "include_comments": true
+      },
+      {
+        "type": "configuration",
+        "paths": ["*.json", "*.config.{js,ts}"],
+        "chunk_size": 200,
+        "overlap": 50
+      }
+    ],
+    "metadata": {
+      "extract": ["file_path", "file_type", "last_modified", "author"],
+      "custom_fields": ["component_type", "feature_category"]
+    }
+  },
+  "retrieval": {
+    "top_k": 5,
+    "similarity_threshold": 0.7,
+    "reranking": {
+      "enabled": true,
+      "model": "cross-encoder"
+    },
+    "filters": {
+      "file_type": ["typescript", "markdown", "json"],
+      "recency_weight": 0.2
+    }
+  },
+  "generation": {
+    "context_window": 4000,
+    "include_sources": true,
+    "citation_format": "inline",
+    "temperature": 0.3
+  },
+  "caching": {
+    "enabled": true,
+    "ttl": 3600,
+    "invalidate_on_change": true
+  },
+  "use_cases": {
+    "code_search": {
+      "description": "Find relevant code examples and patterns",
+      "sources": ["code"],
+      "top_k": 3
+    },
+    "documentation_lookup": {
+      "description": "Search documentation and guides",
+      "sources": ["documentation"],
+      "top_k": 5
+    },
+    "feature_discovery": {
+      "description": "Find features and their implementations",
+      "sources": ["code", "documentation"],
+      "top_k": 7
+    },
+    "troubleshooting": {
+      "description": "Find solutions to errors and issues",
+      "sources": ["documentation", "code"],
+      "top_k": 5,
+      "filters": {
+        "keywords": ["error", "fix", "issue", "bug"]
+      }
+    }
+  }
+}
+

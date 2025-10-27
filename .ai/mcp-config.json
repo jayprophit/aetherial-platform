@@ -1,0 +1,86 @@
+{
+  "name": "aetherial-platform",
+  "version": "0.3.0",
+  "description": "Model Context Protocol configuration for AETHERIAL Platform",
+  "context": {
+    "project_type": "full-stack-web-application",
+    "primary_language": "typescript",
+    "frameworks": ["react", "express", "tailwindcss"],
+    "architecture": "monorepo",
+    "design_system": "ethereal-energy-theme"
+  },
+  "capabilities": {
+    "code_generation": true,
+    "documentation": true,
+    "testing": true,
+    "refactoring": true,
+    "debugging": true
+  },
+  "knowledge_base": {
+    "documentation_paths": [
+      "README.md",
+      "CHANGELOG.md",
+      "PROGRESS.md",
+      "docs/**/*.md"
+    ],
+    "code_paths": [
+      "client/src/**/*.{ts,tsx}",
+      "server/**/*.ts"
+    ],
+    "config_paths": [
+      "package.json",
+      "tsconfig.json",
+      "tailwind.config.js",
+      "vite.config.ts"
+    ]
+  },
+  "conventions": {
+    "naming": {
+      "components": "PascalCase",
+      "files": "kebab-case or PascalCase",
+      "functions": "camelCase",
+      "constants": "UPPER_SNAKE_CASE"
+    },
+    "structure": {
+      "components": "client/src/components/",
+      "pages": "client/src/pages/",
+      "hooks": "client/src/hooks/",
+      "contexts": "client/src/contexts/",
+      "api": "server/routes/",
+      "database": "server/db/"
+    },
+    "styling": {
+      "approach": "tailwindcss-utility-first",
+      "theme": "css-variables",
+      "dark_mode": "class-based"
+    }
+  },
+  "patterns": {
+    "component_structure": "functional-components-with-hooks",
+    "state_management": "react-context",
+    "api_calls": "fetch-with-error-handling",
+    "routing": "wouter",
+    "database": "drizzle-orm"
+  },
+  "quality_standards": {
+    "typescript": {
+      "strict": true,
+      "no_implicit_any": true
+    },
+    "accessibility": {
+      "wcag_level": "AA",
+      "aria_labels": "required"
+    },
+    "performance": {
+      "lazy_loading": "enabled",
+      "code_splitting": "enabled"
+    }
+  },
+  "integration": {
+    "version_control": "git",
+    "repository": "https://github.com/jayprophit/aetherial-platform",
+    "ci_cd": "github-actions",
+    "deployment": "manus-platform"
+  }
+}
+
