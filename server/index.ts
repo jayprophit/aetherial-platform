@@ -39,6 +39,7 @@ async function startServer() {
   app.use("/api/notifications", (await import("./routes/notifications.js")).default);
   app.use("/api/payments", (await import("./routes/payments.js")).default);
   app.use("/api/admin", (await import("./routes/admin.js")).default);
+  app.use("/api/settings", (await import("./routes/settings.js")).default);
   // AI routes handled by tRPC
 
   // Health check

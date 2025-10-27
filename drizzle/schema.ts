@@ -1214,3 +1214,61 @@ export const cartItems = mysqlTable('cart_items', {
   uniqueCartItem: uniqueIndex('unique_cart_item_idx').on(table.userId, table.productId),
 }));
 
+
+// ============================================================================
+// FEATURE TOGGLES & SETTINGS
+// ============================================================================
+
+// Feature Toggles - Control platform features for different user roles
+export const featureToggles = mysqlTable('feature_toggles', {
+  id: int('id').primaryKey().autoincrement(),
+  featureKey: varchar('feature_key', { length: 100 }).notNull().unique(),
+  featureName: varchar('feature_name', { length: 255 }).notNull(),
+  description: text('description'),
+  category: varchar('category', { length: 50 }).notNull(),
+  enabledForPublic: boolean('enabled_for_public').default(false),
+  enabledForUsers: boolean('enabled_for_users').default(true),
+  enabledForAdmin: boolean('enabled_for_admin').default(true),
+  enabledForOwner: boolean('enabled_for_owner').default(true),
+  isActive: boolean('is_active').default(true),
+  requiresSetup: boolean('requires_setup').default(false),
+  setupInstructions: text('setup_instructions'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow(),
+});
+
+// System Settings - Platform-wide configuration
+export const systemSettings = mysqlTable('system_settings', {
+  id: int('id').primaryKey().autoincrement(),
+  settingKey: varchar('setting_key', { length: 100 }).notNull().unique(),
+  settingName: varchar('setting_name', { length: 255 }).notNull(),
+  settingValue: text('setting_value'),
+  settingType: varchar('setting_type', { length: 50 }).notNull(),
+  category: varchar('category', { length: 50 }).notNull(),
+  description: text('description'),
+  isPublic: boolean('is_public').default(false),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow(),
+});
+
+// Cloud Hosting Settings - For cloud deployment configuration
+export const cloudSettings = mysqlTable('cloud_settings', {
+  id: int('id').primaryKey().autoincrement(),
+  provider: varchar('provider', { length: 50 }).notNull(),
+  region: varchar('region', { length: 100 }),
+  instanceType: varchar('instance_type', { length: 100 }),
+  storageType: varchar('storage_type', { length: 50 }),
+  storageSize: int('storage_size'),
+  bandwidth: int('bandwidth'),
+  autoScaling: boolean('auto_scaling').default(false),
+  minInstances: int('min_instances').default(1),
+  maxInstances: int('max_instances').default(10),
+  cdnEnabled: boolean('cdn_enabled').default(false),
+  cdnProvider: varchar('cdn_provider', { length: 50 }),
+  backupEnabled: boolean('backup_enabled').default(true),
+  backupFrequency: varchar('backup_frequency', { length: 50 }),
+  monitoringEnabled: boolean('monitoring_enabled').default(true),
+  isActive: boolean('is_active').default(true),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow(),
+});
