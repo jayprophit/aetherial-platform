@@ -1,0 +1,205 @@
+/* AETHERIAL Ethereal Energy Design System */
+/* Global Styles with Friendly Light/Dark Modes */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* CSS Variables for Light Mode (Default) */
+[data-theme="light"] {
+  /* Backgrounds - Soft & Welcoming */
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F8FAFC;
+  --bg-tertiary: #F1F5F9;
+  --bg-card: #FFFFFF;
+  
+  /* Text - Clear & Readable */
+  --text-primary: #1E293B;
+  --text-secondary: #475569;
+  --text-tertiary: #64748B;
+  --text-muted: #94A3B8;
+  
+  /* Borders - Subtle */
+  --border-light: #E2E8F0;
+  --border-default: #CBD5E1;
+  --border-strong: #94A3B8;
+  
+  /* Ethereal Energy - Softer for light mode */
+  --ethereal-primary: #00B8D4;
+  --ethereal-secondary: #0097A7;
+  --ethereal-glow: rgba(0, 184, 212, 0.15);
+  
+  /* Gradients */
+  --gradient-ethereal: linear-gradient(135deg, #00B8D4 0%, #0097A7 100%);
+  --gradient-hero: linear-gradient(135deg, #F8FAFC 0%, #E0F2FE 100%);
+  
+  /* Shadows - Gentle */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-glow: 0 0 20px rgba(0, 184, 212, 0.3);
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* CSS Variables for Dark Mode - Soft & Comfortable */
+[data-theme="dark"] {
+  /* Backgrounds - Soft dark blues, NOT pure black */
+  --bg-primary: #1A2332;
+  --bg-secondary: #0F1824;
+  --bg-tertiary: #232D3F;
+  --bg-card: #1E2836;
+  
+  /* Text - Clear & Comfortable */
+  --text-primary: #F1F5F9;
+  --text-secondary: #CBD5E1;
+  --text-tertiary: #94A3B8;
+  --text-muted: #64748B;
+  
+  /* Borders - Visible but not harsh */
+  --border-light: #2D3748;
+  --border-default: #3F4E5F;
+  --border-strong: #4A5568;
+  
+  /* Ethereal Energy - Brighter for dark mode */
+  --ethereal-primary: #00D9FF;
+  --ethereal-secondary: #00FFF0;
+  --ethereal-glow: rgba(0, 217, 255, 0.2);
+  
+  /* Gradients */
+  --gradient-ethereal: linear-gradient(135deg, #00D9FF 0%, #00FFF0 100%);
+  --gradient-hero: linear-gradient(135deg, #1A2332 0%, #0F1824 100%);
+  
+  /* Shadows - Deeper but not harsh */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 20px rgba(0, 217, 255, 0.4);
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+/* Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Smooth transitions for theme switching */
+*,
+*::before,
+*::after {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-duration: 0.3s;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Animations */
+@keyframes glow {
+  0%, 100% { 
+    filter: drop-shadow(0 0 10px var(--ethereal-glow)); 
+  }
+  50% { 
+    filter: drop-shadow(0 0 20px var(--ethereal-glow)); 
+  }
+}
+
+@keyframes energyFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+/* Utility Classes */
+.ethereal-glow {
+  box-shadow: var(--shadow-glow);
+}
+
+.ethereal-text {
+  background: var(--gradient-ethereal);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-card);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-glow);
+  border-color: var(--ethereal-primary);
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ethereal-primary);
+}
+
+/* Selection */
+::selection {
+  background-color: var(--ethereal-primary);
+  color: white;
+}
+
+/* Focus Styles - Accessible */
+:focus-visible {
+  outline: 2px solid var(--ethereal-primary);
+  outline-offset: 2px;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+

@@ -19,18 +19,29 @@ interface ThemeProviderProps {
 export function ThemeProvider({
   children,
   defaultTheme = "light",
-  switchable = false,
+  switchable = true, // Enable by default
 }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(() => {
     if (switchable) {
+      // Check localStorage first
       const stored = localStorage.getItem("theme");
-      return (stored as Theme) || defaultTheme;
+      if (stored) return stored as Theme;
+      
+      // Then check system preference
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        return "dark";
+      }
     }
     return defaultTheme;
   });
 
   useEffect(() => {
     const root = document.documentElement;
+    
+    // Set data-theme attribute for CSS variables
+    root.setAttribute('data-theme', theme);
+    
+    // Also set class for Tailwind dark mode
     if (theme === "dark") {
       root.classList.add("dark");
     } else {
@@ -41,6 +52,22 @@ export function ThemeProvider({
       localStorage.setItem("theme", theme);
     }
   }, [theme, switchable]);
+  
+  // Listen for system theme changes
+  useEffect(() => {
+    if (!switchable) return;
+    
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (e: MediaQueryListEvent) => {
+      // Only auto-switch if user hasn't manually set a preference
+      if (!localStorage.getItem("theme")) {
+        setTheme(e.matches ? "dark" : "light");
+      }
+    };
+    
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, [switchable]);
 
   const toggleTheme = switchable
     ? () => {

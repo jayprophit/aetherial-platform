@@ -1604,3 +1604,52 @@ Layer 7: Light Circuits
 **Priority:** Implement systematically in phases
 **Status:** Planning complete, ready for implementation
 
+
+
+
+---
+
+## 🎨 ETHEREAL ENERGY DESIGN SYSTEM (Based on Logo)
+
+**Brand Identity:**
+- [x] Logo files added to project
+- [x] Friendly light/dark mode theme system
+- [x] User preference detection (system + manual)
+- [x] Smooth theme transitions
+- [x] CSS variables for both modes
+- [ ] Update all components with ethereal energy theme
+- [ ] Implement glowing effects
+- [ ] Add energy ribbon animations
+- [ ] Particle effects system
+
+**Color Palette:**
+- [x] Primary: Ethereal Cyan (#00D9FF → #00FFF0)
+- [x] Secondary: Soft Dark Blue (#1A2332 - friendly, not harsh)
+- [x] Accent: Energy Glow (#00FFFF)
+- [x] Light mode: Soft whites and warm grays
+- [x] Dark mode: Comfortable dark blues (NOT pure black)
+- [ ] Update all existing components
+
+**Visual Effects:**
+- [ ] Glowing borders on cards
+- [ ] Energy particle animations
+- [ ] Pulsing glow effects
+- [ ] Flowing energy ribbons
+- [ ] Blur/glow shadows
+- [ ] Hover animations with glow
+
+**Typography:**
+- [ ] Update logo in MainLayout
+- [ ] Consistent font pairing
+- [ ] Glowing text effects for headings
+
+**Components to Update:**
+- [ ] MainLayout (logo, colors)
+- [ ] AIAssistant (ethereal theme)
+- [ ] All page cards and buttons
+- [ ] Navigation menus
+- [ ] Forms and inputs
+- [ ] Modals and overlays
+
+**Priority:** HIGH - Brand identity implementation
+
