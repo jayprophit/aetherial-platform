@@ -1,140 +1,162 @@
-import { useAuth } from "@/_core/hooks/useAuth";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Link } from "wouter";
-import { docs, getDocsByCategory } from "@/lib/docs";
-import { FileText, BookOpen, MessageSquare, Moon, Sun, ArrowRight } from "lucide-react";
-import { useTheme } from "@/contexts/ThemeContext";
+import { useState } from 'react';
+import { Heart, MessageCircle, Share2, MoreHorizontal, Image as ImageIcon, Video, Smile } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useAuth } from '@/_core/hooks/useAuth';
+
+// Mock data for posts
+const mockPosts = [
+  {
+    id: 1,
+    author: {
+      name: 'Sarah Johnson',
+      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah',
+      username: '@sarahj'
+    },
+    content: 'Just completed my first course on blockchain development! 🎓 The Aetherial learning platform is amazing. Earned 50 AETH tokens as a reward!',
+    image: 'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=600&h=400&fit=crop',
+    timestamp: '2 hours ago',
+    likes: 24,
+    comments: 5,
+    shares: 2
+  },
+  {
+    id: 2,
+    author: {
+      name: 'Michael Chen',
+      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Michael',
+      username: '@mchen'
+    },
+    content: 'My new AI agent just made its first sale! 🤖💰 Automated e-commerce is the future. Check out the AI Agents marketplace if you want to create your own!',
+    timestamp: '5 hours ago',
+    likes: 42,
+    comments: 12,
+    shares: 8
+  },
+  {
+    id: 3,
+    author: {
+      name: 'Emma Davis',
+      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Emma',
+      username: '@emmad'
+    },
+    content: 'Just set up my smart home with Aetherial IoT! All my devices are now connected and earning me passive AETH. The automation features are incredible! 🏠✨',
+    image: 'https://images.unsplash.com/photo-1558002038-1055907df827?w=600&h=400&fit=crop',
+    timestamp: '1 day ago',
+    likes: 67,
+    comments: 18,
+    shares: 15
+  }
+];
 
 export default function Home() {
-  // The userAuth hooks provides authentication state
-  // To implement login/logout functionality, simply call logout() or redirect to getLoginUrl()
-  let { user, loading, error, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated } = useAuth();
+  const [postContent, setPostContent] = useState('');
 
-  const { theme, toggleTheme } = useTheme();
-  const coreDocs = getDocsByCategory('core');
-  const chatDocs = getDocsByCategory('chat');
+  const handlePost = () => {
+    // TODO: Implement post creation
+    console.log('Creating post:', postContent);
+    setPostContent('');
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex items-center justify-between h-16 px-6">
-          <div className="flex items-center gap-2">
-            <BookOpen className="w-6 h-6 text-primary" />
-            <h1 className="font-bold text-xl">Unified Platform Documentation</h1>
-          </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleTheme}
-            aria-label="Toggle theme"
-          >
-            {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-          </Button>
-        </div>
-      </header>
-
-      <main className="container px-6 py-12">
-        {/* Hero Section */}
-        <div className="max-w-4xl mx-auto text-center mb-16">
-          <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-            Unified Platform Project Analysis
-          </h2>
-          <p className="text-xl text-muted-foreground mb-6">
-            Comprehensive documentation from 19 chat sessions analyzing a sophisticated enterprise platform
-          </p>
-          <div className="flex gap-4 justify-center">
-            <Link href="/doc/index">
-              <Button size="lg" className="gap-2">
-                <FileText className="w-4 h-4" />
-                Start Reading
-                <ArrowRight className="w-4 h-4" />
+    <div className="max-w-2xl mx-auto space-y-6">
+      {/* Post Composer */}
+      {isAuthenticated && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-start gap-4">
+              <Avatar>
+                <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.name}`} />
+                <AvatarFallback>{user?.name?.[0] || 'U'}</AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
+                <Textarea
+                  placeholder="What's on your mind?"
+                  value={postContent}
+                  onChange={(e) => setPostContent(e.target.value)}
+                  className="min-h-[100px] resize-none border-0 focus-visible:ring-0 p-0"
+                />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div className="flex gap-2">
+                <Button variant="ghost" size="sm" className="gap-2">
+                  <ImageIcon className="h-4 w-4" />
+                  Photo
+                </Button>
+                <Button variant="ghost" size="sm" className="gap-2">
+                  <Video className="h-4 w-4" />
+                  Video
+                </Button>
+                <Button variant="ghost" size="sm" className="gap-2">
+                  <Smile className="h-4 w-4" />
+                  Emoji
+                </Button>
+              </div>
+              <Button onClick={handlePost} disabled={!postContent.trim()}>
+                Post
               </Button>
-            </Link>
-            <Link href="/doc/executive-summary">
-              <Button size="lg" variant="outline" className="gap-2">
-                <BookOpen className="w-4 h-4" />
-                Executive Summary
-              </Button>
-            </Link>
-          </div>
-        </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-12 max-w-4xl mx-auto">
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-2xl font-bold">19</CardTitle>
-              <CardDescription>Chat Sessions</CardDescription>
+      {/* Activity Feed */}
+      <div className="space-y-4">
+        {mockPosts.map((post) => (
+          <Card key={post.id}>
+            <CardHeader>
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  <Avatar>
+                    <AvatarImage src={post.author.avatar} />
+                    <AvatarFallback>{post.author.name[0]}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h3 className="font-semibold">{post.author.name}</h3>
+                    <p className="text-sm text-gray-500">{post.timestamp}</p>
+                  </div>
+                </div>
+                <Button variant="ghost" size="icon">
+                  <MoreHorizontal className="h-5 w-5" />
+                </Button>
+              </div>
             </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-2xl font-bold">70-80%</CardTitle>
-              <CardDescription>Complete</CardDescription>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-2xl font-bold">28</CardTitle>
-              <CardDescription>Week Roadmap</CardDescription>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-2xl font-bold">8</CardTitle>
-              <CardDescription>Implementation Phases</CardDescription>
-            </CardHeader>
-          </Card>
-        </div>
+            <CardContent className="space-y-4">
+              <p className="text-gray-800">{post.content}</p>
+              
+              {post.image && (
+                <img
+                  src={post.image}
+                  alt="Post content"
+                  className="w-full rounded-lg object-cover max-h-96"
+                />
+              )}
 
-        {/* Core Documents */}
-        <div className="mb-12">
-          <div className="flex items-center gap-2 mb-6">
-            <FileText className="w-5 h-5 text-primary" />
-            <h3 className="text-2xl font-bold">Core Documents</h3>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {coreDocs.map(doc => (
-              <Link key={doc.id} href={`/doc/${doc.id}`}>
-                <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
-                  <CardHeader>
-                    <CardTitle className="text-lg">{doc.title}</CardTitle>
-                    <CardDescription>{doc.description}</CardDescription>
-                  </CardHeader>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        {/* Chat Sessions */}
-        <div>
-          <div className="flex items-center gap-2 mb-6">
-            <MessageSquare className="w-5 h-5 text-primary" />
-            <h3 className="text-2xl font-bold">Chat Session Extractions</h3>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {chatDocs.map(doc => (
-              <Link key={doc.id} href={`/doc/${doc.id}`}>
-                <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
-                  <CardHeader>
-                    <CardTitle className="text-lg">{doc.title}</CardTitle>
-                    <CardDescription>{doc.description}</CardDescription>
-                  </CardHeader>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </main>
-
-      <footer className="border-t mt-16">
-        <div className="container px-6 py-8 text-center text-sm text-muted-foreground">
-          <p>Generated by Manus AI • October 26, 2025</p>
-          <p className="mt-2">Analysis of 19 chat sessions documenting the Unified Platform project</p>
-        </div>
-      </footer>
+              <div className="flex items-center justify-between pt-4 border-t">
+                <Button variant="ghost" size="sm" className="gap-2">
+                  <Heart className="h-4 w-4" />
+                  <span>{post.likes}</span>
+                </Button>
+                <Button variant="ghost" size="sm" className="gap-2">
+                  <MessageCircle className="h-4 w-4" />
+                  <span>{post.comments}</span>
+                </Button>
+                <Button variant="ghost" size="sm" className="gap-2">
+                  <Share2 className="h-4 w-4" />
+                  <span>{post.shares}</span>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 }
+

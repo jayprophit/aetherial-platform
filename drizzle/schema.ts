@@ -164,7 +164,7 @@ export const products = mysqlTable('products', {
   categoryIdx: index('products_category_idx').on(table.category),
 }));
 
-export const orders = mysqlTable('orders', {
+export const productOrders = mysqlTable('product_orders', {
   id: int('id').autoincrement().primaryKey(),
   buyerId: int('buyer_id').notNull(),
   sellerId: int('seller_id').notNull(),
@@ -417,4 +417,563 @@ export type Product = typeof products.$inferSelect;
 export type Course = typeof courses.$inferSelect;
 export type Job = typeof jobs.$inferSelect;
 export type AIAgent = typeof aiAgents.$inferSelect;
+
+
+
+
+// ============================================================================
+// TRADING PLATFORM
+// ============================================================================
+
+export const tradingPairs = mysqlTable('trading_pairs', {
+  id: int('id').autoincrement().primaryKey(),
+  baseAsset: varchar('base_asset', { length: 20 }).notNull(), // AETH, BTC, ETH, etc.
+  quoteAsset: varchar('quote_asset', { length: 20 }).notNull(), // USD, USDT, etc.
+  currentPrice: decimal('current_price', { precision: 20, scale: 8 }).notNull(),
+  volume24h: decimal('volume_24h', { precision: 20, scale: 8 }).default('0'),
+  priceChange24h: decimal('price_change_24h', { precision: 10, scale: 4 }).default('0'),
+  high24h: decimal('high_24h', { precision: 20, scale: 8 }),
+  low24h: decimal('low_24h', { precision: 20, scale: 8 }),
+  isActive: boolean('is_active').default(true),
+  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow(),
+}, (table) => ({
+  pairIdx: index('trading_pairs_pair_idx').on(table.baseAsset, table.quoteAsset),
+}));
+
+export const orders = mysqlTable('orders', {
+  id: int('id').autoincrement().primaryKey(),
+  userId: int('user_id').notNull(),
+  pairId: int('pair_id').notNull(),
+  type: mysqlEnum('type', ['market', 'limit', 'stop-loss', 'stop-limit']).notNull(),
+  side: mysqlEnum('side', ['buy', 'sell']).notNull(),
+  price: decimal('price', { precision: 20, scale: 8 }),
+  amount: decimal('amount', { precision: 20, scale: 8 }).notNull(),
+  filled: decimal('filled', { precision: 20, scale: 8 }).default('0'),
+  status: mysqlEnum('status', ['pending', 'partial', 'filled', 'cancelled']).default('pending'),
+  createdAt: timestamp('created_at').defaultNow(),
+  filledAt: timestamp('filled_at'),
+}, (table) => ({
+  userIdx: index('orders_user_idx').on(table.userId),
+  pairIdx: index('orders_pair_idx').on(table.pairId),
+  statusIdx: index('orders_status_idx').on(table.status),
+}));
+
+export const trades = mysqlTable('trades', {
+  id: int('id').autoincrement().primaryKey(),
+  pairId: int('pair_id').notNull(),
+  buyOrderId: int('buy_order_id').notNull(),
+  sellOrderId: int('sell_order_id').notNull(),
+  buyerId: int('buyer_id').notNull(),
+  sellerId: int('seller_id').notNull(),
+  price: decimal('price', { precision: 20, scale: 8 }).notNull(),
+  amount: decimal('amount', { precision: 20, scale: 8 }).notNull(),
+  total: decimal('total', { precision: 20, scale: 8 }).notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+}, (table) => ({
+  pairIdx: index('trades_pair_idx').on(table.pairId),
+  createdIdx: index('trades_created_idx').on(table.createdAt),
+}));
+
+export const portfolios = mysqlTable('portfolios', {
+  id: int('id').autoincrement().primaryKey(),
+  userId: int('user_id').notNull(),
+  asset: varchar('asset', { length: 20 }).notNull(),
+  balance: decimal('balance', { precision: 20, scale: 8 }).default('0'),
+  lockedBalance: decimal('locked_balance', { precision: 20, scale: 8 }).default('0'), // In open orders
+  averageBuyPrice: decimal('average_buy_price', { precision: 20, scale: 8 }),
+  totalInvested: decimal('total_invested', { precision: 20, scale: 8 }).default('0'),
+  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow(),
+}, (table) => ({
+  uniqueAsset: uniqueIndex('unique_portfolio_asset_idx').on(table.userId, table.asset),
+}));
+
+// ============================================================================
+// NFT MARKETPLACE
+// ============================================================================
+
+export const nfts = mysqlTable('nfts', {
+  id: int('id').autoincrement().primaryKey(),
+  tokenId: varchar('token_id', { length: 255 }).notNull().unique(),
+  contractAddress: varchar('contract_address', { length: 255 }),
+  creatorId: int('creator_id').notNull(),
+  ownerId: int('owner_id').notNull(),
+  name: varchar('name', { length: 255 }).notNull(),
+  description: text('description'),
+  imageUrl: text('image_url'),
+  metadataUrl: text('metadata_url'), // IPFS URL
+  category: mysqlEnum('category', ['art', 'collectible', 'certificate', 'achievement', 'inheritance', 'other']),
+  royaltyPercentage: decimal('royalty_percentage', { precision: 5, scale: 2 }).default('0'), // 0-100%
+  isListed: boolean('is_listed').default(false),
+  price: decimal('price', { precision: 20, scale: 8 }),
+  createdAt: timestamp('created_at').defaultNow(),
+}, (table) => ({
+  ownerIdx: index('nfts_owner_idx').on(table.ownerId),
+  creatorIdx: index('nfts_creator_idx').on(table.creatorId),
+  categoryIdx: index('nfts_category_idx').on(table.category),
+}));
+
+export const nftCollections = mysqlTable('nft_collections', {
+  id: int('id').autoincrement().primaryKey(),
+  creatorId: int('creator_id').notNull(),
+  name: varchar('name', { length: 255 }).notNull(),
+  description: text('description'),
+  coverImage: text('cover_image'),
+  floorPrice: decimal('floor_price', { precision: 20, scale: 8 }),
+  totalVolume: decimal('total_volume', { precision: 20, scale: 8 }).default('0'),
+  itemCount: int('item_count').default(0),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const nftSales = mysqlTable('nft_sales', {
+  id: int('id').autoincrement().primaryKey(),
+  nftId: int('nft_id').notNull(),
+  sellerId: int('seller_id').notNull(),
+  buyerId: int('buyer_id').notNull(),
+  price: decimal('price', { precision: 20, scale: 8 }).notNull(),
+  royaltyPaid: decimal('royalty_paid', { precision: 20, scale: 8 }).default('0'),
+  createdAt: timestamp('created_at').defaultNow(),
+}, (table) => ({
+  nftIdx: index('nft_sales_nft_idx').on(table.nftId),
+  createdIdx: index('nft_sales_created_idx').on(table.createdAt),
+}));
+
+export const nftAuctions = mysqlTable('nft_auctions', {
+  id: int('id').autoincrement().primaryKey(),
+  nftId: int('nft_id').notNull(),
+  sellerId: int('seller_id').notNull(),
+  startingPrice: decimal('starting_price', { precision: 20, scale: 8 }).notNull(),
+  currentBid: decimal('current_bid', { precision: 20, scale: 8 }),
+  highestBidderId: int('highest_bidder_id'),
+  startTime: timestamp('start_time').notNull(),
+  endTime: timestamp('end_time').notNull(),
+  status: mysqlEnum('status', ['active', 'ended', 'cancelled']).default('active'),
+  createdAt: timestamp('created_at').defaultNow(),
+}, (table) => ({
+  nftIdx: index('nft_auctions_nft_idx').on(table.nftId),
+  statusIdx: index('nft_auctions_status_idx').on(table.status),
+}));
+
+export const nftBids = mysqlTable('nft_bids', {
+  id: int('id').autoincrement().primaryKey(),
+  auctionId: int('auction_id').notNull(),
+  bidderId: int('bidder_id').notNull(),
+  amount: decimal('amount', { precision: 20, scale: 8 }).notNull(),
+  isWinning: boolean('is_winning').default(false),
+  createdAt: timestamp('created_at').defaultNow(),
+}, (table) => ({
+  auctionIdx: index('nft_bids_auction_idx').on(table.auctionId),
+}));
+
+// ============================================================================
+// UPDATED EXPORTS
+// ============================================================================
+
+export type TradingPair = typeof tradingPairs.$inferSelect;
+export type ProductOrder = typeof productOrders.$inferSelect;
+export type TradingOrder = typeof orders.$inferSelect;
+export type Trade = typeof trades.$inferSelect;
+export type Portfolio = typeof portfolios.$inferSelect;
+export type NFT = typeof nfts.$inferSelect;
+export type NFTCollection = typeof nftCollections.$inferSelect;
+export type NFTSale = typeof nftSales.$inferSelect;
+export type NFTAuction = typeof nftAuctions.$inferSelect;
+export type NFTBid = typeof nftBids.$inferSelect;
+
+
+
+
+// ============================================================================
+// IoT (INTERNET OF THINGS)
+// ============================================================================
+
+export const iotDevices = mysqlTable('iot_devices', {
+  id: int('id').autoincrement().primaryKey(),
+  ownerId: int('owner_id').notNull(),
+  name: varchar('name', { length: 255 }).notNull(),
+  deviceType: varchar('device_type', { length: 100 }).notNull(), // 'light', 'thermostat', 'camera', 'sensor', etc.
+  manufacturer: varchar('manufacturer', { length: 255 }),
+  model: varchar('model', { length: 255 }),
+  deviceId: varchar('device_id', { length: 255 }).unique(), // Unique device identifier
+  status: mysqlEnum('status', ['online', 'offline', 'error']).default('offline'),
+  roomId: int('room_id'), // Group devices by room
+  config: json('config'), // Device-specific configuration
+  lastSeen: timestamp('last_seen'),
+  firmwareVersion: varchar('firmware_version', { length: 50 }),
+  createdAt: timestamp('created_at').defaultNow(),
+}, (table) => ({
+  ownerIdx: index('iot_devices_owner_idx').on(table.ownerId),
+  typeIdx: index('iot_devices_type_idx').on(table.deviceType),
+  statusIdx: index('iot_devices_status_idx').on(table.status),
+}));
+
+export const iotRooms = mysqlTable('iot_rooms', {
+  id: int('id').autoincrement().primaryKey(),
+  ownerId: int('owner_id').notNull(),
+  name: varchar('name', { length: 255 }).notNull(),
+  icon: varchar('icon', { length: 50 }),
+  deviceCount: int('device_count').default(0),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const iotSensorData = mysqlTable('iot_sensor_data', {
+  id: int('id').autoincrement().primaryKey(),
+  deviceId: int('device_id').notNull(),
+  dataType: varchar('data_type', { length: 50 }).notNull(), // 'temperature', 'humidity', 'motion', etc.
+  value: decimal('value', { precision: 10, scale: 4 }).notNull(),
+  unit: varchar('unit', { length: 20 }), // 'celsius', 'fahrenheit', '%', etc.
+  timestamp: timestamp('timestamp').defaultNow(),
+}, (table) => ({
+  deviceIdx: index('iot_sensor_data_device_idx').on(table.deviceId),
+  timestampIdx: index('iot_sensor_data_timestamp_idx').on(table.timestamp),
+}));
+
+export const iotAutomations = mysqlTable('iot_automations', {
+  id: int('id').autoincrement().primaryKey(),
+  ownerId: int('owner_id').notNull(),
+  name: varchar('name', { length: 255 }).notNull(),
+  description: text('description'),
+  trigger: json('trigger').notNull(), // Condition that triggers automation
+  actions: json('actions').notNull(), // Actions to perform
+  isActive: boolean('is_active').default(true),
+  lastTriggered: timestamp('last_triggered'),
+  createdAt: timestamp('created_at').defaultNow(),
+}, (table) => ({
+  ownerIdx: index('iot_automations_owner_idx').on(table.ownerId),
+}));
+
+// ============================================================================
+// ROBOTICS
+// ============================================================================
+
+export const robots = mysqlTable('robots', {
+  id: int('id').autoincrement().primaryKey(),
+  ownerId: int('owner_id').notNull(),
+  name: varchar('name', { length: 255 }).notNull(),
+  robotType: varchar('robot_type', { length: 100 }).notNull(), // 'industrial', 'service', 'educational', 'drone', etc.
+  manufacturer: varchar('manufacturer', { length: 255 }),
+  model: varchar('model', { length: 255 }),
+  serialNumber: varchar('serial_number', { length: 255 }).unique(),
+  status: mysqlEnum('status', ['idle', 'working', 'charging', 'maintenance', 'offline', 'error']).default('offline'),
+  batteryLevel: int('battery_level'), // 0-100%
+  location: json('location'), // {latitude, longitude, altitude}
+  capabilities: json('capabilities'), // Array of robot capabilities
+  config: json('config'),
+  firmwareVersion: varchar('firmware_version', { length: 50 }),
+  lastSeen: timestamp('last_seen'),
+  createdAt: timestamp('created_at').defaultNow(),
+}, (table) => ({
+  ownerIdx: index('robots_owner_idx').on(table.ownerId),
+  typeIdx: index('robots_type_idx').on(table.robotType),
+  statusIdx: index('robots_status_idx').on(table.status),
+}));
+
+export const robotTasks = mysqlTable('robot_tasks', {
+  id: int('id').autoincrement().primaryKey(),
+  robotId: int('robot_id').notNull(),
+  name: varchar('name', { length: 255 }).notNull(),
+  description: text('description'),
+  taskType: varchar('task_type', { length: 100 }).notNull(), // 'delivery', 'cleaning', 'inspection', etc.
+  priority: mysqlEnum('priority', ['low', 'medium', 'high', 'urgent']).default('medium'),
+  status: mysqlEnum('status', ['queued', 'in-progress', 'completed', 'failed', 'cancelled']).default('queued'),
+  progress: int('progress').default(0), // 0-100%
+  parameters: json('parameters'), // Task-specific parameters
+  result: json('result'), // Task result data
+  startedAt: timestamp('started_at'),
+  completedAt: timestamp('completed_at'),
+  createdAt: timestamp('created_at').defaultNow(),
+}, (table) => ({
+  robotIdx: index('robot_tasks_robot_idx').on(table.robotId),
+  statusIdx: index('robot_tasks_status_idx').on(table.status),
+}));
+
+export const robotFleets = mysqlTable('robot_fleets', {
+  id: int('id').autoincrement().primaryKey(),
+  ownerId: int('owner_id').notNull(),
+  name: varchar('name', { length: 255 }).notNull(),
+  description: text('description'),
+  robotCount: int('robot_count').default(0),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const robotFleetMembers = mysqlTable('robot_fleet_members', {
+  id: int('id').autoincrement().primaryKey(),
+  fleetId: int('fleet_id').notNull(),
+  robotId: int('robot_id').notNull(),
+  role: varchar('role', { length: 100 }), // 'leader', 'worker', etc.
+  joinedAt: timestamp('joined_at').defaultNow(),
+}, (table) => ({
+  uniqueMember: uniqueIndex('unique_fleet_robot_idx').on(table.fleetId, table.robotId),
+}));
+
+export const robotPrograms = mysqlTable('robot_programs', {
+  id: int('id').autoincrement().primaryKey(),
+  creatorId: int('creator_id').notNull(),
+  name: varchar('name', { length: 255 }).notNull(),
+  description: text('description'),
+  code: text('code').notNull(), // Robot program code
+  language: varchar('language', { length: 50 }), // 'python', 'javascript', 'ros', etc.
+  robotType: varchar('robot_type', { length: 100 }), // Compatible robot type
+  isPublic: boolean('is_public').default(false),
+  downloads: int('downloads').default(0),
+  rating: decimal('rating', { precision: 3, scale: 2 }).default('0'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow(),
+});
+
+export const robotMaintenanceLogs = mysqlTable('robot_maintenance_logs', {
+  id: int('id').autoincrement().primaryKey(),
+  robotId: int('robot_id').notNull(),
+  type: mysqlEnum('type', ['routine', 'repair', 'upgrade', 'inspection']).notNull(),
+  description: text('description'),
+  performedBy: int('performed_by'), // User ID
+  cost: decimal('cost', { precision: 10, scale: 2 }),
+  nextMaintenanceDate: timestamp('next_maintenance_date'),
+  createdAt: timestamp('created_at').defaultNow(),
+}, (table) => ({
+  robotIdx: index('robot_maintenance_robot_idx').on(table.robotId),
+}));
+
+// ============================================================================
+// UPDATED EXPORTS
+// ============================================================================
+
+export type IoTDevice = typeof iotDevices.$inferSelect;
+export type IoTRoom = typeof iotRooms.$inferSelect;
+export type IoTSensorData = typeof iotSensorData.$inferSelect;
+export type IoTAutomation = typeof iotAutomations.$inferSelect;
+export type Robot = typeof robots.$inferSelect;
+export type RobotTask = typeof robotTasks.$inferSelect;
+export type RobotFleet = typeof robotFleets.$inferSelect;
+export type RobotProgram = typeof robotPrograms.$inferSelect;
+export type RobotMaintenanceLog = typeof robotMaintenanceLogs.$inferSelect;
+
+
+
+
+// ============================================================================
+// CV & CAREER MANAGEMENT
+// ============================================================================
+
+export const userCVs = mysqlTable('user_cvs', {
+  id: int('id').autoincrement().primaryKey(),
+  userId: int('user_id').notNull().unique(),
+  fullName: varchar('full_name', { length: 255 }).notNull(),
+  title: varchar('title', { length: 255 }), // Professional title
+  summary: text('summary'),
+  email: varchar('email', { length: 255 }),
+  phone: varchar('phone', { length: 50 }),
+  location: varchar('location', { length: 255 }),
+  website: varchar('website', { length: 255 }),
+  linkedIn: varchar('linked_in', { length: 255 }),
+  github: varchar('github', { length: 255 }),
+  isPublic: boolean('is_public').default(false),
+  allowEmployerContact: boolean('allow_employer_contact').default(true),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow(),
+});
+
+export const cvCertificates = mysqlTable('cv_certificates', {
+  id: int('id').autoincrement().primaryKey(),
+  cvId: int('cv_id').notNull(),
+  certificateNftId: int('certificate_nft_id'), // Links to NFTs table
+  courseName: varchar('course_name', { length: 255 }).notNull(),
+  issuer: varchar('issuer', { length: 255 }).notNull(), // Aetherial, etc.
+  issueDate: timestamp('issue_date').notNull(),
+  expiryDate: timestamp('expiry_date'),
+  credentialId: varchar('credential_id', { length: 255 }),
+  blockchainTxHash: varchar('blockchain_tx_hash', { length: 255 }), // Verification
+  skills: json('skills'), // Array of skills learned
+  grade: varchar('grade', { length: 50 }),
+  isVerified: boolean('is_verified').default(true),
+  isVisible: boolean('is_visible').default(true),
+  createdAt: timestamp('created_at').defaultNow(),
+}, (table) => ({
+  cvIdx: index('cv_certificates_cv_idx').on(table.cvId),
+}));
+
+export const cvExperience = mysqlTable('cv_experience', {
+  id: int('id').autoincrement().primaryKey(),
+  cvId: int('cv_id').notNull(),
+  company: varchar('company', { length: 255 }).notNull(),
+  position: varchar('position', { length: 255 }).notNull(),
+  location: varchar('location', { length: 255 }),
+  startDate: timestamp('start_date').notNull(),
+  endDate: timestamp('end_date'),
+  isCurrent: boolean('is_current').default(false),
+  description: text('description'),
+  achievements: json('achievements'), // Array of achievements
+  skills: json('skills'), // Skills used
+  createdAt: timestamp('created_at').defaultNow(),
+}, (table) => ({
+  cvIdx: index('cv_experience_cv_idx').on(table.cvId),
+}));
+
+export const cvEducation = mysqlTable('cv_education', {
+  id: int('id').autoincrement().primaryKey(),
+  cvId: int('cv_id').notNull(),
+  institution: varchar('institution', { length: 255 }).notNull(),
+  degree: varchar('degree', { length: 255 }).notNull(),
+  fieldOfStudy: varchar('field_of_study', { length: 255 }),
+  startDate: timestamp('start_date'),
+  endDate: timestamp('end_date'),
+  grade: varchar('grade', { length: 50 }),
+  description: text('description'),
+  createdAt: timestamp('created_at').defaultNow(),
+}, (table) => ({
+  cvIdx: index('cv_education_cv_idx').on(table.cvId),
+}));
+
+export const cvSkills = mysqlTable('cv_skills', {
+  id: int('id').autoincrement().primaryKey(),
+  cvId: int('cv_id').notNull(),
+  skillName: varchar('skill_name', { length: 255 }).notNull(),
+  category: varchar('category', { length: 100 }), // 'technical', 'soft', 'language', etc.
+  proficiency: mysqlEnum('proficiency', ['beginner', 'intermediate', 'advanced', 'expert']),
+  yearsOfExperience: int('years_of_experience'),
+  isVerified: boolean('is_verified').default(false), // Verified by certificates
+  createdAt: timestamp('created_at').defaultNow(),
+}, (table) => ({
+  cvIdx: index('cv_skills_cv_idx').on(table.cvId),
+}));
+
+// ============================================================================
+// LEARNING POINTS & REWARDS
+// ============================================================================
+
+export const learningPoints = mysqlTable('learning_points', {
+  id: int('id').autoincrement().primaryKey(),
+  userId: int('user_id').notNull().unique(),
+  totalPoints: int('total_points').default(0),
+  availablePoints: int('available_points').default(0), // Not yet spent
+  lifetimeEarned: int('lifetime_earned').default(0),
+  lifetimeSpent: int('lifetime_spent').default(0),
+  currentLevel: int('current_level').default(1),
+  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow(),
+});
+
+export const pointTransactions = mysqlTable('point_transactions', {
+  id: int('id').autoincrement().primaryKey(),
+  userId: int('user_id').notNull(),
+  type: mysqlEnum('type', ['earned', 'spent', 'bonus', 'penalty']).notNull(),
+  amount: int('amount').notNull(),
+  source: varchar('source', { length: 255 }), // 'course_completion', 'quiz', 'achievement', etc.
+  sourceId: int('source_id'), // ID of course, quiz, etc.
+  description: text('description'),
+  createdAt: timestamp('created_at').defaultNow(),
+}, (table) => ({
+  userIdx: index('point_transactions_user_idx').on(table.userId),
+  createdIdx: index('point_transactions_created_idx').on(table.createdAt),
+}));
+
+export const courseUnlocks = mysqlTable('course_unlocks', {
+  id: int('id').autoincrement().primaryKey(),
+  userId: int('user_id').notNull(),
+  courseId: int('course_id').notNull(),
+  pointsCost: int('points_cost').notNull(),
+  unlockedAt: timestamp('unlocked_at').defaultNow(),
+}, (table) => ({
+  uniqueUnlock: uniqueIndex('unique_course_unlock_idx').on(table.userId, table.courseId),
+}));
+
+// ============================================================================
+// BARTERING SYSTEM
+// ============================================================================
+
+export const barterOffers = mysqlTable('barter_offers', {
+  id: int('id').autoincrement().primaryKey(),
+  userId: int('user_id').notNull(),
+  title: varchar('title', { length: 255 }).notNull(),
+  description: text('description').notNull(),
+  category: varchar('category', { length: 100 }),
+  offeringType: mysqlEnum('offering_type', ['service', 'skill', 'time', 'product']).notNull(),
+  offeringValue: decimal('offering_value', { precision: 10, scale: 2 }), // Estimated value in USD
+  seekingType: mysqlEnum('seeking_type', ['service', 'skill', 'time', 'product', 'aeth', 'course']).notNull(),
+  seekingValue: decimal('seeking_value', { precision: 10, scale: 2 }),
+  duration: int('duration'), // In hours for services
+  location: varchar('location', { length: 255 }),
+  isRemote: boolean('is_remote').default(true),
+  status: mysqlEnum('status', ['active', 'pending', 'completed', 'cancelled']).default('active'),
+  expiresAt: timestamp('expires_at'),
+  createdAt: timestamp('created_at').defaultNow(),
+}, (table) => ({
+  userIdx: index('barter_offers_user_idx').on(table.userId),
+  categoryIdx: index('barter_offers_category_idx').on(table.category),
+  statusIdx: index('barter_offers_status_idx').on(table.status),
+}));
+
+export const barterMatches = mysqlTable('barter_matches', {
+  id: int('id').autoincrement().primaryKey(),
+  offer1Id: int('offer1_id').notNull(),
+  offer2Id: int('offer2_id').notNull(),
+  user1Id: int('user1_id').notNull(),
+  user2Id: int('user2_id').notNull(),
+  matchScore: int('match_score'), // 0-100 compatibility score
+  status: mysqlEnum('status', ['pending', 'accepted', 'rejected', 'completed']).default('pending'),
+  agreedTerms: text('agreed_terms'),
+  completedAt: timestamp('completed_at'),
+  createdAt: timestamp('created_at').defaultNow(),
+}, (table) => ({
+  offer1Idx: index('barter_matches_offer1_idx').on(table.offer1Id),
+  offer2Idx: index('barter_matches_offer2_idx').on(table.offer2Id),
+}));
+
+export const skillEquivalencies = mysqlTable('skill_equivalencies', {
+  id: int('id').autoincrement().primaryKey(),
+  skillName: varchar('skill_name', { length: 255 }).notNull().unique(),
+  category: varchar('category', { length: 100 }),
+  averageHourlyRate: decimal('average_hourly_rate', { precision: 10, scale: 2 }), // USD
+  demandLevel: mysqlEnum('demand_level', ['low', 'medium', 'high', 'critical']),
+  requiredCertificates: json('required_certificates'), // Array of certificate types
+  marketValue: decimal('market_value', { precision: 10, scale: 2 }), // Overall market value
+  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow(),
+});
+
+export const internationalWageStandards = mysqlTable('international_wage_standards', {
+  id: int('id').autoincrement().primaryKey(),
+  country: varchar('country', { length: 100 }).notNull(),
+  skillCategory: varchar('skill_category', { length: 100 }).notNull(),
+  experienceLevel: mysqlEnum('experience_level', ['entry', 'mid', 'senior', 'expert']).notNull(),
+  averageHourlyRate: decimal('average_hourly_rate', { precision: 10, scale: 2 }).notNull(),
+  currency: varchar('currency', { length: 10 }).notNull(),
+  usdEquivalent: decimal('usd_equivalent', { precision: 10, scale: 2 }).notNull(),
+  costOfLiving: decimal('cost_of_living', { precision: 10, scale: 2 }), // Index
+  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow(),
+}, (table) => ({
+  countryIdx: index('wage_standards_country_idx').on(table.country),
+  categoryIdx: index('wage_standards_category_idx').on(table.skillCategory),
+}));
+
+// ============================================================================
+// PRODUCT-COURSE LINKING
+// ============================================================================
+
+export const productCourseLinks = mysqlTable('product_course_links', {
+  id: int('id').autoincrement().primaryKey(),
+  productId: int('product_id').notNull(),
+  courseId: int('course_id').notNull(),
+  linkType: mysqlEnum('link_type', ['tutorial', 'related', 'required', 'recommended']).default('related'),
+  displayOrder: int('display_order').default(0),
+  createdAt: timestamp('created_at').defaultNow(),
+}, (table) => ({
+  productIdx: index('product_course_links_product_idx').on(table.productId),
+  courseIdx: index('product_course_links_course_idx').on(table.courseId),
+}));
+
+// ============================================================================
+// UPDATED EXPORTS
+// ============================================================================
+
+export type UserCV = typeof userCVs.$inferSelect;
+export type CVCertificate = typeof cvCertificates.$inferSelect;
+export type CVExperience = typeof cvExperience.$inferSelect;
+export type CVEducation = typeof cvEducation.$inferSelect;
+export type CVSkill = typeof cvSkills.$inferSelect;
+export type LearningPoints = typeof learningPoints.$inferSelect;
+export type PointTransaction = typeof pointTransactions.$inferSelect;
+export type CourseUnlock = typeof courseUnlocks.$inferSelect;
+export type BarterOffer = typeof barterOffers.$inferSelect;
+export type BarterMatch = typeof barterMatches.$inferSelect;
+export type SkillEquivalency = typeof skillEquivalencies.$inferSelect;
+export type InternationalWageStandard = typeof internationalWageStandards.$inferSelect;
+export type ProductCourseLink = typeof productCourseLinks.$inferSelect;
 

@@ -1,37 +1,58 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import MainLayout from "./components/MainLayout";
+
+// Pages
 import Home from "./pages/Home";
-import DocPage from "./pages/DocPage";
+import NotFound from "./pages/NotFound";
+import Profile from "./pages/Profile";
+import Friends from "./pages/Friends";
+import Groups from "./pages/Groups";
+import Messages from "./pages/Messages";
+import Marketplace from "./pages/Marketplace";
+import Learning from "./pages/Learning";
+import Jobs from "./pages/Jobs";
+import AIAgents from "./pages/AIAgents";
+import Wallet from "./pages/Wallet";
+import Trading from "./pages/Trading";
+import NFTMarketplace from "./pages/NFTMarketplace";
+import IoT from "./pages/IoT";
+import Robotics from "./pages/Robotics";
+import Governance from "./pages/Governance";
 
 function Router() {
-  // make sure to consider if you need authentication for certain routes
   return (
-    <Switch>
-      <Route path={"/"} component={Home} />
-      <Route path={"/doc/:id"} component={DocPage} />
-      <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
-      <Route component={NotFound} />
-    </Switch>
+    <MainLayout>
+      <Switch>
+        <Route path="/" component={Home} />
+        <Route path="/profile/:id?" component={Profile} />
+        <Route path="/friends" component={Friends} />
+        <Route path="/groups" component={Groups} />
+        <Route path="/messages" component={Messages} />
+        <Route path="/marketplace" component={Marketplace} />
+        <Route path="/learning" component={Learning} />
+        <Route path="/jobs" component={Jobs} />
+        <Route path="/ai-agents" component={AIAgents} />
+        <Route path="/wallet" component={Wallet} />
+        <Route path="/trading" component={Trading} />
+        <Route path="/nft" component={NFTMarketplace} />
+        <Route path="/iot" component={IoT} />
+        <Route path="/robotics" component={Robotics} />
+        <Route path="/governance" component={Governance} />
+        <Route path="/404" component={NotFound} />
+        <Route component={NotFound} />
+      </Switch>
+    </MainLayout>
   );
 }
-
-// NOTE: About Theme
-// - First choose a default theme according to your design style (dark or light bg), than change color palette in index.css
-//   to keep consistent foreground/background color across components
-// - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
 
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider
-        defaultTheme="light"
-        switchable
-      >
+      <ThemeProvider defaultTheme="light">
         <TooltipProvider>
           <Toaster />
           <Router />
@@ -42,3 +63,4 @@ function App() {
 }
 
 export default App;
+
