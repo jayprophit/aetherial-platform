@@ -1005,3 +1005,39 @@ Layer 7: Light Circuits
 
 **Priority:** HIGH - Fix immediately
 
+
+
+
+---
+
+## 🤖 ENHANCED AI ASSISTANT (VS Code Cascade Style)
+
+**UI Components:**
+- [ ] Rich message formatting (markdown support)
+- [ ] Code blocks with syntax highlighting
+- [ ] File/folder reference chips
+- [ ] Expandable/collapsible sections
+- [ ] Message action buttons (copy, accept, reject)
+- [ ] Model selector dropdown (Claude, GPT, etc.)
+- [ ] "@" mention support for code blocks
+- [ ] Thinking/loading indicators
+- [ ] Message timestamps
+- [ ] User/AI avatar indicators
+
+**Input Area:**
+- [ ] Multi-line text input
+- [ ] "@" autocomplete for mentions
+- [ ] File attachment button
+- [ ] Send button
+- [ ] Keyboard shortcuts (Ctrl+Enter to send)
+
+**Functionality:**
+- [ ] Message threading
+- [ ] Code execution preview
+- [ ] File diff viewer
+- [ ] Accept/reject changes
+- [ ] Copy code snippets
+- [ ] Export conversation
+
+**Priority:** HIGH - Make AI assistant production-ready
+
