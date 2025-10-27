@@ -4,6 +4,7 @@ import { Route, Switch } from "wouter";
 import { HelmetProvider } from 'react-helmet-async';
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { AuthProvider } from "./contexts/AuthContext";
 import ToastProvider from './components/ToastProvider';
 import { useKeyboardShortcuts, KEYBOARD_SHORTCUTS } from './hooks/useKeyboardShortcuts';
 import MainLayout from "./components/MainLayout";
@@ -58,13 +59,15 @@ function App() {
   return (
     <HelmetProvider>
       <ErrorBoundary>
-        <ThemeProvider defaultTheme="light">
-          <TooltipProvider>
-            <Toaster />
-            <ToastProvider />
-            <Router />
-          </TooltipProvider>
-        </ThemeProvider>
+        <AuthProvider>
+          <ThemeProvider defaultTheme="light">
+            <TooltipProvider>
+              <Toaster />
+              <ToastProvider />
+              <Router />
+            </TooltipProvider>
+          </ThemeProvider>
+        </AuthProvider>
       </ErrorBoundary>
     </HelmetProvider>
   );
