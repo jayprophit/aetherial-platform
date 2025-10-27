@@ -27,8 +27,8 @@ async function startServer() {
   app.use("/api/products", (await import("./routes/products.js")).default);
   app.use("/api/courses", (await import("./routes/courses.js")).default);
   app.use("/api/jobs", (await import("./routes/jobs.js")).default);
-  app.use("/api/ai", (await import("./routes/ai.js")).default);
-  app.use("/api/upload", (await import("./routes/upload.js")).default);
+  // AI routes handled by tRPC
+  // Upload routes handled by tRPC
 
   // Health check
   app.get("/api/health", (_req, res) => {

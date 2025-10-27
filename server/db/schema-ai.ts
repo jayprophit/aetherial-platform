@@ -10,7 +10,7 @@
  */
 
 import { pgTable, text, timestamp, integer, boolean, jsonb, uuid, real, index } from "drizzle-orm/pg-core";
-import { users } from "./schema";
+import { users } from "../../drizzle/schema";
 
 // ============================================================================
 // AI CONVERSATIONS
