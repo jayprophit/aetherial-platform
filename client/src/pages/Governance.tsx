@@ -1,3 +1,1 @@
-export default function Governance() {
-  return <div>Governance</div>;
-}
+export default function Governance() { return <div className='p-6'><h1 className='text-3xl font-bold'>Governance</h1><p>Coming soon...</p></div>; }
