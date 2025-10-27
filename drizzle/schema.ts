@@ -1196,3 +1196,21 @@ export const aiModelUsage = mysqlTable('ai_model_usage', {
   dateIdx: index('ai_model_usage_date_idx').on(table.date),
 }));
 
+
+
+// ============================================================================
+// SHOPPING CART
+// ============================================================================
+
+export const cartItems = mysqlTable('cart_items', {
+  id: int('id').autoincrement().primaryKey(),
+  userId: int('user_id').notNull(),
+  productId: int('product_id').notNull(),
+  quantity: int('quantity').notNull().default(1),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow(),
+}, (table) => ({
+  userIdx: index('cart_items_user_idx').on(table.userId),
+  uniqueCartItem: uniqueIndex('unique_cart_item_idx').on(table.userId, table.productId),
+}));
+
