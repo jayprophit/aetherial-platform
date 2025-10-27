@@ -318,12 +318,12 @@ export class AetherialAIService {
     // Get or create conversation
     let conversationId = request.conversationId;
     if (!conversationId) {
-      const result = await db.insert(aiConversations).values({
+      const result: any = await db.insert(aiConversations).values({
         userId: request.userId,
         context: request.context || 'general',
         title: request.message.substring(0, 100),
       });
-      conversationId = Number(result.insertId);
+      conversationId = Number(result.insertId || result[0]?.insertId || 0);
     }
 
     // Get conversation history
