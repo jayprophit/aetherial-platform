@@ -10,6 +10,13 @@ const __dirname = path.dirname(__filename);
 async function startServer() {
   const app = express();
   const server = createServer(app);
+  
+  // Initialize WebSocket server
+  const { WebSocketManager } = await import("./websocket.js");
+  const wsManager = new WebSocketManager(server);
+  
+  // Make WebSocket manager available to routes
+  app.locals.wsManager = wsManager;
 
   // Middleware
   app.use(cors());
@@ -58,6 +65,7 @@ async function startServer() {
   server.listen(port, () => {
     console.log(`✅ Server running on http://localhost:${port}/`);
     console.log(`✅ API available at http://localhost:${port}/api`);
+    console.log(`✅ WebSocket server running on ws://localhost:${port}/ws`);
   });
 }
 
