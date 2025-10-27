@@ -250,9 +250,9 @@ mkdir -p backups
 docker exec aetherial-db pg_dump -U aetherial aetherial > backups/db_backup.sql
 
 # Backup volumes
-docker run --rm -v unified-platform-docs_postgres-data:/data -v $(pwd)/backups:/backup alpine tar czf /backup/postgres-data.tar.gz -C /data .
-docker run --rm -v unified-platform-docs_redis-data:/data -v $(pwd)/backups:/backup alpine tar czf /backup/redis-data.tar.gz -C /data .
-docker run --rm -v unified-platform-docs_minio-data:/data -v $(pwd)/backups:/backup alpine tar czf /backup/minio-data.tar.gz -C /data .
+docker run --rm -v aetherial-platform_postgres-data:/data -v $(pwd)/backups:/backup alpine tar czf /backup/postgres-data.tar.gz -C /data .
+docker run --rm -v aetherial-platform_redis-data:/data -v $(pwd)/backups:/backup alpine tar czf /backup/redis-data.tar.gz -C /data .
+docker run --rm -v aetherial-platform_minio-data:/data -v $(pwd)/backups:/backup alpine tar czf /backup/minio-data.tar.gz -C /data .
 ```
 
 ### Restore Data
@@ -261,7 +261,7 @@ docker run --rm -v unified-platform-docs_minio-data:/data -v $(pwd)/backups:/bac
 docker exec -i aetherial-db psql -U aetherial aetherial < backups/db_backup.sql
 
 # Restore volumes
-docker run --rm -v unified-platform-docs_postgres-data:/data -v $(pwd)/backups:/backup alpine tar xzf /backup/postgres-data.tar.gz -C /data
+docker run --rm -v aetherial-platform_postgres-data:/data -v $(pwd)/backups:/backup alpine tar xzf /backup/postgres-data.tar.gz -C /data
 ```
 
 ---
