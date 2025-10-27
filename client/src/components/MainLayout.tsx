@@ -172,6 +172,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const [expandedMenus, setExpandedMenus] = useState<string[]>(['home']);
   const [darkMode, setDarkMode] = useState(false);
   const [location] = useLocation();
+  const [activeMainMenu, setActiveMainMenu] = useState<string>('home');
 
   const toggleMenu = (menuId: string) => {
     setExpandedMenus(prev =>
@@ -189,7 +190,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   return (
     <div className={`min-h-screen ${darkMode ? 'dark bg-gray-900' : 'bg-gray-50'}`}>
       {/* Top Bar */}
-      <header className="fixed top-0 left-0 right-0 h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 z-50">
+      <header className="fixed top-0 left-0 right-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 z-50">
         <div className="flex items-center justify-between h-full px-4">
           {/* Left: Logo + Menu Toggle */}
           <div className="flex items-center gap-4">
@@ -236,6 +237,29 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             </button>
           </div>
         </div>
+
+        {/* Dynamic Submenu Tabs (changes based on selected main menu) */}
+        <div className="flex items-center gap-1 px-4 py-2 border-t border-gray-100 dark:border-gray-700 overflow-x-auto">
+          {mainMenuItems.find(item => item.id === activeMainMenu)?.children?.map((submenu) => (
+            <Link key={submenu.id} to={submenu.path || '#'}>
+              <button className={`flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors whitespace-nowrap relative ${location === submenu.path ? 'text-purple-600 bg-purple-50 dark:bg-purple-900/20 font-semibold' : 'text-gray-700 dark:text-gray-300'}`}>
+                <submenu.icon className="w-4 h-4" />
+                <span className="text-sm">{submenu.label}</span>
+                {submenu.badge && (
+                  <span className="ml-1 px-2 py-0.5 bg-red-500 text-white text-xs rounded-full">{submenu.badge}</span>
+                )}
+              </button>
+            </Link>
+          ))}
+          {/* AI Assistant Toggle */}
+          <button
+            onClick={() => setAiAssistantOpen(!aiAssistantOpen)}
+            className={`ml-auto flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${aiAssistantOpen ? 'text-purple-600 bg-purple-50 dark:bg-purple-900/20 font-semibold' : 'text-gray-700 dark:text-gray-300'}`}
+          >
+            <Bot className="w-4 h-4" />
+            <span className="text-sm">AI Assistant</span>
+          </button>
+        </div>
       </header>
 
       {/* Left Sidebar */}
@@ -248,9 +272,12 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           {mainMenuItems.map((item) => (
             <div key={item.id}>
               <button
-                onClick={() => item.children && toggleMenu(item.id)}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
-                  isActive(item.path) ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-600' : ''
+                onClick={() => {
+                  toggleMenu(item.id);
+                  setActiveMainMenu(item.id);
+                }}
+                className={`w-full flex items-center justify-between p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
+                  expandedMenus.includes(item.id) || activeMainMenu === item.id ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-600' : ''
                 }`}
               >
                 <div className="flex items-center gap-3">
