@@ -1,0 +1,156 @@
+# Aetherial Platform - Complete VM Package
+# "Aetherial in a Box" - Everything you need in one deployment
+
+version: '3.8'
+
+services:
+  # Documentation Website
+  docs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: aetherial-docs
+    ports:
+      - "3000:80"
+    networks:
+      - aetherial-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: aetherial-db
+    environment:
+      POSTGRES_DB: aetherial
+      POSTGRES_USER: aetherial
+      POSTGRES_PASSWORD: aetherial_dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - aetherial-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aetherial"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: aetherial-cache
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - aetherial-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  # Elasticsearch (Search Engine)
+  elasticsearch:
+    image: elasticsearch:8.11.0
+    container_name: aetherial-search
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    networks:
+      - aetherial-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # MinIO (S3-compatible storage)
+  minio:
+    image: minio/minio:latest
+    container_name: aetherial-storage
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: aetherial
+      MINIO_ROOT_PASSWORD: aetherial_dev_password
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio-data:/data
+    networks:
+      - aetherial-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  # Adminer (Database Management UI)
+  adminer:
+    image: adminer:latest
+    container_name: aetherial-adminer
+    ports:
+      - "8080:8080"
+    networks:
+      - aetherial-network
+    restart: unless-stopped
+    depends_on:
+      - postgres
+
+  # Redis Commander (Redis Management UI)
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: aetherial-redis-ui
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "8081:8081"
+    networks:
+      - aetherial-network
+    restart: unless-stopped
+    depends_on:
+      - redis
+
+  # Portainer (Container Management UI)
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: aetherial-portainer
+    command: -H unix:///var/run/docker.sock
+    ports:
+      - "9443:9443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer-data:/data
+    networks:
+      - aetherial-network
+    restart: unless-stopped
+
+networks:
+  aetherial-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  redis-data:
+  elasticsearch-data:
+  minio-data:
+  portainer-data:
+
