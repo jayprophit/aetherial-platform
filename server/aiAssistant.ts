@@ -14,7 +14,19 @@ import { TRPCError } from "@trpc/server";
 // TYPES & SCHEMAS
 // ============================================================================
 
-const AIModelSchema = z.enum(["gpt-4", "claude", "gemini", "auto"]);
+const AIModelSchema = z.enum([
+  "gpt-4o",
+  "gpt-4o-mini",
+  "claude-opus-4-1",
+  "claude-sonnet-4-5",
+  "claude-haiku-4-5",
+  "deepseek-v3-2",
+  "qwen-2-5",
+  "grok-2",
+  "gemini-pro",
+  "perplexity",
+  "auto"
+]);
 
 const AIContextSchema = z.enum([
   "admin",
@@ -101,11 +113,22 @@ const AITaskTypeSchema = z.enum([
 // ============================================================================
 
 /**
- * Selects the best AI model for a given task type
+ * Selects the best AI model for a given task type (Updated October 2025)
+ * Based on latest model capabilities and benchmarks
  */
 function selectModelForTask(taskType: z.infer<typeof AITaskTypeSchema>): string {
-  // GPT-4: Best for creative writing and content generation
-  const gpt4Tasks = [
+  // Claude Sonnet 4.5: Best coding model in the world (Sep 2025)
+  const claudeSonnet45Tasks = [
+    "product_specs",
+    "quiz_questions",
+    "video_script",
+    "assignments",
+    "curriculum_design",
+    "landing_page"
+  ];
+  
+  // GPT-4o: Best for creative writing and multimodal content
+  const gpt4oTasks = [
     "product_description",
     "product_title",
     "marketing_copy",
@@ -132,8 +155,8 @@ function selectModelForTask(taskType: z.infer<typeof AITaskTypeSchema>): string 
     "idea_generation"
   ];
   
-  // Claude: Best for analysis and reasoning
-  const claudeTasks = [
+  // Claude Opus 4.1: Best for complex reasoning and research (Aug 2025)
+  const claudeOpus41Tasks = [
     "pricing_strategy",
     "category_tags",
     "competitor_analysis",
@@ -155,19 +178,29 @@ function selectModelForTask(taskType: z.infer<typeof AITaskTypeSchema>): string 
     "troubleshooting"
   ];
   
-  // Gemini: Best for multimodal and technical tasks
-  const geminiTasks = [
-    "product_specs",
-    "quiz_questions",
+  // Claude Haiku 4.5: Fastest with near-frontier performance (Oct 2025)
+  const claudeHaiku45Tasks = [
     "order_tracking",
-    "return_handling"
+    "return_handling",
+    "platform_navigation",
+    "account_management"
   ];
   
-  if (gpt4Tasks.includes(taskType)) return "gpt-4";
-  if (claudeTasks.includes(taskType)) return "claude";
-  if (geminiTasks.includes(taskType)) return "gemini";
+  // Perplexity: Best for real-time research and citations
+  const perplexityTasks = [
+    "competitor_analysis",
+    "analytics_insights",
+    "customer_behavior",
+    "troubleshooting"
+  ];
   
-  return "gpt-4"; // Default
+  if (claudeSonnet45Tasks.includes(taskType)) return "claude-sonnet-4-5";
+  if (gpt4oTasks.includes(taskType)) return "gpt-4o";
+  if (claudeOpus41Tasks.includes(taskType)) return "claude-opus-4-1";
+  if (claudeHaiku45Tasks.includes(taskType)) return "claude-haiku-4-5";
+  if (perplexityTasks.includes(taskType)) return "perplexity";
+  
+  return "claude-sonnet-4-5"; // Default to best coding model
 }
 
 // ============================================================================
