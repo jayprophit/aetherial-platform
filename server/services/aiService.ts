@@ -318,12 +318,12 @@ export class AetherialAIService {
     // Get or create conversation
     let conversationId = request.conversationId;
     if (!conversationId) {
-      const [conversation] = await db.insert(aiConversations).values({
+      const result = await db.insert(aiConversations).values({
         userId: request.userId,
         context: request.context || 'general',
         title: request.message.substring(0, 100),
-      }).returning();
-      conversationId = conversation.id;
+      });
+      conversationId = Number(result.insertId);
     }
 
     // Get conversation history
@@ -380,7 +380,7 @@ export class AetherialAIService {
     });
 
     // Save AI response
-    const [aiMessage] = await db.insert(aiMessages).values({
+    const aiMessageResult = await db.insert(aiMessages).values({
       conversationId,
       role: 'assistant',
       content: result.content,
@@ -393,9 +393,10 @@ export class AetherialAIService {
       outputCost: outputCost.toString(),
       totalCost: totalCost.toString(),
       latencyMs,
-      metadata: { thinkingLevel },
+      metadata: JSON.stringify({ thinkingLevel }),
       createdAt: new Date(),
-    }).returning();
+    });
+    const aiMessageId = Number((aiMessageResult as any).insertId || 0);
 
     // Update conversation
     await db
@@ -408,7 +409,7 @@ export class AetherialAIService {
 
     return {
       conversationId,
-      messageId: aiMessage.id,
+      messageId: aiMessageId,
       content: result.content,
       model,
       thinkingLevel,
