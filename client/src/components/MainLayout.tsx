@@ -232,7 +232,13 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           {mainMenuItems.map((item) => (
             <div key={item.id}>
               <button
-                onClick={() => toggleMenu(item.id)}
+                onClick={() => {
+                  if (sidebarOpen) {
+                    toggleMenu(item.id);
+                  } else if (item.children && item.children[0]?.path) {
+                    window.location.href = item.children[0].path;
+                  }
+                }}
                 className={`w-full flex items-center justify-between p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
                   activeMainMenu === item.id ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-600' : ''
                 }`}
@@ -448,13 +454,17 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="p-4">
-              <div className="space-y-4">
+            <div className="flex flex-col h-full">
+              {/* Messages Area */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
                   <p className="text-sm text-gray-700 dark:text-gray-300">
                     👋 Hi! I'm your AI assistant. How can I help you today?
                   </p>
                 </div>
+              </div>
+              {/* Input Area - Fixed at Bottom */}
+              <div className="border-t border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-800">
                 <div className="flex gap-2">
                   <input
                     type="text"

@@ -986,3 +986,22 @@ Layer 7: Light Circuits
 
 **Priority:** CRITICAL - Get this right!
 
+
+
+
+---
+
+## 🔧 UI FIXES (USER FEEDBACK)
+
+**Collapsed Sidebar:**
+- [x] Icons should be clickable when sidebar is collapsed
+- [x] Clicking icon navigates to first page of that section
+- [x] Not just expanding the menu
+
+**AI Assistant:**
+- [x] Chat input should be at BOTTOM of window
+- [x] Messages scroll upward (like real chat)
+- [x] Natural chat interface layout
+
+**Priority:** HIGH - Fix immediately
+
