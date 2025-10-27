@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Register() {
   const navigate = useNavigate();
+  const { register } = useAuth();
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -78,14 +80,9 @@ export default function Register() {
     setLoading(true);
 
     try {
-      // TODO: Implement actual registration API call
-      console.log('Registration attempt:', formData);
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Redirect to email verification page
-      navigate('/verify-email');
+      await register(formData.email, formData.password, formData.fullName);
+      // Redirect to home on success
+      navigate('/');
     } catch (err) {
       setErrors({ submit: 'Registration failed. Please try again.' });
     } finally {
