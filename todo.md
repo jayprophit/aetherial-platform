@@ -1751,3 +1751,26 @@ Layer 7: Light Circuits
 - [ ] Documentation complete
 - [ ] **DEPLOY:** Full platform launch
 
+
+---
+
+## 📺 PREVIEW/VIEWER PANEL (4TH BAR)
+
+**Layout:**
+- [ ] 4th panel to the right of AI bar
+- [ ] Optional (toggle on/off)
+- [ ] Resizable width
+- [ ] Collapsible
+- [ ] Floating mode
+
+**Code Viewer:**
+- [ ] Syntax highlighting
+- [ ] Line numbers
+- [ ] Copy code button
+- [ ] File tree navigation
+
+**Video/Image/Audio/Document/3D Viewers:**
+- [ ] Multi-format support
+- [ ] Controls and navigation
+- [ ] Auto-detect file type
+
