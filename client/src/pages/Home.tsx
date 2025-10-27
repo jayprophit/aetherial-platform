@@ -1,3 +1,4 @@
+import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "wouter";
@@ -6,6 +7,10 @@ import { FileText, BookOpen, MessageSquare, Moon, Sun, ArrowRight } from "lucide
 import { useTheme } from "@/contexts/ThemeContext";
 
 export default function Home() {
+  // The userAuth hooks provides authentication state
+  // To implement login/logout functionality, simply call logout() or redirect to getLoginUrl()
+  let { user, loading, error, isAuthenticated, logout } = useAuth();
+
   const { theme, toggleTheme } = useTheme();
   const coreDocs = getDocsByCategory('core');
   const chatDocs = getDocsByCategory('chat');
