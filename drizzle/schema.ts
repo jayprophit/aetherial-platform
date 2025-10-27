@@ -1272,3 +1272,41 @@ export const cloudSettings = mysqlTable('cloud_settings', {
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow().onUpdateNow(),
 });
+
+// Business Registration - For users who want to sell/teach on platform
+export const businessRegistrations = mysqlTable('business_registrations', {
+  id: int('id').primaryKey().autoincrement(),
+  userId: int('user_id').notNull(),
+  businessName: varchar('business_name', { length: 255 }).notNull(),
+  businessType: varchar('business_type', { length: 50 }).notNull(), // 'seller', 'instructor', 'employer', 'all'
+  businessEmail: varchar('business_email', { length: 255 }).notNull(),
+  businessPhone: varchar('business_phone', { length: 50 }),
+  businessAddress: text('business_address'),
+  taxId: varchar('tax_id', { length: 100 }),
+  website: varchar('website', { length: 255 }),
+  description: text('description'),
+  logo: varchar('logo', { length: 500 }),
+  status: varchar('status', { length: 50 }).default('pending'), // 'pending', 'approved', 'rejected', 'suspended'
+  verifiedAt: timestamp('verified_at'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow(),
+}, (table) => ({
+  userIdx: index('business_user_idx').on(table.userId),
+}));
+
+// Platform Sections - Control entire platform sections
+export const platformSections = mysqlTable('platform_sections', {
+  id: int('id').primaryKey().autoincrement(),
+  sectionKey: varchar('section_key', { length: 50 }).notNull().unique(), // 'social', 'marketplace', 'learning', 'jobs', 'trading', 'blockchain', 'iot', 'ai'
+  sectionName: varchar('section_name', { length: 100 }).notNull(),
+  description: text('description'),
+  isEnabled: boolean('is_enabled').default(true),
+  inMaintenance: boolean('in_maintenance').default(false),
+  maintenanceMessage: text('maintenance_message'),
+  maintenanceStartAt: timestamp('maintenance_start_at'),
+  maintenanceEndAt: timestamp('maintenance_end_at'),
+  icon: varchar('icon', { length: 50 }),
+  displayOrder: int('display_order').default(0),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow(),
+});
