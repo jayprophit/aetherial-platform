@@ -204,10 +204,12 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           {sidebarOpen ? (
             <>
               <Link to="/" className="flex items-center gap-2">
-                <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-blue-600 rounded-lg flex items-center justify-center">
-                  <Zap className="w-6 h-6 text-white" />
-                </div>
-                <span className="text-xl font-bold">AETHERIAL</span>
+                <img 
+                  src="/images/logo-icon.png" 
+                  alt="AETHERIAL" 
+                  className="w-10 h-10 object-contain animate-[glow_3s_ease-in-out_infinite]"
+                />
+                <span className="text-xl font-bold ethereal-text">AETHERIAL</span>
               </Link>
               <button
                 onClick={() => setSidebarOpen(false)}
@@ -221,9 +223,11 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
               onClick={() => setSidebarOpen(true)}
               className="w-full flex justify-center"
             >
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-blue-600 rounded-lg flex items-center justify-center">
-                <Zap className="w-6 h-6 text-white" />
-              </div>
+              <img 
+                src="/images/logo-icon.png" 
+                alt="AETHERIAL" 
+                className="w-10 h-10 object-contain animate-[glow_3s_ease-in-out_infinite]"
+              />
             </button>
           )}
         </div>
@@ -298,10 +302,12 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
           <aside className="fixed left-0 top-0 bottom-0 w-72 bg-white dark:bg-gray-800 overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
               <Link to="/" className="flex items-center gap-2" onClick={() => setMobileMenuOpen(false)}>
-                <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-blue-600 rounded-lg flex items-center justify-center">
-                  <Zap className="w-6 h-6 text-white" />
-                </div>
-                <span className="text-xl font-bold">AETHERIAL</span>
+                <img 
+                  src="/images/logo-icon.png" 
+                  alt="AETHERIAL" 
+                  className="w-10 h-10 object-contain animate-[glow_3s_ease-in-out_infinite]"
+                />
+                <span className="text-xl font-bold ethereal-text">AETHERIAL</span>
               </Link>
               <button onClick={() => setMobileMenuOpen(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
                 <X className="w-5 h-5" />
