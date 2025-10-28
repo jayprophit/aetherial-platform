@@ -4,6 +4,7 @@ import { eq, like, or, desc, sql } from "drizzle-orm";
 import { getDb } from "../db";
 import { users, friendships, posts } from "../../drizzle/schema";
 import { EncryptionService } from "../lib/encryption";
+import { createNotification } from "../notifications";
 import cache from "../cache";
 
 const router = Router();
@@ -355,7 +356,7 @@ router.post("/:id/follow", async (req: Request, res: Response) => {
       status: "pending",
     });
 
-    // TODO: Send notification to target user
+    createNotification(targetUserId, "friend_request", `${currentUserId} sent you a friend request.`, `/profile/${currentUserId}`);
 
     res.json({
       success: true,

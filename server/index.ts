@@ -6,6 +6,7 @@ import cors from "cors";
 import helmet from "helmet";
 import { apiLimiter, authLimiter } from "./middleware/rateLimit";
 import "./queues";
+import { initializeNotificationService } from "./notifications";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -20,6 +21,7 @@ async function startServer() {
   
   // Make WebSocket manager available to routes
   app.locals.wsManager = wsManager;
+  initializeNotificationService(wsManager);
 
   // Middleware
   app.use(helmet());
