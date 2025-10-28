@@ -78,6 +78,7 @@ async function startServer() {
   app.use("/api/social-graph", (await import("./routes/social-graph.js")).default);
   app.use("/api/live-streaming", (await import("./routes/live-streaming.js")).default);
   app.use("/api/cloud-gaming", (await import("./routes/cloud-gaming.js")).default);
+  app.use("/api/digital-twin", (await import("./routes/digital-twin.js")).default);
   // AI routes handled by tRPC
 
   // Serve static files from dist/public in production

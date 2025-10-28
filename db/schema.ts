@@ -250,3 +250,16 @@ export const cloudGamingSessions = sqliteTable("cloud_gaming_sessions", {
   endedAt: text("ended_at"),
 });
 
+
+
+
+// Digital Twins Table
+export const digitalTwins = sqliteTable("digital_twins", {
+  id: integer("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  name: text("name").notNull(),
+  description: text("description"),
+  data: text("data", { mode: "json" }),
+  createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
+});
+
