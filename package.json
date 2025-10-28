@@ -65,6 +65,7 @@
     "bcryptjs": "^3.0.2",
     "better-sqlite3": "^12.4.1",
     "bullmq": "^5.62.0",
+    "cannon-es": "^0.20.0",
     "chai": "^6.2.0",
     "class-variance-authority": "^0.7.1",
     "cloudinary": "^2.8.0",

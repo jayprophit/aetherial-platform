@@ -169,6 +169,9 @@ importers:
       bullmq:
         specifier: ^5.62.0
         version: 5.62.0
+      cannon-es:
+        specifier: ^0.20.0
+        version: 0.20.0
       chai:
         specifier: ^6.2.0
         version: 6.2.0
@@ -3584,6 +3587,9 @@ packages:
 
   caniuse-lite@1.0.30001751:
     resolution: {integrity: sha512-A0QJhug0Ly64Ii3eIqHu5X51ebln3k4yTUkY1j8drqpWHVreg/VLijN48cZ1bYPiqOQuqpkIKnzr/Ul8V+p6Cw==}
+
+  cannon-es@0.20.0:
+    resolution: {integrity: sha512-eZhWTZIkFOnMAJOgfXJa9+b3kVlvG+FX4mdkpePev/w/rP5V8NRquGyEozcjPfEoXUlb+p7d9SUcmDSn14prOA==}
 
   caseless@0.12.0:
     resolution: {integrity: sha512-4tYFyifaFfGacoiObjJegolkwSU4xQNGbVgUiNYVUxbQ2x2lUsFvY4hVgVzGiIe6WLOPqycWXA40l+PWsxthUw==}
@@ -11384,6 +11390,8 @@ snapshots:
       three: 0.180.0
 
   caniuse-lite@1.0.30001751: {}
+
+  cannon-es@0.20.0: {}
 
   caseless@0.12.0: {}
 
