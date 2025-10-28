@@ -300,3 +300,14 @@ export const swarms = sqliteTable("swarms", {
   createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
 });
 
+
+
+
+// Student Models Table
+export const studentModels = sqliteTable("student_models", {
+  id: integer("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id).unique(),
+  data: text("data", { mode: "json" }),
+  createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
+});
+
