@@ -1,5 +1,6 @@
 import React, { useRef, useEffect } from "react";
 import * as THREE from "three";
+import { VoxelEngine } from "../voxel-engine/engine";
 
 const World: React.FC = () => {
   const mountRef = useRef<HTMLDivElement>(null);
@@ -27,15 +28,14 @@ const World: React.FC = () => {
     // Cube
     const geometry = new THREE.BoxGeometry();
     const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    const cube = new THREE.Mesh(geometry, material);
-    scene.add(cube);
+    const voxelEngine = new VoxelEngine(scene);
+    voxelEngine.generateChunk(0, 0, 0);
 
     // Animation loop
     const animate = () => {
       requestAnimationFrame(animate);
 
-      cube.rotation.x += 0.01;
-      cube.rotation.y += 0.01;
+      
 
       renderer.render(scene, camera);
     };
