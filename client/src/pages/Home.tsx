@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState, useEffect } from 'react';
 import {
   Heart, MessageCircle, Share2, MoreHorizontal, Image as ImageIcon,
@@ -25,6 +26,11 @@ interface Post {
 }
 
 export default function Home() {
+  const { t, i18n } = useTranslation();
+
+  const changeLanguage = (lng: string) => {
+    i18n.changeLanguage(lng);
+  };
   const { user } = useAuth();
   const [posts, setPosts] = useState<Post[]>([]);
   const [newPost, setNewPost] = useState('');
@@ -106,6 +112,10 @@ export default function Home() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
+      <div className="flex justify-end mb-4">
+        <button onClick={() => changeLanguage("en")} className="mr-2 px-3 py-1 rounded-md bg-gray-200 text-sm font-medium">English</button>
+        <button onClick={() => changeLanguage("es")} className="px-3 py-1 rounded-md bg-gray-200 text-sm font-medium">Español</button>
+      </div>
       {/* Create Post Card */}
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-6">
         <div className="flex gap-3">
@@ -118,7 +128,7 @@ export default function Home() {
             <textarea
               value={newPost}
               onChange={(e) => setNewPost(e.target.value)}
-              placeholder={user ? "What's on your mind?" : "Please login to post..."}
+              placeholder={user ? t("whats_on_your_mind") : t("please_login_to_post")}
               disabled={!user || posting}
               className="w-full px-4 py-3 bg-slate-50 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent resize-none"
               rows={3}
@@ -202,8 +212,8 @@ export default function Home() {
       {!loading && posts.length === 0 && (
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-12 text-center">
           <TrendingUp className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-slate-800 mb-2">No posts yet</h3>
-          <p className="text-slate-600">Be the first to share something!</p>
+          <h3 className="text-xl font-semibold text-slate-800 mb-2">{t("no_posts_yet")}</h3>
+          <p className="text-slate-600">{t("be_the_first_to_share")}</p>
         </div>
       )}
 
