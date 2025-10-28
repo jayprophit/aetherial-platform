@@ -1,0 +1,99 @@
+/**
+ * AETHERIAL Breadcrumbs Styles
+ * 
+ * Military-Grade Breadcrumb Navigation
+ */
+
+.breadcrumbs {
+  padding: var(--space-4) 0;
+}
+
+.breadcrumbs-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.breadcrumbs-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.breadcrumbs-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  padding: var(--space-1) var(--space-2);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  border-radius: var(--radius-md);
+  transition: all var(--duration-fast) var(--ease-in-out);
+}
+
+.breadcrumbs-link:hover {
+  color: var(--color-text-primary);
+  background-color: var(--color-surface);
+}
+
+.breadcrumbs-link:focus-visible {
+  outline: 2px solid var(--primary-500);
+  outline-offset: 2px;
+}
+
+.breadcrumbs-current {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1-5);
+  padding: var(--space-1) var(--space-2);
+  color: var(--color-text-primary);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+}
+
+.breadcrumbs-collapsed {
+  display: flex;
+  align-items: center;
+  padding: var(--space-1) var(--space-2);
+  color: var(--color-text-tertiary);
+  font-size: var(--text-sm);
+  cursor: default;
+}
+
+.breadcrumbs-icon {
+  font-size: 1em;
+  line-height: 1;
+}
+
+.breadcrumbs-label {
+  white-space: nowrap;
+}
+
+.breadcrumbs-separator {
+  color: var(--color-text-tertiary);
+  font-size: var(--text-sm);
+  user-select: none;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .breadcrumbs-label {
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .breadcrumbs-link {
+    transition: none;
+  }
+}
+
