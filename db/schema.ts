@@ -209,3 +209,15 @@ export const chat_messages = sqliteTable("chat_messages", {
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
 });
 
+
+
+// Biometric Authentication
+export const authenticators = sqliteTable("authenticators", {
+  id: integer("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  credentialID: text("credential_id").notNull().unique(),
+  credentialPublicKey: text("credential_public_key").notNull(),
+  counter: integer("counter").notNull(),
+  transports: text("transports", { mode: "json" }),
+});
+
