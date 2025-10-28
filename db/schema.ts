@@ -367,3 +367,14 @@ export const forum_replies = sqliteTable(
     createdAt: integer("created_at", { mode: 'timestamp' }).notNull(),
   }
 );
+
+
+export const knowledge_base_articles = sqliteTable(
+  'knowledge_base_articles',
+  {
+    id: integer("id").primaryKey(),
+    title: text("title").notNull(),
+    content: text("content").notNull(),
+    createdAt: integer("created_at", { mode: 'timestamp' }).notNull(),
+  }
+);
