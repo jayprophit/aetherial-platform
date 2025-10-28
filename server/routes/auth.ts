@@ -12,6 +12,7 @@ import {
   generateUsername,
 } from "../utils/auth";
 import { authenticate } from "../middleware/auth";
+import { AuditLogger } from "../lib/audit";
 
 const router = Router();
 
@@ -85,6 +86,16 @@ router.post("/register", async (req: Request, res: Response) => {
 
     const userId = Number(result[0].insertId);
 
+    AuditLogger.log({
+      action: "REGISTER_SUCCESS",
+      userId: String(userId),
+      object: "user",
+      objectId: String(userId),
+      ipAddress: req.ip,
+      userAgent: req.headers["user-agent"],
+      status: "SUCCESS",
+    });
+
     // Generate JWT token
     const token = generateToken({
       userId,
@@ -142,6 +153,14 @@ router.post("/login", async (req: Request, res: Response) => {
       .limit(1);
 
     if (userResult.length === 0) {
+      AuditLogger.log({
+        action: "LOGIN_FAILURE",
+        object: "user",
+        context: { email, reason: "User not found" },
+        ipAddress: req.ip,
+        userAgent: req.headers["user-agent"],
+        status: "FAILURE",
+      });
       return res.status(401).json({
         success: false,
         message: "Invalid email or password",
@@ -154,11 +173,31 @@ router.post("/login", async (req: Request, res: Response) => {
     const isPasswordValid = await comparePassword(password, user.password);
 
     if (!isPasswordValid) {
+      AuditLogger.log({
+        action: "LOGIN_FAILURE",
+        userId: String(user.id),
+        object: "user",
+        objectId: String(user.id),
+        context: { email, reason: "Invalid password" },
+        ipAddress: req.ip,
+        userAgent: req.headers["user-agent"],
+        status: "FAILURE",
+      });
       return res.status(401).json({
         success: false,
         message: "Invalid email or password",
       });
     }
+
+    AuditLogger.log({
+      action: "LOGIN_SUCCESS",
+      userId: String(user.id),
+      object: "user",
+      objectId: String(user.id),
+      ipAddress: req.ip,
+      userAgent: req.headers["user-agent"],
+      status: "SUCCESS",
+    });
 
     // Generate JWT token
     const token = generateToken({
@@ -251,6 +290,16 @@ router.get("/me", authenticate, async (req: Request, res: Response) => {
 router.post("/logout", authenticate, async (req: Request, res: Response) => {
   // With JWT, logout is handled client-side by removing the token
   // This endpoint exists for consistency and potential future token blacklisting
+  AuditLogger.log({
+    action: "LOGOUT_SUCCESS",
+    userId: req.user.userId,
+    object: "user",
+    objectId: req.user.userId,
+    ipAddress: req.ip,
+    userAgent: req.headers["user-agent"],
+    status: "SUCCESS",
+  });
+
   res.json({
     success: true,
     message: "Logout successful",
@@ -312,6 +361,16 @@ router.post("/change-password", authenticate, async (req: Request, res: Response
     const isPasswordValid = await comparePassword(currentPassword, user.password);
 
     if (!isPasswordValid) {
+      AuditLogger.log({
+        action: "CHANGE_PASSWORD_FAILURE",
+        userId: req.user.userId,
+        object: "user",
+        objectId: req.user.userId,
+        ipAddress: req.ip,
+        userAgent: req.headers["user-agent"],
+        status: "FAILURE",
+        context: { reason: "Incorrect current password" },
+      });
       return res.status(401).json({
         success: false,
         message: "Current password is incorrect",
@@ -326,6 +385,16 @@ router.post("/change-password", authenticate, async (req: Request, res: Response
       .update(users)
       .set({ password: hashedPassword })
       .where(eq(users.id, req.user.userId));
+
+    AuditLogger.log({
+      action: "CHANGE_PASSWORD_SUCCESS",
+      userId: req.user.userId,
+      object: "user",
+      objectId: req.user.userId,
+      ipAddress: req.ip,
+      userAgent: req.headers["user-agent"],
+      status: "SUCCESS",
+    });
 
     res.json({
       success: true,
