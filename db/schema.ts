@@ -1,6 +1,7 @@
 import { sqliteTable, integer, text } from 'drizzle-orm/sqlite-core';
 
-export const users = sqliteTable('users', {
+export const users = sqliteTable("users", {
+  did: text("did"),
   id: integer('id').primaryKey(),
   email: text('email').notNull().unique(),
   password: text('password').notNull(),
@@ -220,4 +221,9 @@ export const authenticators = sqliteTable("authenticators", {
   counter: integer("counter").notNull(),
   transports: text("transports", { mode: "json" }),
 });
+
+
+
+// Decentralized Identity
+
 
