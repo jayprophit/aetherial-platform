@@ -1,8 +1,8 @@
 import { Router } from "express";
 import type { Request, Response } from "express";
 import { eq } from "drizzle-orm";
-import { getDb } from "../db";
-import { users } from "../../drizzle/schema";
+import { db } from "../db";
+import { users } from "../db/schema";
 import {
   hashPassword,
   comparePassword,
@@ -10,9 +10,11 @@ import {
   isValidEmail,
   isValidPassword,
   generateUsername,
-} from "../utils/auth";
+} from "../lib/auth";
 import { authenticate } from "../middleware/auth";
 import { AuditLogger } from "../lib/audit";
+import { MfaService } from "../lib/mfa";
+import jwt from 'jsonwebtoken';
 
 const router = Router();
 
@@ -21,7 +23,6 @@ router.post("/register", async (req: Request, res: Response) => {
   try {
     const { email, password, displayName } = req.body;
 
-    // Validate input
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -44,20 +45,7 @@ router.post("/register", async (req: Request, res: Response) => {
       });
     }
 
-    const db = await getDb();
-    if (!db) {
-      return res.status(503).json({
-        success: false,
-        message: "Database not available",
-      });
-    }
-
-    // Check if user already exists
-    const existingUser = await db
-      .select()
-      .from(users)
-      .where(eq(users.email, email))
-      .limit(1);
+    const existingUser = await db.select().from(users).where(eq(users.email, email)).limit(1);
 
     if (existingUser.length > 0) {
       return res.status(409).json({
@@ -66,25 +54,17 @@ router.post("/register", async (req: Request, res: Response) => {
       });
     }
 
-    // Hash password
     const hashedPassword = await hashPassword(password);
-
-    // Generate username if not provided
     const username = displayName || generateUsername(email);
 
-    // Create user
     const result = await db.insert(users).values({
       email,
       password: hashedPassword,
       username,
       displayName: username,
-      bio: null,
-      avatar: null,
-      coverImage: null,
-      isVerified: false,
-    });
+    }).returning({ insertedId: users.id });
 
-    const userId = Number(result[0].insertId);
+    const userId = result[0].insertedId;
 
     AuditLogger.log({
       action: "REGISTER_SUCCESS",
@@ -96,7 +76,6 @@ router.post("/register", async (req: Request, res: Response) => {
       status: "SUCCESS",
     });
 
-    // Generate JWT token
     const token = generateToken({
       userId,
       email,
@@ -129,7 +108,6 @@ router.post("/login", async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
 
-    // Validate input
     if (!email || !password) {
       return res.status(400).json({
         success: false,
@@ -137,20 +115,7 @@ router.post("/login", async (req: Request, res: Response) => {
       });
     }
 
-    const db = await getDb();
-    if (!db) {
-      return res.status(503).json({
-        success: false,
-        message: "Database not available",
-      });
-    }
-
-    // Find user by email
-    const userResult = await db
-      .select()
-      .from(users)
-      .where(eq(users.email, email))
-      .limit(1);
+    const userResult = await db.select().from(users).where(eq(users.email, email)).limit(1);
 
     if (userResult.length === 0) {
       AuditLogger.log({
@@ -169,8 +134,7 @@ router.post("/login", async (req: Request, res: Response) => {
 
     const user = userResult[0];
 
-    // Verify password
-    const isPasswordValid = await comparePassword(password, user.password);
+    const isPasswordValid = await comparePassword(password, user.password || '');
 
     if (!isPasswordValid) {
       AuditLogger.log({
@@ -189,6 +153,27 @@ router.post("/login", async (req: Request, res: Response) => {
       });
     }
 
+    if (user.mfaEnabled) {
+      const mfaToken = generateToken({ userId: user.id, email: user.email, mfaRequired: true }, '15m');
+
+      AuditLogger.log({
+        action: "LOGIN_MFA_REQUIRED",
+        userId: String(user.id),
+        object: "user",
+        objectId: String(user.id),
+        ipAddress: req.ip,
+        userAgent: req.headers["user-agent"],
+        status: "SUCCESS",
+      });
+
+      return res.json({
+        success: true,
+        mfaRequired: true,
+        mfaToken,
+        message: "MFA token required",
+      });
+    }
+
     AuditLogger.log({
       action: "LOGIN_SUCCESS",
       userId: String(user.id),
@@ -199,7 +184,6 @@ router.post("/login", async (req: Request, res: Response) => {
       status: "SUCCESS",
     });
 
-    // Generate JWT token
     const token = generateToken({
       userId: user.id,
       email: user.email,
@@ -230,6 +214,72 @@ router.post("/login", async (req: Request, res: Response) => {
   }
 });
 
+// POST /api/auth/verify-mfa - Verify MFA token and complete login
+router.post("/verify-mfa", async (req: Request, res: Response) => {
+  const { mfaToken, mfaCode } = req.body;
+
+  if (!mfaToken || !mfaCode) {
+    return res.status(400).json({ success: false, message: "MFA token and code are required" });
+  }
+
+  try {
+    const decoded = jwt.verify(mfaToken, process.env.JWT_SECRET as string) as { userId: number; mfaRequired: boolean };
+
+    if (!decoded || !decoded.mfaRequired) {
+      return res.status(401).json({ success: false, message: "Invalid MFA token" });
+    }
+
+    const userResult = await db.select().from(users).where(eq(users.id, decoded.userId));
+    const user = userResult[0];
+
+    if (!user || !user.mfaSecret || !user.mfaEnabled) {
+      return res.status(400).json({ success: false, message: "MFA is not enabled for this user" });
+    }
+
+    const isTokenValid = MfaService.verifyToken(user.mfaSecret, mfaCode);
+
+    if (!isTokenValid) {
+      AuditLogger.log({
+        action: "MFA_VERIFY_FAILURE",
+        userId: String(user.id),
+        object: "user",
+        objectId: String(user.id),
+        status: "FAILURE",
+      });
+      return res.status(400).json({ success: false, message: "Invalid MFA token" });
+    }
+
+    const finalToken = generateToken({ userId: user.id, email: user.email, displayName: user.displayName });
+
+    AuditLogger.log({
+      action: "MFA_VERIFY_SUCCESS",
+      userId: String(user.id),
+      object: "user",
+      objectId: String(user.id),
+      status: "SUCCESS",
+    });
+
+    res.json({
+      success: true,
+      message: "Login successful",
+      token: finalToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        displayName: user.displayName,
+        avatar: user.avatar,
+        bio: user.bio,
+        isVerified: user.isVerified,
+        mfaEnabled: user.mfaEnabled,
+      },
+    });
+
+  } catch (error) {
+    res.status(401).json({ success: false, message: "Invalid or expired MFA token" });
+  }
+});
+
 // GET /api/auth/me - Get current user
 router.get("/me", authenticate, async (req: Request, res: Response) => {
   try {
@@ -240,15 +290,6 @@ router.get("/me", authenticate, async (req: Request, res: Response) => {
       });
     }
 
-    const db = await getDb();
-    if (!db) {
-      return res.status(503).json({
-        success: false,
-        message: "Database not available",
-      });
-    }
-
-    // Get fresh user data
     const userResult = await db
       .select({
         id: users.id,
@@ -260,6 +301,7 @@ router.get("/me", authenticate, async (req: Request, res: Response) => {
         coverImage: users.coverImage,
         isVerified: users.isVerified,
         createdAt: users.createdAt,
+        mfaEnabled: users.mfaEnabled,
       })
       .from(users)
       .where(eq(users.id, req.user.userId))
@@ -286,10 +328,8 @@ router.get("/me", authenticate, async (req: Request, res: Response) => {
   }
 });
 
-// POST /api/auth/logout - Logout user (client-side token removal)
+// POST /api/auth/logout - Logout user
 router.post("/logout", authenticate, async (req: Request, res: Response) => {
-  // With JWT, logout is handled client-side by removing the token
-  // This endpoint exists for consistency and potential future token blacklisting
   AuditLogger.log({
     action: "LOGOUT_SUCCESS",
     userId: req.user.userId,
@@ -333,15 +373,6 @@ router.post("/change-password", authenticate, async (req: Request, res: Response
       });
     }
 
-    const db = await getDb();
-    if (!db) {
-      return res.status(503).json({
-        success: false,
-        message: "Database not available",
-      });
-    }
-
-    // Get user with password
     const userResult = await db
       .select()
       .from(users)
@@ -357,8 +388,7 @@ router.post("/change-password", authenticate, async (req: Request, res: Response
 
     const user = userResult[0];
 
-    // Verify current password
-    const isPasswordValid = await comparePassword(currentPassword, user.password);
+    const isPasswordValid = await comparePassword(currentPassword, user.password || '');
 
     if (!isPasswordValid) {
       AuditLogger.log({
@@ -377,10 +407,8 @@ router.post("/change-password", authenticate, async (req: Request, res: Response
       });
     }
 
-    // Hash new password
     const hashedPassword = await hashPassword(newPassword);
 
-    // Update password
     await db
       .update(users)
       .set({ password: hashedPassword })

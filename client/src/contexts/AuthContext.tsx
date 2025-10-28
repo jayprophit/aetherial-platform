@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { api } from "../lib/api";
 
 interface User {
   id: number;
@@ -9,6 +8,7 @@ interface User {
   avatar: string | null;
   bio: string | null;
   isVerified: boolean;
+  mfaEnabled?: boolean;
 }
 
 interface AuthContextType {
@@ -16,7 +16,8 @@ interface AuthContextType {
   token: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<{ mfaRequired: boolean; mfaToken?: string }>;
+  loginWithMfa: (mfaToken: string, mfaCode: string) => Promise<void>;
   register: (email: string, password: string, displayName?: string) => Promise<void>;
   logout: () => void;
   updateUser: (userData: Partial<User>) => void;
@@ -29,27 +30,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load token and user from localStorage on mount
   useEffect(() => {
     const loadAuth = async () => {
       const storedToken = localStorage.getItem("token");
-      
       if (storedToken) {
         setToken(storedToken);
-        
         try {
-          // Verify token and get user data
           const response = await fetch("/api/auth/me", {
             headers: {
               Authorization: `Bearer ${storedToken}`,
             },
           });
-
           if (response.ok) {
             const data = await response.json();
             setUser(data.user);
           } else {
-            // Token is invalid, clear it
             localStorage.removeItem("token");
             setToken(null);
           }
@@ -59,61 +54,74 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setToken(null);
         }
       }
-      
       setIsLoading(false);
     };
-
     loadAuth();
   }, []);
 
   const login = async (email: string, password: string) => {
-    try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
+    const response = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+    });
 
-      const data = await response.json();
+    const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.message || "Login failed");
-      }
+    if (!response.ok) {
+      throw new Error(data.message || "Login failed");
+    }
 
+    if (data.mfaRequired) {
+      return { mfaRequired: true, mfaToken: data.mfaToken };
+    } else {
       setToken(data.token);
       setUser(data.user);
       localStorage.setItem("token", data.token);
-    } catch (error) {
-      console.error("Login error:", error);
-      throw error;
+      return { mfaRequired: false };
     }
   };
 
-  const register = async (email: string, password: string, displayName?: string) => {
-    try {
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password, displayName }),
-      });
+  const loginWithMfa = async (mfaToken: string, mfaCode: string) => {
+    const response = await fetch("/api/auth/verify-mfa", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ mfaToken, mfaCode }),
+    });
 
-      const data = await response.json();
+    const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.message || "Registration failed");
-      }
-
-      setToken(data.token);
-      setUser(data.user);
-      localStorage.setItem("token", data.token);
-    } catch (error) {
-      console.error("Registration error:", error);
-      throw error;
+    if (!response.ok) {
+      throw new Error(data.message || "MFA verification failed");
     }
+
+    setToken(data.token);
+    setUser(data.user);
+    localStorage.setItem("token", data.token);
+  };
+
+  const register = async (email: string, password: string, displayName?: string) => {
+    const response = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password, displayName }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Registration failed");
+    }
+
+    setToken(data.token);
+    setUser(data.user);
+    localStorage.setItem("token", data.token);
   };
 
   const logout = () => {
@@ -134,6 +142,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isLoading,
     isAuthenticated: !!user,
     login,
+    loginWithMfa,
     register,
     logout,
     updateUser,

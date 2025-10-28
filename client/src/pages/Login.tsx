@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useHistory, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function Login() {
-  const navigate = useNavigate();
+  const history = useHistory();
+  const location = useLocation();
   const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
@@ -19,9 +20,14 @@ export default function Login() {
     setError('');
 
     try {
-      await login(formData.email, formData.password);
+      const { mfaRequired, mfaToken } = await login(formData.email, formData.password);
       // Redirect to home on success
-      navigate('/');
+      if (mfaRequired) {
+        history.push('/verify-mfa', { mfaToken });
+      } else {
+        const from = location.state?.from || { pathname: '/' };
+        history.push(from);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Invalid email or password');
     } finally {

@@ -29,6 +29,7 @@ import Governance from "./pages/Governance";
 import HealthDashboard from "./pages/HealthDashboard";
 import AuditLogs from "./pages/AuditLogs";
 import MfaSettings from "./pages/MfaSettings";
+import MfaVerification from "./pages/MfaVerification";
 
 function Router() {
   useKeyboardShortcuts(KEYBOARD_SHORTCUTS);
@@ -54,6 +55,7 @@ function Router() {
         <Route path="/health" component={HealthDashboard} />
         <Route path="/audit-logs" component={AuditLogs} />
         <Route path="/settings/mfa" component={MfaSettings} />
+        <Route path="/verify-mfa" component={MfaVerification} />
         <Route path="/404" component={NotFound} />
         <Route component={NotFound} />
       </Switch>
