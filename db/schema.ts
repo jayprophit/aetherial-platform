@@ -490,3 +490,44 @@ export const dropshippingOrders = sqliteTable(
   }
 );
 
+
+
+
+// Subscriptions Table
+export const subscriptions = sqliteTable(
+  'subscriptions',
+  {
+    id: integer("id").primaryKey(),
+    userId: integer("user_id").notNull().references(() => users.id),
+    tier: text("tier").notNull().default('free'), // free, pro, business, enterprise
+    billingCycle: text("billing_cycle").notNull().default('monthly'), // monthly, yearly
+    status: text("status").notNull().default('active'), // active, cancelled, expired, trial
+    startDate: integer("start_date", { mode: 'timestamp' }).notNull(),
+    endDate: integer("end_date", { mode: 'timestamp' }).notNull(),
+    autoRenew: integer("auto_renew", { mode: 'boolean' }).default(true),
+    paymentMethod: text("payment_method"), // stripe, paypal, etc.
+    stripeCustomerId: text("stripe_customer_id"),
+    stripeSubscriptionId: text("stripe_subscription_id"),
+    createdAt: integer("created_at", { mode: 'timestamp' }).notNull(),
+    updatedAt: integer("updated_at", { mode: 'timestamp' }).notNull(),
+  }
+);
+
+// Usage Tracking Table
+export const usageTracking = sqliteTable(
+  'usage_tracking',
+  {
+    id: integer("id").primaryKey(),
+    userId: integer("user_id").notNull().references(() => users.id),
+    month: text("month").notNull(), // YYYY-MM format
+    storage: integer("storage").notNull().default(0), // bytes
+    apiCalls: integer("api_calls").notNull().default(0),
+    projects: integer("projects").notNull().default(0),
+    teamMembers: integer("team_members").notNull().default(0),
+    aiRequests: integer("ai_requests").notNull().default(0),
+    blockchainTransactions: integer("blockchain_transactions").notNull().default(0),
+    createdAt: integer("created_at", { mode: 'timestamp' }).notNull(),
+    updatedAt: integer("updated_at", { mode: 'timestamp' }).notNull(),
+  }
+);
+
