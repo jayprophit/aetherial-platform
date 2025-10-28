@@ -49,6 +49,8 @@
     "@react-three/drei": "^10.7.6",
     "@react-three/fiber": "^9.4.0",
     "@react-three/xr": "^6.6.27",
+    "@sentry/node": "^10.22.0",
+    "@sentry/tracing": "^7.120.4",
     "@simplewebauthn/browser": "^13.2.2",
     "@simplewebauthn/server": "^13.2.2",
     "@stripe/stripe-js": "^8.2.0",
@@ -141,6 +143,7 @@
     "three": "^0.180.0",
     "unleash-client": "^6.7.0",
     "vaul": "^1.1.2",
+    "winston": "^3.18.3",
     "wouter": "^3.3.5",
     "ws": "^8.18.3",
     "zod": "^4.1.12"

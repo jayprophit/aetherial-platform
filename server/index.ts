@@ -5,6 +5,9 @@ import { fileURLToPath } from "url";
 import cors from "cors";
 import helmet from "helmet";
 import * as client from 'prom-client';
+import * as Sentry from '@sentry/node';
+import { Integrations } from '@sentry/tracing';
+import logger from './logger';
 import { apiLimiter, authLimiter } from "./middleware/rateLimit";
 import "./queues";
 import { initializeNotificationService } from "./notifications";
@@ -15,6 +18,21 @@ const __dirname = path.dirname(__filename);
 
 async function startServer() {
   const app = express();
+
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  integrations: [
+    new Integrations.BrowserTracing(),
+  ],
+
+  // Set tracesSampleRate to 1.0 to capture 100%
+  // of transactions for performance monitoring.
+  // We recommend adjusting this value in production
+  tracesSampleRate: 1.0,
+});
+
+app.use(Sentry.Handlers.requestHandler());
+app.use(Sentry.Handlers.tracingHandler());
 const collectDefaultMetrics = client.collectDefaultMetrics;
 collectDefaultMetrics();
 
@@ -112,7 +130,9 @@ app.get('/metrics', async (req, res) => {
   app.use("/uploads", express.static(uploadsPath));
 
   // Handle client-side routing - serve index.html for all routes
-  app.get("*", (_req, res) => {
+  app.use(Sentry.Handlers.errorHandler());
+
+app.get("*", (_req, res) => {
     res.sendFile(path.join(staticPath, "index.html"));
   });
 
