@@ -11,7 +11,9 @@
     "format": "prettier --write .",
     "test": "vitest run",
     "db:push": "drizzle-kit generate && drizzle-kit migrate",
-    "db:seed": "tsx db/seed.ts"
+    "db:seed": "tsx db/seed.ts",
+    "security:audit": "node scripts/security-audit.cjs",
+    "security:pentest": "node scripts/penetration-test.cjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.67.0",

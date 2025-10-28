@@ -106,3 +106,21 @@ temp/
 *.sqlite
 *.sqlite3
 uploads/
+
+
+# Sensitive files and keys
+config/secrets.json
+*.key
+*.pem
+id_rsa
+id_rsa.pub
+*.crt
+*.p12
+*.pfx
+
+# Security reports
+security-audit-report.json
+penetration-test-report.json
+SECURITY_AUDIT_REPORT.md
+PENETRATION_TEST_REPORT.md
+
