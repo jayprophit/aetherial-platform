@@ -230,11 +230,23 @@ export const authenticators = sqliteTable("authenticators", {
 
 
 
+
 // Live Streams Table
 export const liveStreams = sqliteTable("live_streams", {
   id: integer("id").primaryKey(),
   userId: integer("user_id").notNull().references(() => users.id),
   title: text("title").notNull(),
   createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
+});
+
+
+// Cloud Gaming Sessions Table
+export const cloudGamingSessions = sqliteTable("cloud_gaming_sessions", {
+  id: integer("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  gameId: integer("game_id").notNull().references(() => games.id),
+  status: text("status").notNull(),
+  createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
+  endedAt: text("ended_at"),
 });
 
