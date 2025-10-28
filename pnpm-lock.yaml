@@ -130,11 +130,14 @@ importers:
       '@tanstack/react-query':
         specifier: ^5.90.2
         version: 5.90.5(react@19.2.0)
+      '@tensorflow-models/toxicity':
+        specifier: 1.2.2
+        version: 1.2.2(@tensorflow/tfjs-converter@4.22.0(@tensorflow/tfjs-core@4.22.0(encoding@0.1.13)))(@tensorflow/tfjs-core@4.22.0(encoding@0.1.13))
       '@tensorflow/tfjs':
-        specifier: ^4.22.0
+        specifier: 4.22.0
         version: 4.22.0(encoding@0.1.13)(seedrandom@3.0.5)
       '@tensorflow/tfjs-node':
-        specifier: ^4.22.0
+        specifier: 4.22.0
         version: 4.22.0(encoding@0.1.13)(seedrandom@3.0.5)
       '@trpc/client':
         specifier: ^11.6.0
@@ -172,6 +175,9 @@ importers:
       axios:
         specifier: ^1.12.0
         version: 1.13.0
+      bad-words:
+        specifier: 3.0.4
+        version: 3.0.4
       bcryptjs:
         specifier: ^3.0.2
         version: 3.0.2
@@ -284,7 +290,7 @@ importers:
         specifier: ^2.3.9
         version: 2.3.9
       multer:
-        specifier: ^2.0.2
+        specifier: ^2.0.0
         version: 2.0.2
       multer-storage-cloudinary:
         specifier: ^4.0.0
@@ -423,8 +429,8 @@ importers:
         specifier: ^9.0.10
         version: 9.0.10
       '@types/multer':
-        specifier: ^2.0.0
-        version: 2.0.0
+        specifier: ^1.4.11
+        version: 1.4.13
       '@types/node':
         specifier: ^24.7.0
         version: 24.9.1
@@ -438,7 +444,7 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
       '@types/ws':
-        specifier: ^8.18.1
+        specifier: ^8.5.10
         version: 8.18.1
       '@vitejs/plugin-react':
         specifier: ^5.0.4
@@ -2923,6 +2929,18 @@ packages:
     peerDependencies:
       react: ^18 || ^19
 
+  '@tensorflow-models/toxicity@1.2.2':
+    resolution: {integrity: sha512-DSMIoBzNyX7+4D4cGKjsFLbCuJz3bksYpwFHKAjTp4+tmgAGpNyg5nDXXI/IQp18nMTbLKgLruLWOxq5y7P4WQ==}
+    peerDependencies:
+      '@tensorflow/tfjs-converter': ^1.3.3
+      '@tensorflow/tfjs-core': ^1.3.3
+
+  '@tensorflow-models/universal-sentence-encoder@1.2.2':
+    resolution: {integrity: sha512-fGCl/gwB7jmKCRI2FhgIBeIa/LCSUcjlEcckH2Bc2dIjhJ+2nspp+22lubxcseN6jjrmP42kkXt/reAPe+KJkQ==}
+    peerDependencies:
+      '@tensorflow/tfjs-converter': ^1.2.9
+      '@tensorflow/tfjs-core': ^1.2.9
+
   '@tensorflow/tfjs-backend-cpu@4.22.0':
     resolution: {integrity: sha512-1u0FmuLGuRAi8D2c3cocHTASGXOmHc/4OvoVDENJayjYkS119fcTcQf4iHrtLthWyDIPy3JiPhRrZQC9EwnhLw==}
     engines: {yarn: '>= 1.3.2'}
@@ -3200,8 +3218,8 @@ packages:
   '@types/ms@2.1.0':
     resolution: {integrity: sha512-GsCCIZDE/p3i96vtEqx+7dBUGXrc7zeSK3wwPHIaRThS+9OhWIXRqzs4d6k1SVU8g91DrNRWxWUGhp5KXQb2VA==}
 
-  '@types/multer@2.0.0':
-    resolution: {integrity: sha512-C3Z9v9Evij2yST3RSBktxP9STm6OdMc5uR1xF1SGr98uv8dUlAL2hqwrZ3GVB3uyMyiegnscEK6PGtYvNrjTjw==}
+  '@types/multer@1.4.13':
+    resolution: {integrity: sha512-bhhdtPw7JqCiEfC9Jimx5LqX9BDIPJEh2q/fQ4bqbBPtyEZYr3cvF22NwG0DmPZNYA0CAf2CnqDB4KIGGpJcaw==}
 
   '@types/node-fetch@2.6.13':
     resolution: {integrity: sha512-QGpRVpzSaUs30JBSGPjOg4Uveu384erbHBoT1zeONvyCfwQxIkUshLAOqN/k9EjGviPRmWTTe6aH2qySWKTVSw==}
@@ -3568,6 +3586,13 @@ packages:
 
   axios@1.13.0:
     resolution: {integrity: sha512-zt40Pz4zcRXra9CVV31KeyofwiNvAbJ5B6YPz9pMJ+yOSLikvPT4Yi5LjfgjRa9CawVYBaD1JQzIVcIvBejKeA==}
+
+  bad-words@3.0.4:
+    resolution: {integrity: sha512-v/Q9uRPH4+yzDVLL4vR1+S9KoFgOEUl5s4axd6NIAq8SV2mradgi4E8lma/Y0cw1ltVdvyegCQQKffCPRCp8fg==}
+    engines: {node: '>=8.0.0'}
+
+  badwords-list@1.0.0:
+    resolution: {integrity: sha512-oWhaSG67e+HQj3OGHQt2ucP+vAPm1wTbdp2aDHeuh4xlGXBdWwzZ//pfu6swf5gZ8iX0b7JgmSo8BhgybbqszA==}
 
   bail@2.0.2:
     resolution: {integrity: sha512-0xO6mYd7JB2YesxDKplafRpsiOzPt9V02ddPCLbY1xYGPOX24NTyN50qnUxgCPcSoYMhKpAuBTjQoRZCAkUDRw==}
@@ -11011,6 +11036,17 @@ snapshots:
       '@tanstack/query-core': 5.90.5
       react: 19.2.0
 
+  '@tensorflow-models/toxicity@1.2.2(@tensorflow/tfjs-converter@4.22.0(@tensorflow/tfjs-core@4.22.0(encoding@0.1.13)))(@tensorflow/tfjs-core@4.22.0(encoding@0.1.13))':
+    dependencies:
+      '@tensorflow-models/universal-sentence-encoder': 1.2.2(@tensorflow/tfjs-converter@4.22.0(@tensorflow/tfjs-core@4.22.0(encoding@0.1.13)))(@tensorflow/tfjs-core@4.22.0(encoding@0.1.13))
+      '@tensorflow/tfjs-converter': 4.22.0(@tensorflow/tfjs-core@4.22.0(encoding@0.1.13))
+      '@tensorflow/tfjs-core': 4.22.0(encoding@0.1.13)
+
+  '@tensorflow-models/universal-sentence-encoder@1.2.2(@tensorflow/tfjs-converter@4.22.0(@tensorflow/tfjs-core@4.22.0(encoding@0.1.13)))(@tensorflow/tfjs-core@4.22.0(encoding@0.1.13))':
+    dependencies:
+      '@tensorflow/tfjs-converter': 4.22.0(@tensorflow/tfjs-core@4.22.0(encoding@0.1.13))
+      '@tensorflow/tfjs-core': 4.22.0(encoding@0.1.13)
+
   '@tensorflow/tfjs-backend-cpu@4.22.0(@tensorflow/tfjs-core@4.22.0(encoding@0.1.13))':
     dependencies:
       '@tensorflow/tfjs-core': 4.22.0(encoding@0.1.13)
@@ -11344,7 +11380,7 @@ snapshots:
 
   '@types/ms@2.1.0': {}
 
-  '@types/multer@2.0.0':
+  '@types/multer@1.4.13':
     dependencies:
       '@types/express': 4.17.21
 
@@ -11717,6 +11753,12 @@ snapshots:
       proxy-from-env: 1.1.0
     transitivePeerDependencies:
       - debug
+
+  bad-words@3.0.4:
+    dependencies:
+      badwords-list: 1.0.0
+
+  badwords-list@1.0.0: {}
 
   bail@2.0.2: {}
 

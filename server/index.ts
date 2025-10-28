@@ -72,6 +72,7 @@ async function startServer() {
   app.use("/api/webauthn", (await import("./routes/webauthn.js")).default);
   app.use("/api/did", (await import("./routes/did.js")).default);
   app.use("/api/federated-learning", (await import("./routes/federated-learning.js")).default);
+  app.use("/api/content-moderation", (await import("./routes/content-moderation.js")).default);
   // AI routes handled by tRPC
 
   // Serve static files from dist/public in production
