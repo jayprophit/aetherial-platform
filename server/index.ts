@@ -82,6 +82,7 @@ async function startServer() {
   app.use("/api/bci", (await import("./routes/bci.js")).default);
   app.use("/api/quantum-computing", (await import("./routes/quantum-computing.js")).default);
   app.use("/api/swarm-intelligence", (await import("./routes/swarm-intelligence.js")).default);
+  app.use("/api/generative-art-and-music", (await import("./routes/generative-art-and-music.js")).default);
   // AI routes handled by tRPC
 
   // Serve static files from dist/public in production
