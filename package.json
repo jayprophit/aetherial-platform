@@ -14,7 +14,10 @@
     "db:seed": "tsx db/seed.ts",
     "security:audit": "node scripts/security-audit.cjs",
     "security:pentest": "node scripts/penetration-test.cjs",
-    "benchmark": "node scripts/benchmark.cjs"
+    "benchmark": "node scripts/benchmark.cjs",
+    "load-test": "node scripts/load-test.cjs",
+    "stress-test": "node scripts/stress-test.cjs",
+    "test:performance": "npm run load-test && npm run stress-test"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.67.0",

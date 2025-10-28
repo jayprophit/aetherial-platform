@@ -126,4 +126,8 @@ PENETRATION_TEST_REPORT.md
 # Performance reports
 benchmark-report.json
 BENCHMARK_REPORT.md
+load-test-report.json
+LOAD_TEST_REPORT.md
+stress-test-report.json
+STRESS_TEST_REPORT.md
 
