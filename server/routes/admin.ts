@@ -3,16 +3,16 @@ import { getDb } from '../db';
 import { users, posts, products, courses, orders, payments } from '../../drizzle/schema';
 import { eq, sql, desc, and, gte, lte } from 'drizzle-orm';
 import { authenticateToken } from '../middleware/auth';
-import { requireAdmin, requireSuperAdmin } from '../middleware/admin';
+import { checkPermission } from '../middleware/rbac';
 
 const router = express.Router();
 
 // All admin routes require authentication and admin role
 router.use(authenticateToken);
-router.use(requireAdmin);
+
 
 // GET /api/admin/stats - Platform statistics
-router.get('/stats', async (req, res) => {
+router.get('/stats', checkPermission('dashboard:view'), async (req, res) => {
   try {
     const db = await getDb();
     if (!db) {
@@ -47,7 +47,7 @@ router.get('/stats', async (req, res) => {
 });
 
 // GET /api/admin/users - Get all users with pagination
-router.get('/users', async (req, res) => {
+router.get('/users', checkPermission('user:view:full'), async (req, res) => {
   try {
     const { page = '1', limit = '20', search, role, status } = req.query;
     const pageNum = parseInt(page as string);
@@ -101,7 +101,7 @@ router.get('/users', async (req, res) => {
 });
 
 // PUT /api/admin/users/:id - Update user (ban, suspend, verify, change role)
-router.put('/users/:id', async (req, res) => {
+router.put('/users/:id', checkPermission('user:edit:any'), async (req, res) => {
   try {
     const userId = parseInt(req.params.id);
     const { status, role, isVerified } = req.body;
@@ -134,7 +134,7 @@ router.put('/users/:id', async (req, res) => {
 });
 
 // DELETE /api/admin/users/:id - Delete user (super admin only)
-router.delete('/users/:id', requireSuperAdmin, async (req, res) => {
+router.delete('/users/:id', checkPermission('user:delete:any'), async (req, res) => {
   try {
     const userId = parseInt(req.params.id);
 
@@ -153,7 +153,7 @@ router.delete('/users/:id', requireSuperAdmin, async (req, res) => {
 });
 
 // GET /api/admin/posts - Get all posts for moderation
-router.get('/posts', async (req, res) => {
+router.get('/posts', checkPermission('post:view:any'), async (req, res) => {
   try {
     const { page = '1', limit = '20', status } = req.query;
     const pageNum = parseInt(page as string);
@@ -208,7 +208,7 @@ router.get('/posts', async (req, res) => {
 });
 
 // DELETE /api/admin/posts/:id - Delete post
-router.delete('/posts/:id', async (req, res) => {
+router.delete('/posts/:id', checkPermission('post:delete:any'), async (req, res) => {
   try {
     const postId = parseInt(req.params.id);
 
@@ -227,7 +227,7 @@ router.delete('/posts/:id', async (req, res) => {
 });
 
 // GET /api/admin/orders - Get all orders
-router.get('/orders', async (req, res) => {
+router.get('/orders', checkPermission('order:view:any'), async (req, res) => {
   try {
     const { page = '1', limit = '20', status } = req.query;
     const pageNum = parseInt(page as string);
@@ -279,7 +279,7 @@ router.get('/orders', async (req, res) => {
 });
 
 // PUT /api/admin/orders/:id - Update order status
-router.put('/orders/:id', async (req, res) => {
+router.put('/orders/:id', checkPermission('order:edit:any'), async (req, res) => {
   try {
     const orderId = parseInt(req.params.id);
     const { status } = req.body;
@@ -301,7 +301,7 @@ router.put('/orders/:id', async (req, res) => {
 });
 
 // GET /api/admin/analytics - Platform analytics
-router.get('/analytics', async (req, res) => {
+router.get('/analytics', checkPermission('analytics:view'), async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
 

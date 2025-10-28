@@ -10,7 +10,8 @@
     "check": "tsc --noEmit",
     "format": "prettier --write .",
     "test": "vitest run",
-    "db:push": "drizzle-kit generate && drizzle-kit migrate"
+    "db:push": "drizzle-kit generate && drizzle-kit migrate",
+    "db:seed": "tsx db/seed.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.67.0",
@@ -50,6 +51,7 @@
     "@trpc/client": "^11.6.0",
     "@trpc/react-query": "^11.6.0",
     "@trpc/server": "^11.6.0",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/cors": "^2.8.19",
     "@types/crypto-js": "^4.2.2",
     "@types/helmet": "^4.0.0",
@@ -58,6 +60,7 @@
     "@types/speakeasy": "^2.0.10",
     "axios": "^1.12.0",
     "bcryptjs": "^3.0.2",
+    "better-sqlite3": "^12.4.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
