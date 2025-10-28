@@ -34,6 +34,15 @@ import World from "./pages/World";
 import AnalyticsDashboard from "./pages/AnalyticsDashboard";
 import BugBounty from "./pages/BugBounty";
 
+// NEW: 7 directories added
+import BillingDashboard from "./pages/billing/BillingDashboard";
+import DeveloperHub from "./pages/dev-tools/DeveloperHub";
+import SellerDashboard from "./pages/ecommerce/SellerDashboard";
+import InstructorDashboard from "./pages/elearning/InstructorDashboard";
+import FinanceDashboard from "./pages/finance/FinanceDashboard";
+import ForumsDashboard from "./pages/forums/ForumsDashboard";
+import HelpCenter from "./pages/help/HelpCenter";
+
 function Router() {
   useKeyboardShortcuts(KEYBOARD_SHORTCUTS);
   
@@ -62,6 +71,16 @@ function Router() {
         <Route path="/world" component={World} />
         <Route path="/analytics" component={AnalyticsDashboard} />
         <Route path="/bug-bounty" component={BugBounty} />
+        
+        {/* NEW: 7 directories routes */}
+        <Route path="/billing" component={BillingDashboard} />
+        <Route path="/developer" component={DeveloperHub} />
+        <Route path="/seller" component={SellerDashboard} />
+        <Route path="/instructor" component={InstructorDashboard} />
+        <Route path="/finance/dashboard" component={FinanceDashboard} />
+        <Route path="/forums" component={ForumsDashboard} />
+        <Route path="/help/center" component={HelpCenter} />
+        
         <Route path="/404" component={NotFound} />
         <Route component={NotFound} />
       </Switch>

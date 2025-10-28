@@ -258,3 +258,67 @@ export const requiresOwner = (path: string): boolean => {
 
 export default routes;
 
+
+
+  // ============================================
+  // BILLING & SUBSCRIPTIONS (NEW)
+  // ============================================
+  { path: '/billing', name: 'Billing Dashboard', component: 'billing/BillingDashboard', requiresAuth: true, category: 'billing', icon: '💳' },
+  { path: '/billing/plans', name: 'Subscription Plans', component: 'billing/Plans', category: 'billing' },
+  { path: '/billing/invoices', name: 'Invoices', component: 'billing/Invoices', requiresAuth: true, category: 'billing' },
+  { path: '/billing/payment-methods', name: 'Payment Methods', component: 'billing/PaymentMethods', requiresAuth: true, category: 'billing' },
+  { path: '/billing/usage', name: 'Usage & Billing', component: 'billing/Usage', requiresAuth: true, category: 'billing' },
+  
+  // ============================================
+  // DEVELOPER TOOLS (NEW)
+  // ============================================
+  { path: '/developer', name: 'Developer Hub', component: 'dev-tools/DeveloperHub', requiresAuth: true, category: 'developer', icon: '⚡' },
+  { path: '/developer/api-keys', name: 'API Keys', component: 'dev-tools/APIKeys', requiresAuth: true, category: 'developer' },
+  { path: '/developer/webhooks', name: 'Webhooks', component: 'dev-tools/Webhooks', requiresAuth: true, category: 'developer' },
+  { path: '/developer/sdks', name: 'SDKs & Libraries', component: 'dev-tools/SDKs', category: 'developer' },
+  { path: '/developer/docs', name: 'API Documentation', component: 'dev-tools/APIDocs', category: 'developer' },
+  
+  // ============================================
+  // E-COMMERCE SELLER (NEW)
+  // ============================================
+  { path: '/seller', name: 'Seller Dashboard', component: 'ecommerce/SellerDashboard', requiresAuth: true, category: 'seller', icon: '🏪' },
+  { path: '/seller/products', name: 'Manage Products', component: 'ecommerce/Products', requiresAuth: true, category: 'seller' },
+  { path: '/seller/orders', name: 'Manage Orders', component: 'ecommerce/Orders', requiresAuth: true, category: 'seller' },
+  { path: '/seller/inventory', name: 'Inventory', component: 'ecommerce/Inventory', requiresAuth: true, category: 'seller' },
+  { path: '/seller/analytics', name: 'Sales Analytics', component: 'ecommerce/Analytics', requiresAuth: true, category: 'seller' },
+  
+  // ============================================
+  // E-LEARNING INSTRUCTOR (NEW)
+  // ============================================
+  { path: '/instructor', name: 'Instructor Dashboard', component: 'elearning/InstructorDashboard', requiresAuth: true, category: 'instructor', icon: '👨‍🏫' },
+  { path: '/instructor/courses', name: 'My Courses', component: 'elearning/Courses', requiresAuth: true, category: 'instructor' },
+  { path: '/instructor/students', name: 'Students', component: 'elearning/Students', requiresAuth: true, category: 'instructor' },
+  { path: '/instructor/analytics', name: 'Course Analytics', component: 'elearning/Analytics', requiresAuth: true, category: 'instructor' },
+  { path: '/instructor/earnings', name: 'Earnings', component: 'elearning/Earnings', requiresAuth: true, category: 'instructor' },
+  
+  // ============================================
+  // FINANCE DASHBOARD (NEW - Enhanced)
+  // ============================================
+  { path: '/finance/dashboard', name: 'Finance Dashboard', component: 'finance/FinanceDashboard', requiresAuth: true, category: 'finance' },
+  { path: '/finance/stocks', name: 'Stocks', component: 'finance/Stocks', requiresAuth: true, category: 'finance' },
+  { path: '/finance/crypto', name: 'Cryptocurrency', component: 'finance/Crypto', requiresAuth: true, category: 'finance' },
+  { path: '/finance/bonds', name: 'Bonds', component: 'finance/Bonds', requiresAuth: true, category: 'finance' },
+  
+  // ============================================
+  // FORUMS & COMMUNITY (NEW)
+  // ============================================
+  { path: '/forums', name: 'Discussion Forums', component: 'forums/ForumsDashboard', category: 'forums', icon: '💬' },
+  { path: '/forums/category/:id', name: 'Forum Category', component: 'forums/Category', category: 'forums' },
+  { path: '/forums/thread/:id', name: 'Forum Thread', component: 'forums/Thread', category: 'forums' },
+  { path: '/forums/create', name: 'Create Thread', component: 'forums/CreateThread', requiresAuth: true, category: 'forums' },
+  { path: '/forums/my-posts', name: 'My Posts', component: 'forums/MyPosts', requiresAuth: true, category: 'forums' },
+  
+  // ============================================
+  // HELP CENTER (Enhanced)
+  // ============================================
+  { path: '/help/center', name: 'Help Center Home', component: 'help/HelpCenter', category: 'help' },
+  { path: '/help/tickets', name: 'Support Tickets', component: 'help/Tickets', requiresAuth: true, category: 'help' },
+  { path: '/help/knowledge-base', name: 'Knowledge Base', component: 'help/KnowledgeBase', category: 'help' },
+  { path: '/help/video-tutorials', name: 'Video Tutorials', component: 'help/VideoTutorials', category: 'help' },
+];
+
