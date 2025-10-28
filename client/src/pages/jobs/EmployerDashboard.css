@@ -1,0 +1,359 @@
+/* Reuse Seller Dashboard styles with employer-specific overrides */
+@import '../marketplace/SellerDashboard.css';
+
+.employer-dashboard {
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+}
+
+.post-job-btn {
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.post-job-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(72, 187, 120, 0.3);
+}
+
+.dashboard-tabs button.active {
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+}
+
+.stat-icon {
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+}
+
+/* Applicants List */
+.applicants-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.applicant-item {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background: #f7fafc;
+  border-radius: 12px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.applicant-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.applicant-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.applicant-details {
+  flex: 1;
+}
+
+.applicant-details h4 {
+  font-size: 1.125rem;
+  color: #2d3748;
+  margin-bottom: 0.25rem;
+}
+
+.applicant-position {
+  color: #718096;
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}
+
+.applicant-experience {
+  color: #a0aec0;
+  font-size: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.applicant-skills {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.skill-tag {
+  background: #e6fffa;
+  color: #234e52;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.applicant-match {
+  text-align: center;
+}
+
+.match-score {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.applicant-match p {
+  font-size: 0.75rem;
+  color: #718096;
+}
+
+.applicant-status {
+  text-align: center;
+  min-width: 120px;
+}
+
+.applied-date {
+  font-size: 0.75rem;
+  color: #a0aec0;
+  margin-top: 0.5rem;
+}
+
+.applicant-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.view-btn-small,
+.shortlist-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s;
+  white-space: nowrap;
+}
+
+.view-btn-small {
+  background: #4299e1;
+  color: white;
+}
+
+.shortlist-btn {
+  background: #48bb78;
+  color: white;
+}
+
+.view-btn-small:hover,
+.shortlist-btn:hover {
+  transform: scale(1.05);
+}
+
+/* Jobs Grid Mini */
+.jobs-grid-mini {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.job-card-mini {
+  background: #f7fafc;
+  padding: 1.5rem;
+  border-radius: 12px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.job-card-mini:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.job-card-mini h4 {
+  font-size: 1.125rem;
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+}
+
+.job-department {
+  color: #718096;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+.job-stats-mini {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.875rem;
+  color: #718096;
+}
+
+/* Job Card */
+.job-card {
+  background: #f7fafc;
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.job-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.job-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.job-header h3 {
+  font-size: 1.25rem;
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+}
+
+.job-meta {
+  color: #718096;
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}
+
+.job-salary {
+  color: #48bb78;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.job-stats {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 8px;
+}
+
+.job-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-number {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2d3748;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: #718096;
+  text-transform: uppercase;
+}
+
+.job-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.applicants-btn {
+  background: #9f7aea;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.applicants-btn:hover {
+  transform: scale(1.05);
+}
+
+/* Applicants Filters */
+.applicants-filters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+/* Applicants Table */
+.applicant-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.applicant-cell img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.match-cell {
+  display: inline-block;
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  color: white;
+  padding: 0.375rem 0.75rem;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .applicant-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .applicant-match,
+  .applicant-status {
+    width: 100%;
+    text-align: left;
+  }
+
+  .applicant-actions {
+    width: 100%;
+    flex-direction: row;
+  }
+
+  .job-header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .job-stats {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .job-actions {
+    flex-wrap: wrap;
+  }
+
+  .applicants-filters {
+    flex-direction: column;
+  }
+}
+
