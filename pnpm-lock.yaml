@@ -250,6 +250,9 @@ importers:
       jsonwebtoken:
         specifier: ^9.0.2
         version: 9.0.2
+      lua.js:
+        specifier: ^0.1.5
+        version: 0.1.5
       lucide-react:
         specifier: ^0.453.0
         version: 0.453.0(react@19.2.0)
@@ -5416,6 +5419,10 @@ packages:
 
   ltgt@2.2.1:
     resolution: {integrity: sha512-AI2r85+4MquTw9ZYqabu4nMwy9Oftlfa/e/52t9IjtfG+mGBbTNdAoZ3RQKLHR6r0wQnwZnPIEh/Ya6XTWAKNA==}
+
+  lua.js@0.1.5:
+    resolution: {integrity: sha512-KoqthNyA0zpIC5toUnka8atpzaa7RkkswDclCG3AelsbMeTsHm5a/owUigy+QhJ80rG4Fl+PAN8EHlB9jJME3w==}
+    hasBin: true
 
   lucide-react@0.453.0:
     resolution: {integrity: sha512-kL+RGZCcJi9BvJtzg2kshO192Ddy9hv3ij+cPrVPWSRzgCWCVazoQJxOjAwgK53NomL07HB7GPHW120FimjNhQ==}
@@ -13311,6 +13318,8 @@ snapshots:
   lru.min@1.1.2: {}
 
   ltgt@2.2.1: {}
+
+  lua.js@0.1.5: {}
 
   lucide-react@0.453.0(react@19.2.0):
     dependencies:

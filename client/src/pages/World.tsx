@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from "react";
 import * as THREE from "three";
 import { VoxelEngine } from "../voxel-engine/engine";
 import * as CANNON from "cannon-es";
+import { ScriptingEngine } from "../scripting-engine/engine";
 
 const World: React.FC = () => {
   const mountRef = useRef<HTMLDivElement>(null);
@@ -51,6 +52,9 @@ const World: React.FC = () => {
       new THREE.MeshBasicMaterial({ color: 0x00ff00 })
     );
     scene.add(cubeMesh);
+
+    const scriptingEngine = new ScriptingEngine();
+    scriptingEngine.runScript(`print("Hello from Lua!")`);
 
     // Animation loop
     const animate = () => {

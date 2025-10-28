@@ -92,6 +92,7 @@
     "ioredis": "^5.8.2",
     "jose": "6.1.0",
     "jsonwebtoken": "^9.0.2",
+    "lua.js": "^0.1.5",
     "lucide-react": "^0.453.0",
     "lunr": "^2.3.9",
     "multer": "^2.0.2",
