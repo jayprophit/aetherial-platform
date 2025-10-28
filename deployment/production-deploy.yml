@@ -1,0 +1,151 @@
+# AETHERIAL Platform - Production Deployment Configuration
+# Docker Compose for full-stack deployment
+
+version: '3.8'
+
+services:
+  # Frontend - React Application
+  frontend:
+    build:
+      context: ../client
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://backend:5000/api
+      - NODE_ENV=production
+    depends_on:
+      - backend
+    restart: always
+    networks:
+      - aetherial-network
+
+  # Backend - Node.js API Server
+  backend:
+    build:
+      context: ../server
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://user:pass@postgres:5432/aetherial
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=${JWT_SECRET}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    depends_on:
+      - postgres
+      - redis
+      - mongodb
+    restart: always
+    networks:
+      - aetherial-network
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=aetherial
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=aetherial
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: always
+    networks:
+      - aetherial-network
+
+  # MongoDB - For blockchain and NoSQL data
+  mongodb:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=aetherial
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+    volumes:
+      - mongo-data:/data/db
+    restart: always
+    networks:
+      - aetherial-network
+
+  # Redis - For caching and real-time features
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    restart: always
+    networks:
+      - aetherial-network
+
+  # Nginx - Reverse Proxy and Load Balancer
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl
+    depends_on:
+      - frontend
+      - backend
+    restart: always
+    networks:
+      - aetherial-network
+
+  # Blockchain Node
+  blockchain-node:
+    build:
+      context: ../server/blockchain
+      dockerfile: Dockerfile
+    ports:
+      - "8545:8545"
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - blockchain-data:/data
+    restart: always
+    networks:
+      - aetherial-network
+
+  # AI Service
+  ai-service:
+    build:
+      context: ../server/ai
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - MODEL=gpt-4
+    restart: always
+    networks:
+      - aetherial-network
+
+  # Communication Service (WebRTC, VoIP)
+  communication-service:
+    build:
+      context: ../server/communication
+      dockerfile: Dockerfile
+    ports:
+      - "3478:3478"  # STUN
+      - "5349:5349"  # TURN
+      - "8080:8080"  # WebSocket
+    restart: always
+    networks:
+      - aetherial-network
+
+volumes:
+  postgres-data:
+  mongo-data:
+  redis-data:
+  blockchain-data:
+
+networks:
+  aetherial-network:
+    driver: bridge
+
