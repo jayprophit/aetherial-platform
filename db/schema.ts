@@ -197,3 +197,15 @@ export const npcs = sqliteTable("npcs", {
   currentActivity: text("current_activity"),
 });
 
+
+
+// Voice and Text Chat
+export const chat_messages = sqliteTable("chat_messages", {
+  id: integer("id").primaryKey(),
+  senderId: integer("sender_id").notNull().references(() => users.id),
+  recipientId: integer("recipient_id").references(() => users.id),
+  channelId: integer("channel_id"), // Assuming a channels table exists
+  message: text("message").notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+});
+

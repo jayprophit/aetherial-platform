@@ -16,7 +16,12 @@ export class WebSocketManager {
   private channels: Map<string, Set<AuthenticatedWebSocket>> = new Map();
 
   constructor(server: Server) {
-    this.wss = new WebSocketServer({ server, path: '/ws' });
+    this.wss = new WebSocketServer({ noServer: true });
+    server.on("upgrade", (request, socket, head) => {
+      this.wss.handleUpgrade(request, socket, head, (ws) => {
+        this.wss.emit("connection", ws, request);
+      });
+    });
     this.initialize();
   }
 
@@ -42,9 +47,9 @@ export class WebSocketManager {
         }
       }
 
-      ws.on('message', (data) => {
+      ws.on('message', (data: string) => {
         try {
-          const message = JSON.parse(data.toString());
+          const message = JSON.parse(data);
           this.handleMessage(ws, message);
         } catch (error) {
           console.error('Message parse error:', error);
@@ -83,7 +88,16 @@ export class WebSocketManager {
       case 'subscribe': this.subscribe(ws, payload.channel); break;
       case 'unsubscribe': this.unsubscribe(ws, payload.channel); break;
       case 'channel_broadcast': this.broadcastToChannel(payload.channel, payload.message, ws.userId); break;
+      case 'signal': this.handleSignaling(ws, payload); break;
       default: console.log('Unknown message type:', type);
+    }
+  }
+
+  private handleSignaling(ws: AuthenticatedWebSocket, payload: any) {
+    const { to, signal } = payload;
+    const recipient = this.onlineUsers.get(to);
+    if (recipient && recipient.readyState === WebSocket.OPEN) {
+      recipient.send(JSON.stringify({ type: 'signal', payload: { from: ws.userId, signal } }));
     }
   }
 
@@ -107,7 +121,7 @@ export class WebSocketManager {
     console.log(`User ${ws.userId} unsubscribed from channel: ${channel}`);
   }
 
-  private broadcastToChannel(channel: string, message: any, senderId?: number) {
+  public broadcastToChannel(channel: string, message: any, senderId?: number) {
     const subscribers = this.channels.get(channel);
     if (subscribers) {
       const data = JSON.stringify({ type: 'channel_message', payload: { channel, message, senderId } });
@@ -125,6 +139,13 @@ export class WebSocketManager {
     this.wss.clients.forEach((ws: AuthenticatedWebSocket) => {
       if (ws.readyState === WebSocket.OPEN) ws.send(message);
     });
+  }
+
+  public sendToUser(userId: number, message: any) {
+    const ws = this.onlineUsers.get(userId);
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify(message));
+    }
   }
 
   public sendNotification(userId: number, notification: any) {
@@ -146,3 +167,4 @@ export class WebSocketManager {
 }
 
 export default WebSocketManager;
+
