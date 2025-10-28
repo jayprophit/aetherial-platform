@@ -4,6 +4,7 @@ import { eq, like, or, desc, sql } from "drizzle-orm";
 import { getDb } from "../db";
 import { users, friendships, posts } from "../../drizzle/schema";
 import { EncryptionService } from "../lib/encryption";
+import cache from "../cache";
 
 const router = Router();
 
@@ -72,12 +73,17 @@ router.get("/:id", async (req: Request, res: Response) => {
       });
     }
 
+    const cacheKey = `user:${userId}`;
+    const cachedUser = cache.get(cacheKey);
+
+    if (cachedUser) {
+      return res.json({ success: true, user: cachedUser });
+    }
+
     const user = userResult[0];
     const stats = await getUserStats(userId);
 
-    res.json({
-      success: true,
-      user: {
+    const userProfile = {
         id: user.id,
         username: user.username,
         email: user.email,
@@ -93,8 +99,12 @@ router.get("/:id", async (req: Request, res: Response) => {
         isVerified: user.isVerified,
         joinedAt: user.createdAt,
         stats,
-      },
-    });
+      };
+
+    cache.set(cacheKey, userProfile);
+
+
+    res.json({ success: true, user: userProfile });
   } catch (error) {
     console.error("Error getting user:", error);
     res.status(500).json({
@@ -156,6 +166,7 @@ router.put("/:id", async (req: Request, res: Response) => {
     }
 
     await db.update(users).set(updateData).where(eq(users.id, userId));
+    cache.del(`user:${userId}`);
 
     // Fetch updated user
     const updatedUser = await db
@@ -203,6 +214,7 @@ router.delete("/:id", async (req: Request, res: Response) => {
     }
 
     await db.delete(users).where(eq(users.id, userId));
+    cache.del(`user:${userId}`);
 
     res.json({
       success: true,
