@@ -7,6 +7,7 @@ import helmet from "helmet";
 import { apiLimiter, authLimiter } from "./middleware/rateLimit";
 import "./queues";
 import { initializeNotificationService } from "./notifications";
+import { initializeGameEngine } from "./gameEngine";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -22,6 +23,7 @@ async function startServer() {
   // Make WebSocket manager available to routes
   app.locals.wsManager = wsManager;
   initializeNotificationService(wsManager);
+  initializeGameEngine(wsManager);
 
   // Middleware
   app.use(helmet());
@@ -63,6 +65,7 @@ async function startServer() {
   app.use("/api/economy", (await import("./routes/economy.js")).default);
   app.use("/api/marketplace", (await import("./routes/marketplace.js")).default);
   app.use("/api/creator", (await import("./routes/creator.js")).default);
+  app.use("/api/games", (await import("./routes/games.js")).default);
   // AI routes handled by tRPC
 
   // Serve static files from dist/public in production

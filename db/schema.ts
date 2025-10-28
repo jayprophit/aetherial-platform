@@ -155,3 +155,22 @@ export const reviews = sqliteTable("reviews", {
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
 });
 
+
+
+// RTS Game Engine
+export const games = sqliteTable("games", {
+  id: integer("id").primaryKey(),
+  gameType: text("game_type").notNull(),
+  status: text("status").notNull().default("pending"),
+  gameState: text("game_state", { mode: "json" }),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+});
+
+export const game_players = sqliteTable("game_players", {
+  id: integer("id").primaryKey(),
+  gameId: integer("game_id").notNull().references(() => games.id),
+  userId: integer("user_id").notNull().references(() => users.id),
+  team: integer("team"),
+});
+
