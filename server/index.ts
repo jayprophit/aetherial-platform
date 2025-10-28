@@ -45,12 +45,8 @@ async function startServer() {
   app.use("/api/ai", (await import("./routes/ai.js")).default);
   app.use("/api/blockchain", (await import("./routes/blockchain.js")).default);
   app.use("/api/iot", (await import("./routes/iot.js")).default);
+  app.use("/api/health", (await import("./routes/health.js")).default);
   // AI routes handled by tRPC
-
-  // Health check
-  app.get("/api/health", (_req, res) => {
-    res.json({ status: "ok", timestamp: new Date().toISOString() });
-  });
 
   // Serve static files from dist/public in production
   const staticPath =
