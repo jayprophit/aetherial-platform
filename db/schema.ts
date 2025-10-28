@@ -378,3 +378,14 @@ export const knowledge_base_articles = sqliteTable(
     createdAt: integer("created_at", { mode: 'timestamp' }).notNull(),
   }
 );
+
+
+export const api_keys = sqliteTable(
+  'api_keys',
+  {
+    id: integer("id").primaryKey(),
+    userId: integer("user_id").notNull(),
+    key: text("key").notNull(),
+    createdAt: integer("created_at", { mode: 'timestamp' }).notNull(),
+  }
+);
