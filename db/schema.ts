@@ -184,3 +184,16 @@ alterTable(listings, {
   nftContractAddress: text("nft_contract_address"),
 });
 
+
+
+// AI NPCs
+export const npcs = sqliteTable("npcs", {
+  id: integer("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  description: text("description"),
+  personality: text("personality", { mode: "json" }),
+  backstory: text("backstory"),
+  currentLocation: text("current_location"),
+  currentActivity: text("current_activity"),
+});
+
