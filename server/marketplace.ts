@@ -2,12 +2,13 @@ import { getDb } from "./db";
 import { categories, listings, reviews, users } from "../drizzle/schema";
 import { eq, and } from "drizzle-orm";
 import { createTransaction } from "./economy";
+import { mintNFT } from "./blockchain";
 
 export async function createListing(sellerId: number, categoryId: number, title: string, description: string, price: number, media: any) {
   const db = await getDb();
   if (!db) return;
 
-  await db.insert(listings).values({
+  const result = await db.insert(listings).values({
     sellerId,
     categoryId,
     title,
@@ -17,6 +18,11 @@ export async function createListing(sellerId: number, categoryId: number, title:
     createdAt: new Date(),
     updatedAt: new Date(),
   });
+
+  const listingId = Number(result[0].insertId);
+
+  // Mint the NFT for the new listing
+  await mintNFT(listingId, `0x${sellerId}`, `https://aetherial.com/api/listings/${listingId}`);
 }
 
 export async function purchaseListing(buyerId: number, listingId: number) {

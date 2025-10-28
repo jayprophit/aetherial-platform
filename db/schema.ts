@@ -144,6 +144,8 @@ export const listings = sqliteTable("listings", {
   status: text("status").notNull().default("active"),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+  nftTokenId: integer("nft_token_id"),
+  nftContractAddress: text("nft_contract_address"),
 });
 
 export const reviews = sqliteTable("reviews", {
@@ -172,5 +174,13 @@ export const game_players = sqliteTable("game_players", {
   gameId: integer("game_id").notNull().references(() => games.id),
   userId: integer("user_id").notNull().references(() => users.id),
   team: integer("team"),
+});
+
+
+
+// Add nftTokenId and nftContractAddress to listings table
+alterTable(listings, {
+  nftTokenId: integer("nft_token_id"),
+  nftContractAddress: text("nft_contract_address"),
 });
 
