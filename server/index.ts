@@ -81,6 +81,7 @@ async function startServer() {
   app.use("/api/digital-twin", (await import("./routes/digital-twin.js")).default);
   app.use("/api/bci", (await import("./routes/bci.js")).default);
   app.use("/api/quantum-computing", (await import("./routes/quantum-computing.js")).default);
+  app.use("/api/swarm-intelligence", (await import("./routes/swarm-intelligence.js")).default);
   // AI routes handled by tRPC
 
   // Serve static files from dist/public in production

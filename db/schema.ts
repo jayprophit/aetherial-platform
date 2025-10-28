@@ -287,3 +287,16 @@ export const quantumAlgorithms = sqliteTable("quantum_algorithms", {
   createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
 });
 
+
+
+
+// Swarms Table
+export const swarms = sqliteTable("swarms", {
+  id: integer("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  name: text("name").notNull(),
+  description: text("description"),
+  agentCount: integer("agent_count").notNull(),
+  createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
+});
+
