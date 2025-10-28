@@ -332,3 +332,15 @@ export const crowdsourcingData = sqliteTable("crowdsourcing_data", {
   createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
 });
 
+
+
+export const feedback = sqliteTable(
+  'feedback',
+  {
+    id: integer("id").primaryKey(),
+    userId: integer("user_id").notNull(),
+    type: text("type").notNull(),
+    message: text("message").notNull(),
+    createdAt: integer("created_at", { mode: 'timestamp' }).notNull(),
+  }
+);
