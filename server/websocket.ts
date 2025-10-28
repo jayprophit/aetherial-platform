@@ -90,7 +90,16 @@ export class WebSocketManager {
       case 'channel_broadcast': this.broadcastToChannel(payload.channel, payload.message, ws.userId); break;
       case 'signal': this.handleSignaling(ws, payload); break;
       case 'webrtc-signal': this.handleWebRTCSignal(ws, payload); break;
+      case 'bci-data': this.handleBCIData(ws, payload); break;
       default: console.log('Unknown message type:', type);
+    }
+  }
+
+  private handleBCIData(ws: AuthenticatedWebSocket, payload: any) {
+    if (ws.userId) {
+      // In a real-world application, this data would be processed by the BCIService.
+      // For now, we will just log it to the console.
+      console.log(`Received BCI data from user ${ws.userId}:`, payload);
     }
   }
 

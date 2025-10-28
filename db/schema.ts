@@ -263,3 +263,14 @@ export const digitalTwins = sqliteTable("digital_twins", {
   createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
 });
 
+
+
+
+// BCI Devices Table
+export const bciDevices = sqliteTable("bci_devices", {
+  id: integer("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  deviceId: text("device_id").notNull().unique(),
+  createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
+});
+
