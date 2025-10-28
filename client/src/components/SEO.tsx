@@ -7,6 +7,12 @@ interface SEOProps {
   image?: string;
   url?: string;
   type?: string;
+  author?: string;
+  publishedTime?: string;
+  modifiedTime?: string;
+  structuredData?: object;
+  noindex?: boolean;
+  nofollow?: boolean;
 }
 
 export default function SEO({
@@ -16,8 +22,17 @@ export default function SEO({
   image = '/og-image.png',
   url = 'https://aetherial.platform',
   type = 'website',
+  author,
+  publishedTime,
+  modifiedTime,
+  structuredData,
+  noindex = false,
+  nofollow = false,
 }: SEOProps) {
   const fullTitle = title === 'AETHERIAL Platform' ? title : `${title} | AETHERIAL Platform`;
+  const robotsContent = noindex || nofollow
+    ? `${noindex ? 'noindex' : 'index'}, ${nofollow ? 'nofollow' : 'follow'}`
+    : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
 
   return (
     <Helmet>
@@ -43,10 +58,29 @@ export default function SEO({
 
       {/* Additional SEO */}
       <link rel="canonical" href={url} />
-      <meta name="robots" content="index, follow" />
+      <meta name="robots" content={robotsContent} />
+      <meta name="googlebot" content={robotsContent} />
       <meta name="language" content="English" />
       <meta name="revisit-after" content="7 days" />
-      <meta name="author" content="AETHERIAL" />
+      {author && <meta name="author" content={author} />}
+      
+      {/* Article Metadata */}
+      {type === 'article' && publishedTime && (
+        <meta property="article:published_time" content={publishedTime} />
+      )}
+      {type === 'article' && modifiedTime && (
+        <meta property="article:modified_time" content={modifiedTime} />
+      )}
+      {type === 'article' && author && (
+        <meta property="article:author" content={author} />
+      )}
+      
+      {/* Structured Data */}
+      {structuredData && (
+        <script type="application/ld+json">
+          {JSON.stringify(structuredData)}
+        </script>
+      )}
     </Helmet>
   );
 }

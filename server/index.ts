@@ -120,6 +120,8 @@ app.use("/api/forum", (await import("./routes/forum.js")).default);
 app.use("/api/knowledge-base", (await import("./routes/knowledge-base.js")).default);
 app.use("/api/developer", (await import("./routes/developer.js")).default);
 app.use("/api/bug-bounty", (await import("./routes/bug-bounty.js")).default);
+  app.use("/api/seo", (await import("./routes/seo.js")).default);
+  app.use("/api/performance", (await import("./routes/performance.js")).default);
   // AI routes handled by tRPC
 
   // Serve static files from dist/public in production
