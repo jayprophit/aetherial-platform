@@ -1,0 +1,426 @@
+.order-history {
+  min-height: 100vh;
+  background: #f8f9fa;
+  padding: 20px;
+}
+
+.orders-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.orders-container h1 {
+  font-size: 2.5rem;
+  margin-bottom: 30px;
+  color: #333;
+}
+
+/* Filters */
+.order-filters {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+.order-filters button {
+  padding: 12px 25px;
+  border: 2px solid #e9ecef;
+  background: white;
+  color: #666;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.order-filters button:hover {
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.order-filters button.active {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 80px 40px;
+  background: white;
+  border-radius: 15px;
+}
+
+.empty-icon {
+  font-size: 5rem;
+  display: block;
+  margin-bottom: 20px;
+  opacity: 0.3;
+}
+
+.empty-state h2 {
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.empty-state p {
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.shop-btn {
+  display: inline-block;
+  padding: 15px 40px;
+  background: #667eea;
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.3s;
+}
+
+.shop-btn:hover {
+  background: #764ba2;
+  transform: translateY(-2px);
+}
+
+/* Orders List */
+.orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.order-card {
+  background: white;
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  transition: all 0.3s;
+}
+
+.order-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #f8f9fa;
+}
+
+.order-info h3 {
+  font-size: 1.3rem;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.order-date {
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.order-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  border-radius: 20px;
+  color: white;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+/* Order Items */
+.order-items {
+  margin-bottom: 20px;
+}
+
+.order-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px 0;
+  border-bottom: 1px solid #f8f9fa;
+}
+
+.order-item:last-child {
+  border-bottom: none;
+}
+
+.order-item img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.item-details {
+  flex: 1;
+}
+
+.item-details h4 {
+  font-size: 1.05rem;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.item-details p {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.item-price {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Order Summary */
+.order-summary {
+  padding: 15px 0;
+  border-top: 2px solid #f8f9fa;
+  margin-bottom: 15px;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.total-amount {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #28a745;
+}
+
+.tracking-info {
+  padding: 10px;
+  background: rgba(0, 123, 255, 0.1);
+  border-radius: 8px;
+  color: #007bff;
+  font-size: 0.9rem;
+  margin-top: 10px;
+}
+
+/* Order Actions */
+.order-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.view-details-btn,
+.reorder-btn,
+.track-btn,
+.invoice-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.view-details-btn {
+  background: #667eea;
+  color: white;
+  flex: 1;
+}
+
+.view-details-btn:hover {
+  background: #764ba2;
+}
+
+.reorder-btn,
+.track-btn,
+.invoice-btn {
+  background: #f8f9fa;
+  color: #333;
+  border: 1px solid #e9ecef;
+}
+
+.reorder-btn:hover,
+.track-btn:hover,
+.invoice-btn:hover {
+  background: #e9ecef;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 15px;
+  max-width: 700px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 25px;
+  border-bottom: 2px solid #f8f9fa;
+}
+
+.modal-header h2 {
+  font-size: 1.8rem;
+  color: #333;
+}
+
+.close-btn {
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: #f8f9fa;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.close-btn:hover {
+  background: #e9ecef;
+}
+
+.modal-body {
+  padding: 25px;
+}
+
+.detail-section {
+  margin-bottom: 30px;
+}
+
+.detail-section:last-child {
+  margin-bottom: 0;
+}
+
+.detail-section h3 {
+  font-size: 1.3rem;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.detail-section p {
+  color: #666;
+  line-height: 1.6;
+  margin: 5px 0;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.detail-item img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.detail-item .item-total {
+  margin-left: auto;
+  font-weight: 600;
+  color: #333;
+}
+
+.summary-line {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #f8f9fa;
+}
+
+.summary-line.total {
+  font-size: 1.3rem;
+  font-weight: bold;
+  border-bottom: none;
+  padding-top: 15px;
+  margin-top: 10px;
+  border-top: 2px solid #e9ecef;
+}
+
+@media (max-width: 768px) {
+  .orders-container h1 {
+    font-size: 2rem;
+  }
+
+  .order-filters {
+    flex-direction: column;
+  }
+
+  .order-filters button {
+    width: 100%;
+  }
+
+  .order-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .order-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .order-item img {
+    width: 100%;
+    height: 200px;
+  }
+
+  .order-actions {
+    flex-direction: column;
+  }
+
+  .view-details-btn,
+  .reorder-btn,
+  .track-btn,
+  .invoice-btn {
+    width: 100%;
+  }
+
+  .modal-content {
+    margin: 20px;
+  }
+
+  .detail-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .detail-item img {
+    width: 100%;
+    height: 150px;
+  }
+}
+
