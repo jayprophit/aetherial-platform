@@ -1,0 +1,352 @@
+/**
+ * AETHERIAL Platform - 4-Panel Layout Styles
+ * Fully responsive across all devices
+ */
+
+/* ============================================
+   BASE LAYOUT
+   ============================================ */
+
+.four-panel-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  position: relative;
+  background: var(--bg-primary, #0a0e27);
+  color: var(--text-primary, #ffffff);
+}
+
+.layout-container {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 1.5rem;
+  background: var(--bg-secondary, #0f1429);
+  transition: margin 0.3s ease;
+}
+
+/* ============================================
+   PANEL OVERLAY (Mobile/Tablet)
+   ============================================ */
+
+.panel-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 998;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ============================================
+   DEVICE DEBUG INFO
+   ============================================ */
+
+.device-debug {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #0f0;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-family: monospace;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+/* ============================================
+   DESKTOP LAYOUT (1025px+)
+   ============================================ */
+
+@media (min-width: 1025px) {
+  .device-desktop .main-content {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .device-desktop.left-sidebar-open .main-content {
+    margin-left: 0;
+  }
+
+  .device-desktop.ai-chat-open .main-content {
+    margin-right: 0;
+  }
+
+  .device-desktop.media-browser-open .main-content {
+    margin-right: 0;
+  }
+
+  /* All panels open: adjust main content */
+  .device-desktop.left-sidebar-open.ai-chat-open.media-browser-open .main-content {
+    max-width: calc(100vw - 280px - 320px - 360px);
+  }
+}
+
+/* ============================================
+   TABLET LAYOUT (768px - 1024px)
+   ============================================ */
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  .device-tablet .main-content {
+    padding: 1rem;
+  }
+
+  /* Panels overlay on tablet */
+  .device-tablet .left-sidebar,
+  .device-tablet .ai-chat-panel,
+  .device-tablet .media-browser {
+    position: fixed;
+    top: 60px;
+    bottom: 0;
+    z-index: 999;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  }
+
+  /* Tablet landscape: show 2 panels side by side */
+  .device-tablet.orientation-landscape.left-sidebar-open.ai-chat-open .main-content {
+    margin-left: 280px;
+    margin-right: 320px;
+  }
+}
+
+/* ============================================
+   MOBILE LAYOUT (320px - 767px)
+   ============================================ */
+
+@media (max-width: 767px) {
+  .device-mobile .main-content {
+    padding: 1rem 0.75rem;
+  }
+
+  /* Full-screen overlay panels on mobile */
+  .device-mobile .left-sidebar,
+  .device-mobile .ai-chat-panel,
+  .device-mobile .media-browser {
+    position: fixed;
+    top: 56px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 999;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Mobile: Larger touch targets */
+  .device-mobile button,
+  .device-mobile a,
+  .device-mobile .menu-item {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* ============================================
+   SMARTWATCH LAYOUT (< 320px)
+   ============================================ */
+
+@media (max-width: 319px) {
+  .device-smartwatch .main-content {
+    padding: 0.5rem;
+    font-size: 12px;
+  }
+
+  /* Minimal UI for smartwatch */
+  .device-smartwatch .top-bar {
+    height: 40px;
+    font-size: 12px;
+  }
+
+  /* Hide complex features on smartwatch */
+  .device-smartwatch .media-browser,
+  .device-smartwatch .ai-chat-panel {
+    display: none;
+  }
+
+  /* Extra large touch targets for smartwatch */
+  .device-smartwatch button,
+  .device-smartwatch a,
+  .device-smartwatch .menu-item {
+    min-height: 48px;
+    min-width: 48px;
+    font-size: 14px;
+  }
+}
+
+/* ============================================
+   RETINA DISPLAYS
+   ============================================ */
+
+.retina {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.retina img,
+.retina svg {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+/* ============================================
+   TOUCH DEVICES
+   ============================================ */
+
+.touch-device {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+.touch-device * {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.touch-device input,
+.touch-device textarea {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+/* ============================================
+   ORIENTATION SPECIFIC
+   ============================================ */
+
+.orientation-portrait {
+  /* Portrait-specific styles */
+}
+
+.orientation-landscape {
+  /* Landscape-specific styles */
+}
+
+/* ============================================
+   SCROLLBAR STYLING
+   ============================================ */
+
+.main-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.main-content::-webkit-scrollbar-track {
+  background: var(--bg-tertiary, #1a1f3a);
+}
+
+.main-content::-webkit-scrollbar-thumb {
+  background: var(--accent-primary, #6366f1);
+  border-radius: 4px;
+}
+
+.main-content::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-secondary, #818cf8);
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutLeft {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* ============================================
+   ACCESSIBILITY
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus visible for keyboard navigation */
+.four-panel-layout *:focus-visible {
+  outline: 2px solid var(--accent-primary, #6366f1);
+  outline-offset: 2px;
+}
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+
+@media print {
+  .top-bar,
+  .left-sidebar,
+  .ai-chat-panel,
+  .media-browser,
+  .panel-overlay {
+    display: none !important;
+  }
+
+  .main-content {
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
+}
+
