@@ -1,0 +1,382 @@
+/* Reuse Seller Dashboard styles with instructor-specific overrides */
+@import '../marketplace/SellerDashboard.css';
+
+.instructor-dashboard {
+  background: linear-gradient(135deg, #4299e1 0%, #667eea 100%);
+}
+
+.create-course-btn {
+  background: linear-gradient(135deg, #4299e1 0%, #667eea 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.create-course-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(66, 153, 225, 0.3);
+}
+
+.dashboard-tabs button.active {
+  background: linear-gradient(135deg, #4299e1 0%, #667eea 100%);
+}
+
+.stat-icon {
+  background: linear-gradient(135deg, #4299e1 0%, #667eea 100%);
+}
+
+.action-btn,
+.action-btn-small {
+  background: linear-gradient(135deg, #4299e1 0%, #667eea 100%);
+}
+
+/* Students List */
+.students-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.student-item {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background: #f7fafc;
+  border-radius: 12px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.student-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.student-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.student-details {
+  flex: 1;
+}
+
+.student-details h4 {
+  font-size: 1.125rem;
+  color: #2d3748;
+  margin-bottom: 0.25rem;
+}
+
+.student-course {
+  color: #718096;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+.student-meta {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.75rem;
+  color: #a0aec0;
+}
+
+.student-progress {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 120px;
+}
+
+.progress-circle {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4299e1 0%, #667eea 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(135deg, #4299e1 0%, #667eea 100%);
+  transition: width 0.3s;
+}
+
+/* Courses Grid Mini */
+.courses-grid-mini {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.course-card-mini {
+  background: #f7fafc;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.course-card-mini:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.course-card-mini img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+
+.course-info-mini {
+  padding: 1rem;
+}
+
+.course-info-mini h4 {
+  font-size: 1rem;
+  color: #2d3748;
+  margin-bottom: 0.75rem;
+  line-height: 1.4;
+}
+
+.course-stats-mini {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.875rem;
+  color: #718096;
+}
+
+/* Course Card */
+.course-card {
+  display: flex;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background: #f7fafc;
+  border-radius: 12px;
+  align-items: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.course-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.course-card img {
+  width: 200px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.course-progress-info {
+  margin-top: 0.75rem;
+}
+
+.course-progress-info span {
+  font-size: 0.875rem;
+  color: #718096;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.status-badge.published {
+  background: #48bb78;
+}
+
+.status-badge.draft {
+  background: #ed8936;
+}
+
+.status-badge.pending {
+  background: #ecc94b;
+}
+
+.stats-btn {
+  background: #9f7aea;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.stats-btn:hover {
+  transform: scale(1.05);
+}
+
+/* Students Table */
+.students-header {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.students-table {
+  overflow-x: auto;
+}
+
+.student-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.student-cell img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.progress-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.progress-bar-small {
+  width: 100px;
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.action-btn-small {
+  background: linear-gradient(135deg, #4299e1 0%, #667eea 100%);
+  color: white;
+  border: none;
+  padding: 0.375rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.action-btn-small:hover {
+  transform: scale(1.05);
+}
+
+/* Earnings */
+.earnings-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.earnings-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.earnings-card h3 {
+  font-size: 1rem;
+  color: #718096;
+  margin-bottom: 1rem;
+}
+
+.earnings-amount {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, #4299e1 0%, #667eea 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.earnings-card p {
+  color: #a0aec0;
+  font-size: 0.875rem;
+}
+
+.earnings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.earnings-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  background: #f7fafc;
+  border-radius: 12px;
+}
+
+.earnings-course-info h4 {
+  font-size: 1.125rem;
+  color: #2d3748;
+  margin-bottom: 0.25rem;
+}
+
+.earnings-course-info p {
+  color: #718096;
+  font-size: 0.875rem;
+}
+
+.earnings-amount-large {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #4299e1;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .student-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .student-progress {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .course-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .course-card img {
+    width: 100%;
+  }
+
+  .earnings-item {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+}
+
