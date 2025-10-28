@@ -74,6 +74,7 @@ async function startServer() {
   app.use("/api/federated-learning", (await import("./routes/federated-learning.js")).default);
   app.use("/api/content-moderation", (await import("./routes/content-moderation.js")).default);
   app.use("/api/analytics", (await import("./routes/analytics.js")).default);
+  app.use("/api/recommender", (await import("./routes/recommender.js")).default);
   // AI routes handled by tRPC
 
   // Serve static files from dist/public in production
