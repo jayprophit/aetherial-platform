@@ -67,6 +67,7 @@ async function startServer() {
   app.use("/api/creator", (await import("./routes/creator.js")).default);
   app.use("/api/games", (await import("./routes/games.js")).default);
   app.use("/api/npcs", (await import("./routes/npcs.js")).default);
+  app.use("/api/pcg", (await import("./routes/pcg.js")).default);
   // AI routes handled by tRPC
 
   // Serve static files from dist/public in production
