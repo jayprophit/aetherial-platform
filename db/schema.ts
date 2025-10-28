@@ -124,3 +124,34 @@ export const transactions = sqliteTable("transactions", {
   createdAt: integer("created_at", { mode: 'timestamp' }).notNull(),
 
 });
+
+
+// Marketplace
+export const categories = sqliteTable("categories", {
+  id: integer("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  description: text("description"),
+});
+
+export const listings = sqliteTable("listings", {
+  id: integer("id").primaryKey(),
+  sellerId: integer("seller_id").notNull().references(() => users.id),
+  categoryId: integer("category_id").notNull().references(() => categories.id),
+  title: text("title").notNull(),
+  description: text("description"),
+  price: integer("price").notNull(),
+  media: text("media", { mode: "json" }),
+  status: text("status").notNull().default("active"),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+});
+
+export const reviews = sqliteTable("reviews", {
+  id: integer("id").primaryKey(),
+  listingId: integer("listing_id").notNull().references(() => listings.id),
+  buyerId: integer("buyer_id").notNull().references(() => users.id),
+  rating: integer("rating").notNull(),
+  comment: text("comment"),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+});
+
