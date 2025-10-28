@@ -9,7 +9,8 @@ import { vitePluginManusRuntime } from "vite-plugin-manus-runtime";
 
 const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime()];
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
+  base: command === 'build' ? process.env.VITE_CDN_URL || '/' : '/',
   plugins,
   resolve: {
     alias: {
@@ -50,4 +51,4 @@ export default defineConfig({
       ],
     },
   },
-});
+}));
