@@ -84,6 +84,7 @@ async function startServer() {
   app.use("/api/swarm-intelligence", (await import("./routes/swarm-intelligence.js")).default);
   app.use("/api/generative-art-and-music", (await import("./routes/generative-art-and-music.js")).default);
   app.use("/api/personalized-learning", (await import("./routes/personalized-learning.js")).default);
+  app.use("/api/crowdsourcing-and-citizen-science", (await import("./routes/crowdsourcing-and-citizen-science.js")).default);
   // AI routes handled by tRPC
 
   // Serve static files from dist/public in production

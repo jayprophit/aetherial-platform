@@ -311,3 +311,24 @@ export const studentModels = sqliteTable("student_models", {
   createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
 });
 
+
+
+
+// Crowdsourcing Projects Table
+export const crowdsourcingProjects = sqliteTable("crowdsourcing_projects", {
+  id: integer("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  name: text("name").notNull(),
+  description: text("description"),
+  createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
+});
+
+// Crowdsourcing Data Table
+export const crowdsourcingData = sqliteTable("crowdsourcing_data", {
+  id: integer("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  projectId: integer("project_id").notNull().references(() => crowdsourcingProjects.id),
+  data: text("data", { mode: "json" }),
+  createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
+});
+
