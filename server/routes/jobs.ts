@@ -606,3 +606,19 @@ router.get("/:id/applications", async (req: Request, res: Response) => {
 
 export default router;
 
+
+
+import { emailQueue } from "../queues";
+
+router.post("/send-test-email", async (req, res) => {
+  try {
+    const job = await emailQueue.add("send-email", {
+      to: "test@example.com",
+      subject: "Welcome to AETHERIAL!",
+    });
+    res.json({ success: true, jobId: job.id });
+  } catch (error) {
+    console.error("Failed to add job to queue:", error);
+    res.status(500).json({ success: false, message: "Failed to add job to queue" });
+  }
+});
