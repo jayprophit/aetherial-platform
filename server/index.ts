@@ -116,6 +116,7 @@ app.get('/metrics', async (req, res) => {
   app.use("/api/personalized-learning", (await import("./routes/personalized-learning.js")).default);
   app.use("/api/crowdsourcing-and-citizen-science", (await import("./routes/crowdsourcing-and-citizen-science.js")).default);
 app.use("/api/feedback", (await import("./routes/feedback.js")).default);
+app.use("/api/forum", (await import("./routes/forum.js")).default);
   // AI routes handled by tRPC
 
   // Serve static files from dist/public in production

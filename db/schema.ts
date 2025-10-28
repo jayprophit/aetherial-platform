@@ -344,3 +344,26 @@ export const feedback = sqliteTable(
     createdAt: integer("created_at", { mode: 'timestamp' }).notNull(),
   }
 );
+
+
+export const forum_posts = sqliteTable(
+  'forum_posts',
+  {
+    id: integer("id").primaryKey(),
+    userId: integer("user_id").notNull(),
+    title: text("title").notNull(),
+    message: text("message").notNull(),
+    createdAt: integer("created_at", { mode: 'timestamp' }).notNull(),
+  }
+);
+
+export const forum_replies = sqliteTable(
+  'forum_replies',
+  {
+    id: integer("id").primaryKey(),
+    postId: integer("post_id").notNull(),
+    userId: integer("user_id").notNull(),
+    message: text("message").notNull(),
+    createdAt: integer("created_at", { mode: 'timestamp' }).notNull(),
+  }
+);
