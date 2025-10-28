@@ -1,0 +1,468 @@
+/**
+ * AETHERIAL Theme Toggle Styles
+ * 
+ * Military-Grade Component Styling
+ * - Smooth animations
+ * - Beautiful transitions
+ * - Accessible
+ * - Responsive
+ */
+
+/* ============================================
+   ICON TOGGLE VARIANT
+   ============================================ */
+
+.theme-toggle-icon {
+  /* Reset */
+  border: none;
+  margin: 0;
+  padding: 0;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+  
+  /* Layout */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
+  /* Styling */
+  color: var(--color-text-secondary);
+  background-color: var(--color-surface);
+  border-radius: var(--radius-lg);
+  transition: all var(--duration-fast) var(--ease-in-out);
+  
+  /* Interaction */
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.theme-toggle-icon:hover {
+  color: var(--color-text-primary);
+  background-color: var(--color-surface-elevated);
+  transform: scale(1.05);
+}
+
+.theme-toggle-icon:active {
+  transform: scale(0.95);
+}
+
+.theme-toggle-icon:focus-visible {
+  outline: 2px solid var(--primary-500);
+  outline-offset: 2px;
+}
+
+.theme-toggle-icon-svg {
+  width: 100%;
+  height: 100%;
+  transition: transform var(--duration-normal) var(--ease-in-out);
+}
+
+.theme-toggle-icon:hover .theme-toggle-icon-svg {
+  transform: rotate(15deg);
+}
+
+/* Sizes */
+.theme-toggle-icon.theme-toggle-sm {
+  width: 2rem;
+  height: 2rem;
+  padding: var(--space-1);
+}
+
+.theme-toggle-icon.theme-toggle-md {
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: var(--space-2);
+}
+
+.theme-toggle-icon.theme-toggle-lg {
+  width: 3rem;
+  height: 3rem;
+  padding: var(--space-2);
+}
+
+/* ============================================
+   SWITCH TOGGLE VARIANT
+   ============================================ */
+
+.theme-toggle-switch {
+  /* Layout */
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  cursor: pointer;
+  user-select: none;
+}
+
+.theme-toggle-switch-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.theme-toggle-switch-slider {
+  position: relative;
+  display: inline-block;
+  background-color: var(--gray-300);
+  border-radius: var(--radius-full);
+  transition: background-color var(--duration-normal) var(--ease-in-out);
+}
+
+[data-theme="dark"] .theme-toggle-switch-slider {
+  background-color: var(--gray-700);
+}
+
+.theme-toggle-switch-input:checked + .theme-toggle-switch-slider {
+  background-color: var(--primary-500);
+}
+
+.theme-toggle-switch-icon {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: white;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75em;
+  transition: all var(--duration-normal) var(--ease-in-out);
+  box-shadow: var(--shadow-sm);
+}
+
+.theme-toggle-switch-input:focus-visible + .theme-toggle-switch-slider {
+  outline: 2px solid var(--primary-500);
+  outline-offset: 2px;
+}
+
+.theme-toggle-switch-label {
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--color-text-primary);
+}
+
+/* Sizes */
+.theme-toggle-switch.theme-toggle-sm .theme-toggle-switch-slider {
+  width: 2.5rem;
+  height: 1.25rem;
+}
+
+.theme-toggle-switch.theme-toggle-sm .theme-toggle-switch-icon {
+  width: 1rem;
+  height: 1rem;
+  left: 0.125rem;
+}
+
+.theme-toggle-switch.theme-toggle-sm .theme-toggle-switch-input:checked + .theme-toggle-switch-slider .theme-toggle-switch-icon {
+  left: calc(100% - 1.125rem);
+}
+
+.theme-toggle-switch.theme-toggle-md .theme-toggle-switch-slider {
+  width: 3rem;
+  height: 1.5rem;
+}
+
+.theme-toggle-switch.theme-toggle-md .theme-toggle-switch-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  left: 0.125rem;
+}
+
+.theme-toggle-switch.theme-toggle-md .theme-toggle-switch-input:checked + .theme-toggle-switch-slider .theme-toggle-switch-icon {
+  left: calc(100% - 1.375rem);
+}
+
+.theme-toggle-switch.theme-toggle-lg .theme-toggle-switch-slider {
+  width: 3.5rem;
+  height: 1.75rem;
+}
+
+.theme-toggle-switch.theme-toggle-lg .theme-toggle-switch-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  left: 0.125rem;
+}
+
+.theme-toggle-switch.theme-toggle-lg .theme-toggle-switch-input:checked + .theme-toggle-switch-slider .theme-toggle-switch-icon {
+  left: calc(100% - 1.625rem);
+}
+
+/* ============================================
+   BUTTON TOGGLE VARIANT
+   ============================================ */
+
+.theme-toggle-button {
+  /* Reset */
+  border: none;
+  margin: 0;
+  padding: 0;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+  
+  /* Layout */
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  
+  /* Styling */
+  color: var(--color-text-primary);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  font-weight: var(--font-medium);
+  transition: all var(--duration-fast) var(--ease-in-out);
+  
+  /* Interaction */
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.theme-toggle-button:hover {
+  background-color: var(--color-surface-elevated);
+  border-color: var(--primary-500);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.theme-toggle-button:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+.theme-toggle-button:focus-visible {
+  outline: 2px solid var(--primary-500);
+  outline-offset: 2px;
+}
+
+.theme-toggle-button-icon {
+  font-size: 1.25em;
+}
+
+.theme-toggle-button-text {
+  white-space: nowrap;
+}
+
+/* Sizes */
+.theme-toggle-button.theme-toggle-sm {
+  height: 2rem;
+  padding: 0 var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.theme-toggle-button.theme-toggle-md {
+  height: 2.5rem;
+  padding: 0 var(--space-4);
+  font-size: var(--text-base);
+}
+
+.theme-toggle-button.theme-toggle-lg {
+  height: 3rem;
+  padding: 0 var(--space-6);
+  font-size: var(--text-lg);
+}
+
+/* ============================================
+   DROPDOWN TOGGLE VARIANT
+   ============================================ */
+
+.theme-toggle-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.theme-toggle-dropdown-trigger {
+  /* Reset */
+  border: none;
+  margin: 0;
+  padding: 0;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+  
+  /* Layout */
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  
+  /* Styling */
+  color: var(--color-text-primary);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  transition: all var(--duration-fast) var(--ease-in-out);
+  
+  /* Interaction */
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.theme-toggle-dropdown-trigger:hover {
+  background-color: var(--color-surface-elevated);
+  border-color: var(--primary-500);
+}
+
+.theme-toggle-dropdown-trigger:focus-visible {
+  outline: 2px solid var(--primary-500);
+  outline-offset: 2px;
+}
+
+.theme-toggle-dropdown-icon {
+  font-size: 1.25em;
+}
+
+.theme-toggle-dropdown-arrow {
+  width: 1em;
+  height: 1em;
+  transition: transform var(--duration-fast) var(--ease-in-out);
+}
+
+.theme-toggle-dropdown-trigger[aria-expanded="true"] .theme-toggle-dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+.theme-toggle-dropdown-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-dropdown);
+}
+
+.theme-toggle-dropdown-menu {
+  position: absolute;
+  top: calc(100% + var(--space-1));
+  right: 0;
+  min-width: 10rem;
+  background-color: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-1);
+  z-index: calc(var(--z-dropdown) + 1);
+  animation: dropdownSlideIn var(--duration-fast) var(--ease-out);
+}
+
+@keyframes dropdownSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.theme-toggle-dropdown-item {
+  /* Reset */
+  border: none;
+  margin: 0;
+  padding: 0;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+  
+  /* Layout */
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  
+  /* Styling */
+  color: var(--color-text-primary);
+  font-size: var(--text-sm);
+  transition: background-color var(--duration-fast) var(--ease-in-out);
+  
+  /* Interaction */
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.theme-toggle-dropdown-item:hover {
+  background-color: var(--color-surface);
+}
+
+.theme-toggle-dropdown-item.active {
+  background-color: var(--primary-50);
+  color: var(--primary-700);
+}
+
+[data-theme="dark"] .theme-toggle-dropdown-item.active {
+  background-color: var(--primary-950);
+  color: var(--primary-300);
+}
+
+.theme-toggle-dropdown-item-icon {
+  font-size: 1.25em;
+  flex-shrink: 0;
+}
+
+.theme-toggle-dropdown-item-text {
+  flex: 1;
+  text-align: left;
+}
+
+.theme-toggle-dropdown-item-check {
+  color: var(--primary-500);
+  font-weight: var(--font-bold);
+  flex-shrink: 0;
+}
+
+/* Sizes */
+.theme-toggle-dropdown.theme-toggle-sm .theme-toggle-dropdown-trigger {
+  height: 2rem;
+  padding: 0 var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.theme-toggle-dropdown.theme-toggle-md .theme-toggle-dropdown-trigger {
+  height: 2.5rem;
+  padding: 0 var(--space-4);
+  font-size: var(--text-base);
+}
+
+.theme-toggle-dropdown.theme-toggle-lg .theme-toggle-dropdown-trigger {
+  height: 3rem;
+  padding: 0 var(--space-6);
+  font-size: var(--text-lg);
+}
+
+/* ============================================
+   ACCESSIBILITY ENHANCEMENTS
+   ============================================ */
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .theme-toggle-icon,
+  .theme-toggle-button,
+  .theme-toggle-dropdown-trigger {
+    border: 2px solid currentColor;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .theme-toggle-icon,
+  .theme-toggle-switch-slider,
+  .theme-toggle-switch-icon,
+  .theme-toggle-button,
+  .theme-toggle-dropdown-trigger,
+  .theme-toggle-dropdown-arrow,
+  .theme-toggle-dropdown-menu {
+    transition: none;
+    animation: none;
+  }
+  
+  .theme-toggle-icon:hover,
+  .theme-toggle-button:hover {
+    transform: none;
+  }
+  
+  .theme-toggle-icon:active,
+  .theme-toggle-button:active {
+    transform: none;
+  }
+}
+

@@ -1,0 +1,447 @@
+/**
+ * AETHERIAL Button Styles
+ * 
+ * Military-Grade Component Styling
+ * - Pixel-perfect design
+ * - Smooth animations
+ * - Accessible focus states
+ * - Dark mode optimized
+ */
+
+/* ============================================
+   BASE BUTTON STYLES
+   ============================================ */
+
+.btn {
+  /* Reset */
+  border: none;
+  margin: 0;
+  padding: 0;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+  
+  /* Layout */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  
+  /* Typography */
+  font-family: var(--font-sans);
+  font-weight: var(--font-medium);
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  
+  /* Interaction */
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  
+  /* Transitions */
+  transition: all var(--duration-fast) var(--ease-in-out);
+  
+  /* Accessibility */
+  position: relative;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--primary-500);
+  outline-offset: 2px;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+/* ============================================
+   BUTTON SIZES
+   ============================================ */
+
+.btn-xs {
+  height: 1.75rem;      /* 28px */
+  padding: 0 var(--space-2);
+  font-size: var(--text-xs);
+  border-radius: var(--radius-md);
+}
+
+.btn-sm {
+  height: 2rem;         /* 32px */
+  padding: 0 var(--space-3);
+  font-size: var(--text-sm);
+  border-radius: var(--radius-md);
+}
+
+.btn-md {
+  height: 2.5rem;       /* 40px */
+  padding: 0 var(--space-4);
+  font-size: var(--text-base);
+  border-radius: var(--radius-lg);
+}
+
+.btn-lg {
+  height: 3rem;         /* 48px */
+  padding: 0 var(--space-6);
+  font-size: var(--text-lg);
+  border-radius: var(--radius-lg);
+}
+
+.btn-xl {
+  height: 3.5rem;       /* 56px */
+  padding: 0 var(--space-8);
+  font-size: var(--text-xl);
+  border-radius: var(--radius-xl);
+}
+
+/* Icon-only buttons (square) */
+.btn-icon-only.btn-xs { width: 1.75rem; padding: 0; }
+.btn-icon-only.btn-sm { width: 2rem; padding: 0; }
+.btn-icon-only.btn-md { width: 2.5rem; padding: 0; }
+.btn-icon-only.btn-lg { width: 3rem; padding: 0; }
+.btn-icon-only.btn-xl { width: 3.5rem; padding: 0; }
+
+/* ============================================
+   BUTTON VARIANTS
+   ============================================ */
+
+/* Primary */
+.btn-primary {
+  background-color: var(--primary-500);
+  color: white;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--primary-600);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-primary:active:not(:disabled) {
+  background-color: var(--primary-700);
+}
+
+/* Secondary */
+.btn-secondary {
+  background-color: var(--secondary-500);
+  color: white;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: var(--secondary-600);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-secondary:active:not(:disabled) {
+  background-color: var(--secondary-700);
+}
+
+/* Success */
+.btn-success {
+  background-color: var(--success-500);
+  color: white;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-success:hover:not(:disabled) {
+  background-color: var(--success-600);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-success:active:not(:disabled) {
+  background-color: var(--success-700);
+}
+
+/* Warning */
+.btn-warning {
+  background-color: var(--warning-500);
+  color: white;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-warning:hover:not(:disabled) {
+  background-color: var(--warning-600);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-warning:active:not(:disabled) {
+  background-color: var(--warning-700);
+}
+
+/* Error */
+.btn-error {
+  background-color: var(--error-500);
+  color: white;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-error:hover:not(:disabled) {
+  background-color: var(--error-600);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-error:active:not(:disabled) {
+  background-color: var(--error-700);
+}
+
+/* Info */
+.btn-info {
+  background-color: var(--info-500);
+  color: white;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-info:hover:not(:disabled) {
+  background-color: var(--info-600);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-info:active:not(:disabled) {
+  background-color: var(--info-700);
+}
+
+/* Outline */
+.btn-outline {
+  background-color: transparent;
+  color: var(--primary-500);
+  border: 1px solid var(--primary-500);
+}
+
+.btn-outline:hover:not(:disabled) {
+  background-color: var(--primary-50);
+}
+
+[data-theme="dark"] .btn-outline:hover:not(:disabled) {
+  background-color: var(--primary-950);
+}
+
+.btn-outline:active:not(:disabled) {
+  background-color: var(--primary-100);
+}
+
+[data-theme="dark"] .btn-outline:active:not(:disabled) {
+  background-color: var(--primary-900);
+}
+
+/* Ghost */
+.btn-ghost {
+  background-color: transparent;
+  color: var(--color-text-primary);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background-color: var(--gray-100);
+}
+
+[data-theme="dark"] .btn-ghost:hover:not(:disabled) {
+  background-color: var(--gray-800);
+}
+
+.btn-ghost:active:not(:disabled) {
+  background-color: var(--gray-200);
+}
+
+[data-theme="dark"] .btn-ghost:active:not(:disabled) {
+  background-color: var(--gray-700);
+}
+
+/* Link */
+.btn-link {
+  background-color: transparent;
+  color: var(--primary-500);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.btn-link:hover:not(:disabled) {
+  color: var(--primary-600);
+  text-decoration: none;
+}
+
+.btn-link:active:not(:disabled) {
+  color: var(--primary-700);
+}
+
+/* ============================================
+   BUTTON STATES
+   ============================================ */
+
+/* Disabled */
+.btn:disabled,
+.btn-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Loading */
+.btn-loading {
+  cursor: wait;
+  pointer-events: none;
+}
+
+.btn-loading .btn-content {
+  opacity: 0.6;
+}
+
+/* Full Width */
+.btn-full-width {
+  width: 100%;
+}
+
+/* ============================================
+   BUTTON ICONS
+   ============================================ */
+
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.btn-icon svg {
+  width: 1em;
+  height: 1em;
+}
+
+.btn-icon-left {
+  margin-left: calc(var(--space-1) * -1);
+}
+
+.btn-icon-right {
+  margin-right: calc(var(--space-1) * -1);
+}
+
+/* ============================================
+   LOADING SPINNER
+   ============================================ */
+
+.btn-spinner {
+  width: 1em;
+  height: 1em;
+  animation: btn-spin 1s linear infinite;
+}
+
+.btn-spinner-track {
+  opacity: 0.25;
+}
+
+.btn-spinner-path {
+  opacity: 0.75;
+}
+
+@keyframes btn-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================================
+   BUTTON GROUP
+   ============================================ */
+
+.btn-group {
+  display: inline-flex;
+  gap: var(--space-2);
+}
+
+.btn-group-vertical {
+  flex-direction: column;
+}
+
+.btn-group-horizontal {
+  flex-direction: row;
+}
+
+/* Attached buttons (no gap) */
+.btn-group-attached {
+  gap: 0;
+}
+
+.btn-group-attached.btn-group-horizontal > .btn:not(:first-child) {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  margin-left: -1px;
+}
+
+.btn-group-attached.btn-group-horizontal > .btn:not(:last-child) {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.btn-group-attached.btn-group-vertical > .btn:not(:first-child) {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  margin-top: -1px;
+}
+
+.btn-group-attached.btn-group-vertical > .btn:not(:last-child) {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+/* Bring focused/hovered button to front */
+.btn-group-attached > .btn:hover,
+.btn-group-attached > .btn:focus {
+  z-index: 1;
+}
+
+/* ============================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================ */
+
+@media (max-width: 640px) {
+  /* Slightly larger touch targets on mobile */
+  .btn-xs { height: 2rem; }
+  .btn-sm { height: 2.25rem; }
+  .btn-md { height: 2.75rem; }
+  .btn-lg { height: 3.25rem; }
+  .btn-xl { height: 3.75rem; }
+}
+
+/* ============================================
+   ACCESSIBILITY ENHANCEMENTS
+   ============================================ */
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .btn {
+    border: 2px solid currentColor;
+  }
+  
+  .btn:focus-visible {
+    outline-width: 3px;
+    outline-offset: 3px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .btn {
+    transition: none;
+  }
+  
+  .btn-spinner {
+    animation: none;
+  }
+  
+  .btn:active {
+    transform: none;
+  }
+}
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+
+@media print {
+  .btn {
+    border: 1px solid currentColor;
+    box-shadow: none;
+  }
+}
+
