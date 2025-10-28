@@ -3,6 +3,7 @@ import type { Request, Response } from "express";
 import { eq, like, or, desc, sql } from "drizzle-orm";
 import { getDb } from "../db";
 import { users, friendships, posts } from "../../drizzle/schema";
+import { EncryptionService } from "../lib/encryption";
 
 const router = Router();
 
@@ -84,7 +85,7 @@ router.get("/:id", async (req: Request, res: Response) => {
         firstName: user.firstName,
         lastName: user.lastName,
         displayName: user.displayName,
-        bio: user.bio,
+        bio: user.bio ? EncryptionService.decrypt(user.bio) : null,
         avatar: user.avatar,
         coverPhoto: user.coverPhoto,
         walletAddress: user.walletAddress,
@@ -143,7 +144,7 @@ router.put("/:id", async (req: Request, res: Response) => {
     if (firstName !== undefined) updateData.firstName = firstName;
     if (lastName !== undefined) updateData.lastName = lastName;
     if (displayName !== undefined) updateData.displayName = displayName;
-    if (bio !== undefined) updateData.bio = bio;
+    if (bio !== undefined) updateData.bio = EncryptionService.encrypt(bio);
     if (avatar !== undefined) updateData.avatar = avatar;
     if (coverPhoto !== undefined) updateData.coverPhoto = coverPhoto;
 
@@ -268,7 +269,7 @@ router.get("/", async (req: Request, res: Response) => {
         username: user.username,
         name: user.displayName || user.name,
         avatar: user.avatar,
-        bio: user.bio,
+        bio: user.bio ? EncryptionService.decrypt(user.bio) : null,
         isVerified: user.isVerified,
       })),
       pagination: {
