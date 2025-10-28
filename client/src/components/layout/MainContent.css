@@ -1,0 +1,42 @@
+.main-content {
+  flex: 1;
+  background: #ffffff;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin: 20px 0;
+}
+
+.dashboard-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.balance {
+  font-size: 32px;
+  font-weight: bold;
+  margin: 10px 0;
+}
+
+.activity-list {
+  background: #f8f9fa;
+  border-radius: 15px;
+  padding: 20px;
+}
+
+.activity-item {
+  display: flex;
+  gap: 15px;
+  padding: 15px;
+  background: white;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
