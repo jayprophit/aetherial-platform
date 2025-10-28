@@ -27,6 +27,7 @@ import IoT from "./pages/IoT";
 import Robotics from "./pages/Robotics";
 import Governance from "./pages/Governance";
 import HealthDashboard from "./pages/HealthDashboard";
+import AuditLogs from "./pages/AuditLogs";
 
 function Router() {
   useKeyboardShortcuts(KEYBOARD_SHORTCUTS);
@@ -50,6 +51,7 @@ function Router() {
         <Route path="/robotics" component={Robotics} />
         <Route path="/governance" component={Governance} />
         <Route path="/health" component={HealthDashboard} />
+        <Route path="/audit-logs" component={AuditLogs} />
         <Route path="/404" component={NotFound} />
         <Route component={NotFound} />
       </Switch>
