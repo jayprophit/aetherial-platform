@@ -52,3 +52,27 @@ export const userRoles = sqliteTable("user_roles", {
   userId: integer("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
   roleId: integer("role_id").references(() => roles.id, { onDelete: "cascade" }).notNull(),
 });
+
+
+// Gamification
+export const user_points = sqliteTable("user_points", {
+  id: integer("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  points: integer("points").notNull(),
+  action: text("action").notNull(),
+  createdAt: integer("created_at", { mode: 'timestamp' }).notNull(),
+});
+
+export const badges = sqliteTable("badges", {
+  id: integer("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  iconUrl: text("icon_url"),
+});
+
+export const user_badges = sqliteTable("user_badges", {
+  id: integer("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  badgeId: integer("badge_id").notNull().references(() => badges.id),
+  createdAt: integer("created_at", { mode: 'timestamp' }).notNull(),
+});

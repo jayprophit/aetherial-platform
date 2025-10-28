@@ -3,6 +3,7 @@ import type { Request, Response } from "express";
 import { eq, desc, sql, and } from "drizzle-orm";
 import { getDb } from "../db";
 import { comments, users, likes, posts } from "../../drizzle/schema";
+import { awardPoints } from "../gamification";
 
 const router = Router();
 
@@ -186,6 +187,8 @@ router.post("/", async (req: Request, res: Response) => {
       .limit(1);
 
     // TODO: Send notification to post author
+
+        awardPoints(currentUserId, "CREATE_COMMENT");
 
     res.status(201).json({
       success: true,

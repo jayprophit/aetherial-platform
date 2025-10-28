@@ -4,6 +4,7 @@ import { eq, desc, sql, and } from "drizzle-orm";
 import { getDb } from "../db";
 import { posts, users, likes, comments } from "../../drizzle/schema";
 import { createNotification } from "./notifications";
+import { awardPoints } from "../gamification";
 
 const router = Router();
 
@@ -160,6 +161,8 @@ router.post("/", async (req: Request, res: Response) => {
       .innerJoin(users, eq(posts.userId, users.id))
       .where(eq(posts.id, postId))
       .limit(1);
+
+        awardPoints(currentUserId, "CREATE_POST");
 
     res.status(201).json({
       success: true,
@@ -491,10 +494,9 @@ router.post("/:id/like", async (req: Request, res: Response) => {
       );
     }
 
-    res.json({
-      success: true,
-      message: "Post liked successfully",
-    });
+    awardPoints(post.userId, "RECEIVE_LIKE");
+
+    res.json({ success: true, message: "Post liked successfully" });
   } catch (error) {
     console.error("Error liking post:", error);
     res.status(500).json({
