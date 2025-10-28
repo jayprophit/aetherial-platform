@@ -71,6 +71,7 @@ async function startServer() {
   app.use("/api/chat", (await import("./routes/chat.js")).default);
   app.use("/api/webauthn", (await import("./routes/webauthn.js")).default);
   app.use("/api/did", (await import("./routes/did.js")).default);
+  app.use("/api/federated-learning", (await import("./routes/federated-learning.js")).default);
   // AI routes handled by tRPC
 
   // Serve static files from dist/public in production
