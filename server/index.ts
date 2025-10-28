@@ -59,6 +59,7 @@ async function startServer() {
   app.use("/api/mfa", (await import("./routes/mfa.js")).default);
   app.use("/api/experimental", (await import("./routes/experimental.js")).default);
   app.use("/api/gamification", (await import("./routes/gamification.js")).default);
+  app.use("/api/quests", (await import("./routes/quests.js")).default);
   // AI routes handled by tRPC
 
   // Serve static files from dist/public in production

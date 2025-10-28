@@ -3,6 +3,7 @@ import type { Request, Response } from "express";
 import { eq, or, and, sql } from "drizzle-orm";
 import { getDb } from "../db";
 import { friendships, users } from "../../drizzle/schema";
+import { checkQuestProgress } from "../quests";
 
 const router = Router();
 
@@ -73,7 +74,7 @@ router.get("/", async (req: Request, res: Response) => {
       );
     const total = Number(totalResult[0]?.count || 0);
 
-    res.json({
+        res.json({
       success: true,
       friends,
       pagination: {
@@ -128,7 +129,7 @@ router.get("/requests", async (req: Request, res: Response) => {
         )
       );
 
-    res.json({
+        res.json({
       success: true,
       requests,
     });
@@ -204,6 +205,10 @@ router.post("/requests/:id/accept", async (req: Request, res: Response) => {
 
     // TODO: Send notification to requester
 
+            const friendId = request[0].userId;
+    checkQuestProgress(currentUserId, "add_x_friends");
+    checkQuestProgress(friendId, "add_x_friends");
+
     res.json({
       success: true,
       message: "Friend request accepted",
@@ -265,7 +270,7 @@ router.post("/requests/:id/decline", async (req: Request, res: Response) => {
     // Delete request
     await db.delete(friendships).where(eq(friendships.id, requestId));
 
-    res.json({
+        res.json({
       success: true,
       message: "Friend request declined",
     });
@@ -321,7 +326,7 @@ router.get("/suggestions", async (req: Request, res: Response) => {
       )
       .limit(limitNum);
 
-    res.json({
+        res.json({
       success: true,
       suggestions,
     });

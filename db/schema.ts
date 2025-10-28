@@ -76,3 +76,30 @@ export const user_badges = sqliteTable("user_badges", {
   badgeId: integer("badge_id").notNull().references(() => badges.id),
   createdAt: integer("created_at", { mode: 'timestamp' }).notNull(),
 });
+
+// Quest System
+export const quests = sqliteTable("quests", {
+  id: integer("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  rewardPoints: integer("reward_points"),
+  rewardBadgeId: integer("reward_badge_id").references(() => badges.id),
+});
+
+export const quest_objectives = sqliteTable("quest_objectives", {
+  id: integer("id").primaryKey(),
+  questId: integer("quest_id").notNull().references(() => quests.id),
+  objectiveType: text("objective_type").notNull(),
+  targetCount: integer("target_count").notNull(),
+});
+
+export const user_quests = sqliteTable("user_quests", {
+  id: integer("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  questId: integer("quest_id").notNull().references(() => quests.id),
+  status: text("status").notNull(),
+  progress: integer("progress").default(0),
+  createdAt: integer("created_at", { mode: 'timestamp' }).notNull(),
+  completedAt: integer("completed_at", { mode: 'timestamp' }),
+});
+

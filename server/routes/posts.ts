@@ -5,6 +5,7 @@ import { getDb } from "../db";
 import { posts, users, likes, comments } from "../../drizzle/schema";
 import { createNotification } from "./notifications";
 import { awardPoints } from "../gamification";
+import { checkQuestProgress } from "../quests";
 
 const router = Router();
 
@@ -163,6 +164,7 @@ router.post("/", async (req: Request, res: Response) => {
       .limit(1);
 
         awardPoints(currentUserId, "CREATE_POST");
+    checkQuestProgress(currentUserId, "post_x_times");
 
     res.status(201).json({
       success: true,
