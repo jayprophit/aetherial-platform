@@ -130,4 +130,6 @@ load-test-report.json
 LOAD_TEST_REPORT.md
 stress-test-report.json
 STRESS_TEST_REPORT.md
+accessibility-test-report.json
+ACCESSIBILITY_TEST_REPORT.md
 

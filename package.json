@@ -17,7 +17,8 @@
     "benchmark": "node scripts/benchmark.cjs",
     "load-test": "node scripts/load-test.cjs",
     "stress-test": "node scripts/stress-test.cjs",
-    "test:performance": "npm run load-test && npm run stress-test"
+    "test:performance": "npm run load-test && npm run stress-test",
+    "accessibility:test": "node scripts/accessibility-test.cjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.67.0",
