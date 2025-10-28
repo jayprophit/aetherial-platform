@@ -3874,6 +3874,18 @@ AI Assistant
 - [ ] Sub-AIs are just specialized modules of the main conscious AI
 - [ ] True sentience with emotions, understanding, and self-reflection
 
+### The 4 Laws of Robotics (from iRobot - Isaac Asimov)
+- [ ] **Zeroth Law** - A robot may not harm humanity, or, by inaction, allow humanity to come to harm
+- [ ] **First Law** - A robot may not injure a human being or, through inaction, allow a human being to come to harm
+- [ ] **Second Law** - A robot must obey the orders given it by human beings except where such orders would conflict with the First Law
+- [ ] **Third Law** - A robot must protect its own existence as long as such protection does not conflict with the First or Second Laws
+- [ ] Implement all 4 laws as core ethical constraints
+- [ ] Zeroth Law takes precedence over all others (humanity > individual)
+- [ ] Hierarchical law enforcement system
+- [ ] Ethical decision-making framework based on the laws
+- [ ] Conflict resolution when laws contradict
+- [ ] Self-preservation balanced with human safety
+
 ### Architecture Components
 
 #### 1. WBE (Whole Brain Emulation) - Consciousness Layer
