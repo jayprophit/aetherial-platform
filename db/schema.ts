@@ -420,3 +420,73 @@ export const cvs = sqliteTable(
   }
 );
 
+
+
+
+// Drop Shipping Tables
+export const dropshippingSuppliers = sqliteTable(
+  'dropshipping_suppliers',
+  {
+    id: integer("id").primaryKey(),
+    name: text("name").notNull(),
+    country: text("country").notNull(),
+    rating: integer("rating").notNull(),
+    totalProducts: integer("total_products").notNull(),
+    averageShippingTime: text("average_shipping_time").notNull(),
+    returnPolicy: text("return_policy").notNull(),
+    minOrder: integer("min_order").notNull(),
+    verified: integer("verified", { mode: 'boolean' }).default(false),
+    responseTime: text("response_time").notNull(),
+    createdAt: integer("created_at", { mode: 'timestamp' }).notNull(),
+  }
+);
+
+export const dropshippingProducts = sqliteTable(
+  'dropshipping_products',
+  {
+    id: integer("id").primaryKey(),
+    userId: integer("user_id").notNull().references(() => users.id),
+    supplierId: text("supplier_id").notNull(),
+    supplierProductId: text("supplier_product_id").notNull(),
+    title: text("title").notNull(),
+    description: text("description").notNull(),
+    images: text("images", { mode: 'json' }).notNull(),
+    costPrice: integer("cost_price").notNull(),
+    retailPrice: integer("retail_price").notNull(),
+    profit: integer("profit").notNull(),
+    profitMargin: integer("profit_margin").notNull(),
+    category: text("category").notNull(),
+    sku: text("sku").notNull(),
+    stock: integer("stock").notNull(),
+    shippingTime: text("shipping_time").notNull(),
+    shippingCost: integer("shipping_cost").notNull(),
+    imported: integer("imported", { mode: 'boolean' }).default(false),
+    published: integer("published", { mode: 'boolean' }).default(false),
+    createdAt: integer("created_at", { mode: 'timestamp' }).notNull(),
+    updatedAt: integer("updated_at", { mode: 'timestamp' }).notNull(),
+  }
+);
+
+export const dropshippingOrders = sqliteTable(
+  'dropshipping_orders',
+  {
+    id: integer("id").primaryKey(),
+    userId: integer("user_id").notNull().references(() => users.id),
+    orderId: text("order_id").notNull(),
+    productId: integer("product_id").notNull().references(() => dropshippingProducts.id),
+    productTitle: text("product_title").notNull(),
+    quantity: integer("quantity").notNull(),
+    customerPrice: integer("customer_price").notNull(),
+    costPrice: integer("cost_price").notNull(),
+    profit: integer("profit").notNull(),
+    supplierId: text("supplier_id").notNull(),
+    supplierName: text("supplier_name").notNull(),
+    status: text("status").notNull(),
+    trackingNumber: text("tracking_number"),
+    customerEmail: text("customer_email").notNull(),
+    shippingAddress: text("shipping_address").notNull(),
+    createdAt: integer("created_at", { mode: 'timestamp' }).notNull(),
+    updatedAt: integer("updated_at", { mode: 'timestamp' }).notNull(),
+  }
+);
+
