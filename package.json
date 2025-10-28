@@ -13,7 +13,8 @@
     "db:push": "drizzle-kit generate && drizzle-kit migrate",
     "db:seed": "tsx db/seed.ts",
     "security:audit": "node scripts/security-audit.cjs",
-    "security:pentest": "node scripts/penetration-test.cjs"
+    "security:pentest": "node scripts/penetration-test.cjs",
+    "benchmark": "node scripts/benchmark.cjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.67.0",

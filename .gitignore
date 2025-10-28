@@ -107,7 +107,6 @@ temp/
 *.sqlite3
 uploads/
 
-
 # Sensitive files and keys
 config/secrets.json
 *.key
@@ -123,4 +122,8 @@ security-audit-report.json
 penetration-test-report.json
 SECURITY_AUDIT_REPORT.md
 PENETRATION_TEST_REPORT.md
+
+# Performance reports
+benchmark-report.json
+BENCHMARK_REPORT.md
 
