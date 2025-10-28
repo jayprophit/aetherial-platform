@@ -2,6 +2,7 @@ import React from "react";
 import { Canvas } from "@react-three/fiber";
 import { VRButton, ARButton, XR, Controllers } from "@react-three/xr";
 import { OrbitControls } from "@react-three/drei";
+import HolographicUI from "../components/HolographicUI";
 
 const World: React.FC = () => {
   return (
@@ -18,6 +19,7 @@ const World: React.FC = () => {
             <meshStandardMaterial color="hotpink" />
           </mesh>
           <OrbitControls />
+          <HolographicUI />
         </XR>
       </Canvas>
     </>
