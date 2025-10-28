@@ -1,12 +1,13 @@
 import React from "react";
 import { Canvas } from "@react-three/fiber";
-import { VRButton, XR, Controllers } from "@react-three/xr";
+import { VRButton, ARButton, XR, Controllers } from "@react-three/xr";
 import { OrbitControls } from "@react-three/drei";
 
 const World: React.FC = () => {
   return (
     <>
       <VRButton />
+      <ARButton />
       <Canvas>
         <XR>
           <Controllers />
