@@ -1,4 +1,4 @@
-import { sqliteTable, integer, text } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, integer, text, sql, alterTable } from 'drizzle-orm/sqlite-core';
 
 export const users = sqliteTable("users", {
   did: text("did"),
@@ -226,4 +226,15 @@ export const authenticators = sqliteTable("authenticators", {
 
 // Decentralized Identity
 
+
+
+
+
+// Live Streams Table
+export const liveStreams = sqliteTable("live_streams", {
+  id: integer("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  title: text("title").notNull(),
+  createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
+});
 

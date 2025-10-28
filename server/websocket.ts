@@ -89,7 +89,19 @@ export class WebSocketManager {
       case 'unsubscribe': this.unsubscribe(ws, payload.channel); break;
       case 'channel_broadcast': this.broadcastToChannel(payload.channel, payload.message, ws.userId); break;
       case 'signal': this.handleSignaling(ws, payload); break;
+      case 'webrtc-signal': this.handleWebRTCSignal(ws, payload); break;
       default: console.log('Unknown message type:', type);
+    }
+  }
+
+  private handleWebRTCSignal(ws: AuthenticatedWebSocket, payload: any) {
+    const { to, signal, channel } = payload;
+    const recipient = this.onlineUsers.get(to);
+    if (recipient && recipient.readyState === WebSocket.OPEN) {
+      recipient.send(JSON.stringify({ type: 'webrtc-signal', payload: { from: ws.userId, signal, channel } }));
+    } else {
+      // If the user is not online, broadcast to the channel
+      this.broadcastToChannel(channel, { type: 'webrtc-signal', from: ws.userId, signal }, ws.userId);
     }
   }
 
