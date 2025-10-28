@@ -389,3 +389,16 @@ export const api_keys = sqliteTable(
     createdAt: integer("created_at", { mode: 'timestamp' }).notNull(),
   }
 );
+
+
+export const bug_reports = sqliteTable(
+  'bug_reports',
+  {
+    id: integer("id").primaryKey(),
+    userId: integer("user_id").notNull(),
+    title: text("title").notNull(),
+    description: text("description").notNull(),
+    status: text("status").notNull(),
+    createdAt: integer("created_at", { mode: 'timestamp' }).notNull(),
+  }
+);

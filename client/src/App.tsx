@@ -32,6 +32,7 @@ import MfaSettings from "./pages/MfaSettings";
 import MfaVerification from "./pages/MfaVerification";
 import World from "./pages/World";
 import AnalyticsDashboard from "./pages/AnalyticsDashboard";
+import BugBounty from "./pages/BugBounty";
 
 function Router() {
   useKeyboardShortcuts(KEYBOARD_SHORTCUTS);
@@ -60,6 +61,7 @@ function Router() {
         <Route path="/verify-mfa" component={MfaVerification} />
         <Route path="/world" component={World} />
         <Route path="/analytics" component={AnalyticsDashboard} />
+        <Route path="/bug-bounty" component={BugBounty} />
         <Route path="/404" component={NotFound} />
         <Route component={NotFound} />
       </Switch>
