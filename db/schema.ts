@@ -274,3 +274,16 @@ export const bciDevices = sqliteTable("bci_devices", {
   createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
 });
 
+
+
+
+// Quantum Algorithms Table
+export const quantumAlgorithms = sqliteTable("quantum_algorithms", {
+  id: integer("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  name: text("name").notNull(),
+  description: text("description"),
+  code: text("code").notNull(),
+  createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
+});
+
