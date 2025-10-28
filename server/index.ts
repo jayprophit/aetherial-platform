@@ -75,6 +75,7 @@ async function startServer() {
   app.use("/api/content-moderation", (await import("./routes/content-moderation.js")).default);
   app.use("/api/analytics", (await import("./routes/analytics.js")).default);
   app.use("/api/recommender", (await import("./routes/recommender.js")).default);
+  app.use("/api/social-graph", (await import("./routes/social-graph.js")).default);
   // AI routes handled by tRPC
 
   // Serve static files from dist/public in production
