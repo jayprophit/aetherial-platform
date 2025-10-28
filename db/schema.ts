@@ -402,3 +402,21 @@ export const bug_reports = sqliteTable(
     createdAt: integer("created_at", { mode: 'timestamp' }).notNull(),
   }
 );
+
+
+
+// CV Builder Table
+export const cvs = sqliteTable(
+  'cvs',
+  {
+    id: integer("id").primaryKey(),
+    userId: integer("user_id").notNull().references(() => users.id),
+    data: text("data", { mode: 'json' }).notNull(),
+    blockchainHash: text("blockchain_hash"),
+    blockchainVerified: integer("blockchain_verified", { mode: 'boolean' }).default(false),
+    blockchainTimestamp: integer("blockchain_timestamp", { mode: 'timestamp' }),
+    createdAt: integer("created_at", { mode: 'timestamp' }).notNull(),
+    updatedAt: integer("updated_at", { mode: 'timestamp' }).notNull(),
+  }
+);
+
