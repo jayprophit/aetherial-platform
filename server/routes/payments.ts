@@ -1,7 +1,8 @@
 import express from 'express';
 import Stripe from 'stripe';
 import { db } from '../db';
-import { orders, payments as paymentsTable, users } from '../../drizzle/schema';
+import { orders, payments as paymentsTable, users, wallets } from '../../drizzle/schema';
+import { createTransaction } from '../economy';
 import { eq } from 'drizzle-orm';
 import { authenticateToken } from '../middleware/auth';
 
@@ -214,9 +215,20 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
         .where(eq(paymentsTable.stripePaymentIntentId, failedPayment.id));
       break;
 
-    case 'checkout.session.completed':
+        case 'checkout.session.completed':
       const session = event.data.object as Stripe.Checkout.Session;
       console.log('Checkout session completed:', session.id);
+
+      // Handle successful checkout for Aether Coins
+      if (session.metadata?.purchase_type === 'aether_coins') {
+        const userId = parseInt(session.metadata.userId || '0');
+        const amount = parseInt(session.metadata.amount || '0');
+        if (userId && amount) {
+          await createTransaction(null, userId, amount, 'purchase', 'Purchased Aether Coins');
+        }
+      }
+
+    
 
       // Handle successful checkout
       const userId = parseInt(session.metadata?.userId || '0');
@@ -273,4 +285,51 @@ router.post('/refund', authenticateToken, async (req, res) => {
 });
 
 export default router;
+
+
+
+// Create checkout session for Aether Coins
+router.post("/purchase-coins", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user!.userId;
+    const { amount, successUrl, cancelUrl } = req.body;
+
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ error: "Amount must be a positive number" });
+    }
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: [
+        {
+          price_data: {
+            currency: "usd",
+            product_data: {
+              name: "Aether Coins",
+              description: "Virtual currency for the AETHERIAL platform",
+            },
+            unit_amount: Math.round(amount * 100), // Convert to cents
+          },
+          quantity: 1,
+        },
+      ],
+      mode: "payment",
+      success_url: successUrl || `${process.env.CLIENT_URL}/wallet?purchase=success`,
+      cancel_url: cancelUrl || `${process.env.CLIENT_URL}/wallet?purchase=cancel`,
+      metadata: {
+        userId: userId.toString(),
+        amount: amount.toString(),
+        purchase_type: "aether_coins",
+      },
+    });
+
+    res.json({
+      sessionId: session.id,
+      url: session.url,
+    });
+  } catch (error) {
+    console.error("Create checkout session for coins error:", error);
+    res.status(500).json({ error: "Failed to create checkout session" });
+  }
+});
 

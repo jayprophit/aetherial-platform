@@ -103,3 +103,24 @@ export const user_quests = sqliteTable("user_quests", {
   completedAt: integer("completed_at", { mode: 'timestamp' }),
 });
 
+
+
+// Virtual Economy
+export const wallets = sqliteTable("wallets", {
+  id: integer("id").primaryKey(),
+  userId: integer("user_id").notNull().unique().references(() => users.id),
+  balance: integer("balance").notNull().default(0),
+  createdAt: integer("created_at", { mode: 'timestamp' }).notNull(),
+  updatedAt: integer("updated_at", { mode: 'timestamp' }).notNull(),
+});
+
+export const transactions = sqliteTable("transactions", {
+  id: integer("id").primaryKey(),
+  fromWalletId: integer("from_wallet_id").references(() => wallets.id),
+  toWalletId: integer("to_wallet_id").references(() => wallets.id),
+  amount: integer("amount").notNull(),
+  type: text("type").notNull(),
+  description: text("description"),
+  createdAt: integer("created_at", { mode: 'timestamp' }).notNull(),
+
+});
