@@ -4,6 +4,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import cors from "cors";
 import helmet from "helmet";
+import { apiLimiter, authLimiter } from "./middleware/rateLimit";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -25,8 +26,11 @@ async function startServer() {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
+  // Apply rate limiting
+  app.use("/api/", apiLimiter);
+
   // API Routes
-  app.use("/api/auth", (await import("./routes/auth.js")).default);
+  app.use("/api/auth", authLimiter, (await import("./routes/auth.js")).default);
   app.use("/api/users", (await import("./routes/users.js")).default);
   app.use("/api/posts", (await import("./routes/posts.js")).default);
   app.use("/api/comments", (await import("./routes/comments.js")).default);
