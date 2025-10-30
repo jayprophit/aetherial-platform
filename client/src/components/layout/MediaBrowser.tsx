@@ -1,239 +1,323 @@
+/**
+ * AETHERIAL Platform - Media Browser (Right Sidebar #2)
+ * 
+ * Features:
+ * - Media gallery viewer
+ * - Iframe content viewer
+ * - Video player
+ * - Document preview
+ * - Cascading view options (grid/list/preview modes)
+ * - Responsive design
+ */
+
 import React, { useState } from 'react';
 import './MediaBrowser.css';
 
-interface MediaFile {
+interface MediaItem {
   id: string;
-  name: string;
-  type: 'image' | 'video' | 'audio' | 'document' | 'other';
-  size: string;
-  thumbnail?: string;
+  type: 'image' | 'video' | 'document' | 'iframe';
+  title: string;
   url: string;
-  uploadedAt: Date;
+  thumbnail?: string;
+  size?: string;
+  date?: Date;
 }
 
-export const MediaBrowser: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'all' | 'images' | 'videos' | 'audio' | 'documents'>('all');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
+interface MediaBrowserProps {
+  isOpen: boolean;
+  deviceInfo: any;
+  onClose: () => void;
+}
 
-  // Sample media files
-  const [mediaFiles] = useState<MediaFile[]>([
+export default function MediaBrowser({ isOpen, deviceInfo, onClose }: MediaBrowserProps) {
+  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'preview'>('grid');
+  const [selectedMedia, setSelectedMedia] = useState<MediaItem | null>(null);
+  const [filterType, setFilterType] = useState<'all' | 'image' | 'video' | 'document'>('all');
+  const [showViewOptions, setShowViewOptions] = useState(false);
+
+  // Sample media items (in production, fetch from API)
+  const [mediaItems] = useState<MediaItem[]>([
     {
       id: '1',
-      name: 'Project_Screenshot.png',
       type: 'image',
+      title: 'Dashboard Screenshot',
+      url: 'https://via.placeholder.com/800x600',
+      thumbnail: 'https://via.placeholder.com/200x150',
       size: '2.4 MB',
-      url: '/api/placeholder/200/150',
-      uploadedAt: new Date('2025-10-27'),
+      date: new Date(),
     },
     {
       id: '2',
-      name: 'Tutorial_Video.mp4',
       type: 'video',
-      size: '45.8 MB',
-      url: '/videos/tutorial.mp4',
-      uploadedAt: new Date('2025-10-26'),
+      title: 'Platform Demo',
+      url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+      thumbnail: 'https://via.placeholder.com/200x150',
+      size: '15.8 MB',
+      date: new Date(),
     },
     {
       id: '3',
-      name: 'Podcast_Episode.mp3',
-      type: 'audio',
-      size: '12.3 MB',
-      url: '/audio/podcast.mp3',
-      uploadedAt: new Date('2025-10-25'),
+      type: 'document',
+      title: 'User Guide.pdf',
+      url: '/documents/user-guide.pdf',
+      thumbnail: 'https://via.placeholder.com/200x150',
+      size: '1.2 MB',
+      date: new Date(),
     },
     {
       id: '4',
-      name: 'Business_Plan.pdf',
-      type: 'document',
-      size: '1.2 MB',
-      url: '/documents/business-plan.pdf',
-      uploadedAt: new Date('2025-10-24'),
+      type: 'iframe',
+      title: 'External Content',
+      url: 'https://example.com',
+      thumbnail: 'https://via.placeholder.com/200x150',
+      date: new Date(),
     },
   ]);
 
-  const getFileIcon = (type: string) => {
-    switch (type) {
-      case 'image': return '🖼️';
-      case 'video': return '🎬';
-      case 'audio': return '🎵';
-      case 'document': return '📄';
-      default: return '📁';
+  /**
+   * Filter media items by type
+   */
+  const filteredItems = mediaItems.filter(item =>
+    filterType === 'all' ? true : item.type === filterType
+  );
+
+  /**
+   * Render media item based on view mode
+   */
+  const renderMediaItem = (item: MediaItem) => {
+    if (viewMode === 'grid') {
+      return (
+        <div
+          key={item.id}
+          className="media-grid-item"
+          onClick={() => setSelectedMedia(item)}
+        >
+          <div className="media-thumbnail">
+            {item.type === 'video' && <div className="play-icon">▶</div>}
+            <img src={item.thumbnail} alt={item.title} />
+          </div>
+          <div className="media-info">
+            <div className="media-title">{item.title}</div>
+            {item.size && <div className="media-size">{item.size}</div>}
+          </div>
+        </div>
+      );
     }
+
+    if (viewMode === 'list') {
+      return (
+        <div
+          key={item.id}
+          className="media-list-item"
+          onClick={() => setSelectedMedia(item)}
+        >
+          <img src={item.thumbnail} alt={item.title} className="list-thumbnail" />
+          <div className="list-info">
+            <div className="media-title">{item.title}</div>
+            <div className="media-meta">
+              <span className="media-type">{item.type}</span>
+              {item.size && <span className="media-size">{item.size}</span>}
+              {item.date && (
+                <span className="media-date">
+                  {item.date.toLocaleDateString()}
+                </span>
+              )}
+            </div>
+          </div>
+          <button className="list-action">⋯</button>
+        </div>
+      );
+    }
+
+    return null;
   };
 
-  const filteredFiles = mediaFiles.filter(file => {
-    const matchesTab = activeTab === 'all' || file.type === activeTab.slice(0, -1);
-    const matchesSearch = file.name.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesTab && matchesSearch;
-  });
-
-  const toggleFileSelection = (fileId: string) => {
-    const newSelected = new Set(selectedFiles);
-    if (newSelected.has(fileId)) {
-      newSelected.delete(fileId);
-    } else {
-      newSelected.add(fileId);
+  /**
+   * Render preview panel
+   */
+  const renderPreview = () => {
+    if (!selectedMedia) {
+      return (
+        <div className="preview-empty">
+          <div className="empty-icon">🖼️</div>
+          <p>Select a media item to preview</p>
+        </div>
+      );
     }
-    setSelectedFiles(newSelected);
+
+    return (
+      <div className="preview-container">
+        <div className="preview-header">
+          <h3>{selectedMedia.title}</h3>
+          <button onClick={() => setSelectedMedia(null)}>✕</button>
+        </div>
+        <div className="preview-content">
+          {selectedMedia.type === 'image' && (
+            <img src={selectedMedia.url} alt={selectedMedia.title} />
+          )}
+          {selectedMedia.type === 'video' && (
+            <iframe
+              src={selectedMedia.url}
+              title={selectedMedia.title}
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          )}
+          {selectedMedia.type === 'document' && (
+            <iframe
+              src={selectedMedia.url}
+              title={selectedMedia.title}
+              frameBorder="0"
+            />
+          )}
+          {selectedMedia.type === 'iframe' && (
+            <iframe
+              src={selectedMedia.url}
+              title={selectedMedia.title}
+              frameBorder="0"
+            />
+          )}
+        </div>
+        <div className="preview-actions">
+          <button className="preview-btn">📥 Download</button>
+          <button className="preview-btn">🔗 Share</button>
+          <button className="preview-btn">🗑️ Delete</button>
+        </div>
+      </div>
+    );
   };
+
+  if (!isOpen) return null;
 
   return (
-    <div className="media-browser">
-      {/* Header */}
-      <div className="browser-header">
-        <h3>📁 Media Browser</h3>
-        <button className="upload-btn">
-          ⬆️ Upload
+    <aside className={`media-browser device-${deviceInfo.type}`}>
+      {/* Panel Header */}
+      <div className="panel-header">
+        <div className="header-title">
+          <span className="media-icon">🖼️</span>
+          <span>Media Browser</span>
+        </div>
+        <button className="close-btn" onClick={onClose}>
+          ✕
         </button>
       </div>
 
-      {/* Search Bar */}
-      <div className="browser-search">
-        <input
-          type="text"
-          placeholder="Search files..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-        <button className="search-btn">🔍</button>
-      </div>
-
-      {/* Tabs */}
-      <div className="browser-tabs">
-        <button
-          className={`tab ${activeTab === 'all' ? 'active' : ''}`}
-          onClick={() => setActiveTab('all')}
-        >
-          📂 All
-        </button>
-        <button
-          className={`tab ${activeTab === 'images' ? 'active' : ''}`}
-          onClick={() => setActiveTab('images')}
-        >
-          🖼️ Images
-        </button>
-        <button
-          className={`tab ${activeTab === 'videos' ? 'active' : ''}`}
-          onClick={() => setActiveTab('videos')}
-        >
-          🎬 Videos
-        </button>
-        <button
-          className={`tab ${activeTab === 'audio' ? 'active' : ''}`}
-          onClick={() => setActiveTab('audio')}
-        >
-          🎵 Audio
-        </button>
-        <button
-          className={`tab ${activeTab === 'documents' ? 'active' : ''}`}
-          onClick={() => setActiveTab('documents')}
-        >
-          📄 Docs
-        </button>
-      </div>
-
-      {/* View Mode Toggle */}
-      <div className="view-controls">
-        <button
-          className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`}
-          onClick={() => setViewMode('grid')}
-          title="Grid View"
-        >
-          ▦
-        </button>
-        <button
-          className={`view-btn ${viewMode === 'list' ? 'active' : ''}`}
-          onClick={() => setViewMode('list')}
-          title="List View"
-        >
-          ☰
-        </button>
-        <span className="file-count">{filteredFiles.length} files</span>
-      </div>
-
-      {/* Files Display */}
-      <div className={`files-container ${viewMode}`}>
-        {filteredFiles.map(file => (
-          <div
-            key={file.id}
-            className={`file-item ${selectedFiles.has(file.id) ? 'selected' : ''}`}
-            onClick={() => toggleFileSelection(file.id)}
+      {/* Toolbar */}
+      <div className="media-toolbar">
+        {/* Filter Buttons */}
+        <div className="filter-buttons">
+          <button
+            className={`filter-btn ${filterType === 'all' ? 'active' : ''}`}
+            onClick={() => setFilterType('all')}
           >
-            {viewMode === 'grid' ? (
-              <>
-                <div className="file-thumbnail">
-                  {file.type === 'image' ? (
-                    <img src={file.url} alt={file.name} />
-                  ) : (
-                    <span className="file-icon-large">{getFileIcon(file.type)}</span>
-                  )}
+            All
+          </button>
+          <button
+            className={`filter-btn ${filterType === 'image' ? 'active' : ''}`}
+            onClick={() => setFilterType('image')}
+          >
+            📷 Images
+          </button>
+          <button
+            className={`filter-btn ${filterType === 'video' ? 'active' : ''}`}
+            onClick={() => setFilterType('video')}
+          >
+            🎥 Videos
+          </button>
+          <button
+            className={`filter-btn ${filterType === 'document' ? 'active' : ''}`}
+            onClick={() => setFilterType('document')}
+          >
+            📄 Docs
+          </button>
+        </div>
+
+        {/* View Options (Cascading Dropdown) */}
+        <div className="view-options">
+          <button
+            className="view-btn"
+            onClick={() => setShowViewOptions(!showViewOptions)}
+          >
+            {viewMode === 'grid' && '⊞'}
+            {viewMode === 'list' && '☰'}
+            {viewMode === 'preview' && '👁️'}
+            <span className="dropdown-arrow">▼</span>
+          </button>
+          {showViewOptions && (
+            <div className="view-dropdown">
+              <button
+                className={`view-option ${viewMode === 'grid' ? 'active' : ''}`}
+                onClick={() => {
+                  setViewMode('grid');
+                  setShowViewOptions(false);
+                }}
+              >
+                ⊞ Grid View
+              </button>
+              <button
+                className={`view-option ${viewMode === 'list' ? 'active' : ''}`}
+                onClick={() => {
+                  setViewMode('list');
+                  setShowViewOptions(false);
+                }}
+              >
+                ☰ List View
+              </button>
+              <button
+                className={`view-option ${viewMode === 'preview' ? 'active' : ''}`}
+                onClick={() => {
+                  setViewMode('preview');
+                  setShowViewOptions(false);
+                }}
+              >
+                👁️ Preview Mode
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Media Content */}
+      <div className="media-content">
+        {viewMode === 'preview' ? (
+          <div className="preview-layout">
+            <div className="preview-sidebar">
+              {filteredItems.map(item => (
+                <div
+                  key={item.id}
+                  className={`preview-thumb ${selectedMedia?.id === item.id ? 'active' : ''}`}
+                  onClick={() => setSelectedMedia(item)}
+                >
+                  <img src={item.thumbnail} alt={item.title} />
                 </div>
-                <div className="file-info">
-                  <div className="file-name" title={file.name}>{file.name}</div>
-                  <div className="file-size">{file.size}</div>
-                </div>
-              </>
+              ))}
+            </div>
+            <div className="preview-main">
+              {renderPreview()}
+            </div>
+          </div>
+        ) : (
+          <div className={`media-${viewMode}`}>
+            {filteredItems.length === 0 ? (
+              <div className="empty-state">
+                <div className="empty-icon">📂</div>
+                <p>No media items found</p>
+              </div>
             ) : (
-              <>
-                <span className="file-icon">{getFileIcon(file.type)}</span>
-                <div className="file-details">
-                  <div className="file-name">{file.name}</div>
-                  <div className="file-meta">
-                    <span>{file.size}</span>
-                    <span>•</span>
-                    <span>{file.uploadedAt.toLocaleDateString()}</span>
-                  </div>
-                </div>
-                <div className="file-actions">
-                  <button className="action-btn" title="Download">⬇️</button>
-                  <button className="action-btn" title="Share">🔗</button>
-                  <button className="action-btn" title="More">⋮</button>
-                </div>
-              </>
+              filteredItems.map(renderMediaItem)
             )}
           </div>
-        ))}
+        )}
       </div>
 
-      {/* Selected Files Actions */}
-      {selectedFiles.size > 0 && (
-        <div className="selection-actions">
-          <span>{selectedFiles.size} selected</span>
-          <div className="action-buttons">
-            <button className="action-btn">⬇️ Download</button>
-            <button className="action-btn">🔗 Share</button>
-            <button className="action-btn">🗑️ Delete</button>
-            <button className="action-btn" onClick={() => setSelectedFiles(new Set())}>
-              ✖️ Clear
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Storage Info */}
-      <div className="storage-info">
-        <div className="storage-bar">
-          <div className="storage-used" style={{ width: '45%' }}></div>
-        </div>
-        <div className="storage-text">
-          <span>45 GB used</span>
-          <span>100 GB total</span>
-        </div>
+      {/* Upload Button */}
+      <div className="media-footer">
+        <button className="upload-btn">
+          📤 Upload Media
+        </button>
       </div>
-
-      {/* Quick Access */}
-      <div className="quick-access">
-        <h4>Quick Access</h4>
-        <div className="quick-folders">
-          <button className="folder-btn">📸 Recent</button>
-          <button className="folder-btn">⭐ Favorites</button>
-          <button className="folder-btn">🗑️ Trash</button>
-          <button className="folder-btn">☁️ Cloud</button>
-        </div>
-      </div>
-    </div>
+    </aside>
   );
-};
+}
 
