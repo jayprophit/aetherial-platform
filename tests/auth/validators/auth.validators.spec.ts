@@ -1,5 +1,3 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { ValidationPipe } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { RegisterDto } from '../../../server/auth/dto/register.dto';
@@ -48,6 +46,325 @@ describe('Auth Validators', () => {
   const validPassword = 'Test@1234';
   const validDisplayName = 'Test User';
   const validPhoneNumber = '+1234567890';
+  const valid2FACode = '123456';
+  const validJWT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
+
+  // Common error messages
+  const ERROR_MESSAGES = {
+    EMAIL: {
+      IS_EMAIL: 'email must be an email',
+      NOT_EMPTY: 'email should not be empty',
+      IS_STRING: 'email must be a string'
+    },
+    PASSWORD: {
+      MATCHES: 'password must match /^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};\':\"\\\\|,.<>\\/?]).{8,}$/',
+      NOT_EMPTY: 'password should not be empty',
+      IS_STRING: 'password must be a string',
+      MIN_LENGTH: 'password must be longer than or equal to 8 characters',
+      MAX_LENGTH: 'password must be shorter than or equal to 100 characters'
+    },
+    USERNAME: {
+      MATCHES: 'username must match /^[a-zA-Z0-9_]{3,30}$/',
+      NOT_EMPTY: 'username should not be empty',
+      IS_STRING: 'username must be a string',
+      MIN_LENGTH: 'username must be longer than or equal to 3 characters',
+      MAX_LENGTH: 'username must be shorter than or equal to 30 characters'
+    },
+    DISPLAY_NAME: {
+      MATCHES: 'displayName must match /^[\\p{L}\\p{N}\\s\\-_\']+$/u',
+      IS_STRING: 'displayName must be a string',
+      MIN_LENGTH: 'displayName must be longer than or equal to 2 characters',
+      MAX_LENGTH: 'displayName must be shorter than or equal to 100 characters'
+    },
+    PHONE_NUMBER: {
+      MATCHES: 'phoneNumber must match a valid phone number format',
+      IS_STRING: 'phoneNumber must be a string'
+    },
+    CODE: {
+      NOT_EMPTY: 'code should not be empty',
+      IS_STRING: 'code must be a string',
+      LENGTH: 'code must be exactly 6 characters',
+      IS_NUMBER_STRING: 'code must be a number string'
+    },
+    CURRENT_PASSWORD: {
+      NOT_EMPTY: 'currentPassword should not be empty',
+      IS_STRING: 'currentPassword must be a string'
+    },
+    NEW_PASSWORD: {
+      NOT_EMPTY: 'newPassword should not be empty',
+      IS_STRING: 'newPassword must be a string'
+    },
+    CONFIRM_PASSWORD: {
+      NOT_EMPTY: 'confirmPassword should not be empty',
+      IS_STRING: 'confirmPassword must be a string',
+      MATCH: 'confirmPassword must match password'
+    },
+    ACCEPT_TERMS: {
+      IS_BOOLEAN: 'acceptTerms must be a boolean value',
+      IS_NOT_EMPTY: 'acceptTerms should not be empty',
+      IS_TRUE: 'You must accept the terms and conditions'
+    },
+    TOKEN: {
+      NOT_EMPTY: 'token should not be empty',
+      IS_STRING: 'token must be a string',
+      IS_JWT: 'token must be a jwt string'
+    }
+  };
+
+  describe('RegisterDto', () => {
+    it('should validate a valid registration', async () => {
+      const dto = new RegisterDto();
+      dto.email = validEmail;
+      dto.username = validUsername;
+      dto.password = validPassword;
+      dto.confirmPassword = validPassword;
+      dto.displayName = validDisplayName;
+      dto.acceptTerms = true;
+
+      const result = await validateDto(dto, RegisterDto);
+      expect(result.valid).toBe(true);
+    });
+
+    it('should reject invalid email format', async () => {
+      const dto = new RegisterDto();
+      dto.email = 'invalid-email';
+      dto.username = validUsername;
+      dto.password = validPassword;
+      dto.confirmPassword = validPassword;
+      dto.acceptTerms = true;
+
+      const result = await validateDto(dto, RegisterDto);
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain(ERROR_MESSAGES.EMAIL.IS_EMAIL);
+    });
+
+    it('should reject missing required fields', async () => {
+      const dto = new RegisterDto();
+      const result = await validateDto(dto, RegisterDto);
+
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain(ERROR_MESSAGES.EMAIL.NOT_EMPTY);
+      expect(result.errors).toContain(ERROR_MESSAGES.USERNAME.NOT_EMPTY);
+      expect(result.errors).toContain(ERROR_MESSAGES.PASSWORD.NOT_EMPTY);
+      expect(result.errors).toContain(ERROR_MESSAGES.ACCEPT_TERMS.IS_NOT_EMPTY);
+    });
+
+    it('should reject weak passwords', async () => {
+      const dto = new RegisterDto();
+      dto.email = validEmail;
+      dto.username = validUsername;
+      dto.password = 'weak';
+      dto.confirmPassword = 'weak';
+      dto.acceptTerms = true;
+
+      const result = await validateDto(dto, RegisterDto);
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain(ERROR_MESSAGES.PASSWORD.MATCHES);
+    });
+
+    it('should reject non-matching passwords', async () => {
+      const dto = new RegisterDto();
+      dto.email = validEmail;
+      dto.username = validUsername;
+      dto.password = validPassword;
+      dto.confirmPassword = 'Different@1234';
+      dto.acceptTerms = true;
+
+      const result = await validateDto(dto, RegisterDto);
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain(ERROR_MESSAGES.CONFIRM_PASSWORD.MATCH);
+    });
+
+    it('should reject invalid username format', async () => {
+      const dto = new RegisterDto();
+      dto.email = validEmail;
+      dto.username = 'user@name';
+      dto.password = validPassword;
+      dto.confirmPassword = validPassword;
+      dto.acceptTerms = true;
+
+      const result = await validateDto(dto, RegisterDto);
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain(ERROR_MESSAGES.USERNAME.MATCHES);
+    });
+  });
+
+  describe('LoginDto', () => {
+    it('should validate a valid login', async () => {
+      const dto = new LoginDto();
+      dto.email = validEmail;
+      dto.password = validPassword;
+
+      const result = await validateDto(dto, LoginDto);
+      expect(result.valid).toBe(true);
+    });
+
+    it('should reject missing email', async () => {
+      const dto = new LoginDto();
+      dto.password = validPassword;
+
+      const result = await validateDto(dto, LoginDto);
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain(ERROR_MESSAGES.EMAIL.NOT_EMPTY);
+    });
+
+    it('should reject missing password', async () => {
+      const dto = new LoginDto();
+      dto.email = validEmail;
+
+      const result = await validateDto(dto, LoginDto);
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain(ERROR_MESSAGES.PASSWORD.NOT_EMPTY);
+    });
+  });
+
+  describe('ResetPasswordDto', () => {
+    it('should validate a valid password reset', async () => {
+      const dto = new ResetPasswordDto();
+      dto.token = validJWT;
+      dto.newPassword = 'NewPassword@123';
+      dto.confirmPassword = 'NewPassword@123';
+
+      const result = await validateDto(dto, ResetPasswordDto);
+      expect(result.valid).toBe(true);
+    });
+
+    it('should reject missing token', async () => {
+      const dto = new ResetPasswordDto();
+      dto.newPassword = 'NewPassword@123';
+      dto.confirmPassword = 'NewPassword@123';
+
+      const result = await validateDto(dto, ResetPasswordDto);
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain(ERROR_MESSAGES.TOKEN.NOT_EMPTY);
+    });
+
+    it('should reject non-matching passwords', async () => {
+      const dto = new ResetPasswordDto();
+      dto.token = validJWT;
+      dto.newPassword = 'NewPassword@123';
+      dto.confirmPassword = 'Different@123';
+
+      const result = await validateDto(dto, ResetPasswordDto);
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain(ERROR_MESSAGES.CONFIRM_PASSWORD.MATCH);
+    });
+  });
+
+  describe('ChangePasswordDto', () => {
+    it('should validate a valid password change', async () => {
+      const dto = new ChangePasswordDto();
+      dto.currentPassword = 'Current@123';
+      dto.newPassword = 'NewPassword@123';
+
+      const result = await validateDto(dto, ChangePasswordDto);
+      expect(result.valid).toBe(true);
+    });
+
+    it('should reject missing current password', async () => {
+      const dto = new ChangePasswordDto();
+      dto.newPassword = 'NewPassword@123';
+
+      const result = await validateDto(dto, ChangePasswordDto);
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain(ERROR_MESSAGES.CURRENT_PASSWORD.NOT_EMPTY);
+    });
+
+    it('should reject missing new password', async () => {
+      const dto = new ChangePasswordDto();
+      dto.currentPassword = 'Current@123';
+
+      const result = await validateDto(dto, ChangePasswordDto);
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain(ERROR_MESSAGES.NEW_PASSWORD.NOT_EMPTY);
+    });
+  });
+
+  describe('UpdateProfileDto', () => {
+    it('should validate a valid profile update', async () => {
+      const dto = new UpdateProfileDto();
+      dto.displayName = 'Updated Name';
+      dto.phoneNumber = validPhoneNumber;
+
+      const result = await validateDto(dto, UpdateProfileDto);
+      expect(result.valid).toBe(true);
+    });
+
+    it('should reject invalid phone number format', async () => {
+      const dto = new UpdateProfileDto();
+      dto.phoneNumber = '123';
+
+      const result = await validateDto(dto, UpdateProfileDto);
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain(ERROR_MESSAGES.PHONE_NUMBER.MATCHES);
+    });
+  });
+
+  describe('Verify2FADto', () => {
+    it('should validate a valid 2FA verification', async () => {
+      const dto = new Verify2FADto();
+      dto.code = valid2FACode;
+
+      const result = await validateDto(dto, Verify2FADto);
+      expect(result.valid).toBe(true);
+    });
+
+    it('should reject empty code', async () => {
+      const dto = new Verify2FADto();
+      dto.code = '';
+
+      const result = await validateDto(dto, Verify2FADto);
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain(ERROR_MESSAGES.CODE.NOT_EMPTY);
+    });
+
+    it('should reject invalid code length', async () => {
+      const dto = new Verify2FADto();
+      dto.code = '12345'; // Too short
+
+      const result = await validateDto(dto, Verify2FADto);
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain(ERROR_MESSAGES.CODE.LENGTH);
+    });
+  });
+
+  describe('RequestEmailVerificationDto', () => {
+    it('should validate a valid email verification request', async () => {
+      const dto = new RequestEmailVerificationDto();
+      dto.email = validEmail;
+
+      const result = await validateDto(dto, RequestEmailVerificationDto);
+      expect(result.valid).toBe(true);
+    });
+
+    it('should reject invalid email format', async () => {
+      const dto = new RequestEmailVerificationDto();
+      dto.email = 'invalid-email';
+
+      const result = await validateDto(dto, RequestEmailVerificationDto);
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain(ERROR_MESSAGES.EMAIL.IS_EMAIL);
+    });
+  });
+
+  describe('Disable2FADto', () => {
+    it('should validate a valid 2FA disable request', async () => {
+      const dto = new Disable2FADto();
+      dto.code = valid2FACode;
+
+      const result = await validateDto(dto, Disable2FADto);
+      expect(result.valid).toBe(true);
+    });
+
+    it('should reject empty code', async () => {
+      const dto = new Disable2FADto();
+      dto.code = '';
+
+      const result = await validateDto(dto, Disable2FADto);
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain(ERROR_MESSAGES.CODE.NOT_EMPTY);
+    });
+  });
   const valid2FACode = '123456';
   const validJWT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
   
