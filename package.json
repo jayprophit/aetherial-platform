@@ -10,8 +10,15 @@
     "check": "tsc --noEmit",
     "format": "prettier --write .",
     "test": "vitest run",
-    "db:push": "drizzle-kit generate && drizzle-kit migrate",
+    
+    "db:migrate": "tsx db/migrate.ts",
+    "db:create": "node -e \"require('child_process').execSync('createdb -U postgres aetherial', { stdio: 'inherit' })\"",
+    "db:drop": "node -e \"require('child_process').execSync('dropdb -U postgres aetherial --if-exists', { stdio: 'inherit' })\"",
+    "db:reset": "npm run db:drop && npm run db:create && npm run db:migrate",
     "db:seed": "tsx db/seed.ts",
+    "db:setup": "npm run db:reset && npm run db:seed",
+    "db:push": "drizzle-kit generate && drizzle-kit migrate",
+    
     "security:audit": "node scripts/security-audit.cjs",
     "security:pentest": "node scripts/penetration-test.cjs",
     "benchmark": "node scripts/benchmark.cjs",

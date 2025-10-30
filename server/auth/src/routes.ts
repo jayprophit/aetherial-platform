@@ -29,28 +29,41 @@ import {
 } from './validators/auth.validators';
 import { rateLimiter } from '../_core/middleware/rate-limiter';
 import { checkSchema } from 'express-validator';
+import passport from 'passport';
+import { validateRequest } from './middleware/validate-request';
+import { 
+  authenticate, 
+  authorize, 
+  authRateLimiter, 
+  optionalAuth 
+} from './middleware/auth.middleware';
+import { ROLES } from '../shared/constants';
 
 const router = Router();
 
-// Apply rate limiting to authentication endpoints
-const authRateLimiter = rateLimiter({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10, // limit each IP to 10 requests per windowMs
-  message: 'Too many requests from this IP, please try again after 15 minutes'
-});
+// Rate limiting middleware for auth endpoints
+const authLimiter = authRateLimiter;
 
-// Public routes
+// ========================
+// Authentication Routes
+// ========================
 router.post(
-  '/register', 
+  '/register',
+  [
+    checkSchema(registerSchema),
+  ],
+  validateRequest,
   rateLimiter({ windowMs: 3600000, max: 5 }), // 5 requests per hour
-  validate(registerSchema), 
   register
 );
 
 router.post(
   '/login', 
-  authRateLimiter,
-  validate(loginSchema), 
+  [
+    checkSchema(loginSchema),
+  ],
+  validateRequest,
+  authLimiter,
   login
 );
 
@@ -86,12 +99,151 @@ router.post(
   resetPassword
 );
 
-// Protected routes (require authentication)
-router.use(authenticate);
+// ========================
+// Token Management
+// ========================
+router.post('/refresh-token', refreshToken);
+router.post('/logout', authenticate, logout);
 
-router.post('/logout', logout);
+// ========================
+// Email Verification
+// ========================
+router.get('/verify-email/:token', verifyEmail);
+router.post(
+  '/request-verification',
+  [
+    body('email').isEmail().normalizeEmail(),
+  ],
+  validateRequest,
+  authLimiter,
+  requestEmailVerification
+);
 
-// 2FA routes
+// ========================
+// Password Management
+// ========================
+router.post(
+  '/forgot-password',
+  [
+    body('email').isEmail().normalizeEmail(),
+  ],
+  validateRequest,
+  authLimiter,
+  requestPasswordReset
+);
+
+router.post(
+  '/reset-password/:token',
+  [
+    body('password').isLength({ min: 8 })
+      .withMessage('Password must be at least 8 characters long')
+      .matches(/[a-z]/).withMessage('Password must contain at least one lowercase letter')
+      .matches(/[A-Z]/).withMessage('Password must contain at least one uppercase letter')
+      .matches(/[0-9]/).withMessage('Password must contain at least one number'),
+    body('confirmPassword').custom((value, { req }) => {
+      if (value !== req.body.password) {
+        throw new Error('Passwords do not match');
+      }
+      return true;
+    }),
+  ],
+  validateRequest,
+  resetPassword
+);
+
+router.post(
+  '/change-password',
+  authenticate,
+  [
+    body('currentPassword').notEmpty().withMessage('Current password is required'),
+    body('newPassword').isLength({ min: 8 })
+      .withMessage('New password must be at least 8 characters long')
+      .matches(/[a-z]/).withMessage('Password must contain at least one lowercase letter')
+      .matches(/[A-Z]/).withMessage('Password must contain at least one uppercase letter')
+      .matches(/[0-9]/).withMessage('Password must contain at least one number'),
+    body('confirmPassword').custom((value, { req }) => {
+      if (value !== req.body.newPassword) {
+        throw new Error('Passwords do not match');
+      }
+      return true;
+    }),
+  ],
+  validateRequest,
+  changePassword
+);
+
+// ========================
+// Social Authentication
+// ========================
+const socialAuthCallback = (provider: string) => 
+  passport.authenticate(provider, { 
+    failureRedirect: '/auth/failure',
+    session: false 
+  });
+
+// Google OAuth
+router.get('/google', googleAuth);
+router.get('/google/callback', socialAuthCallback('google'), googleAuthCallback);
+
+// GitHub OAuth
+router.get('/github', githubAuth);
+router.get('/github/callback', socialAuthCallback('github'), githubAuthCallback);
+
+// Apple OAuth
+router.get('/apple', appleAuth);
+router.get('/apple/callback', socialAuthCallback('apple'), appleAuthCallback);
+
+// Social account linking
+router.post(
+  '/link/:provider', 
+  authenticate, 
+  [
+    body('accessToken').notEmpty().withMessage('Access token is required'),
+    body('userId').optional().isString().withMessage('User ID must be a string'),
+  ],
+  validateRequest,
+  linkSocialAccount
+);
+
+router.delete(
+  '/unlink/:provider', 
+  authenticate, 
+  unlinkSocialAccount
+);
+
+// Auth failure route
+router.get('/failure', authFailure);
+
+// ========================
+// User Management
+// ========================
+router.get('/me', authenticate, getProfile);
+
+router.put(
+  '/profile',
+  authenticate,
+  [
+    body('name').optional().trim().notEmpty().withMessage('Name cannot be empty'),
+    body('email').optional().isEmail().normalizeEmail(),
+    body('avatar').optional().isURL().withMessage('Avatar must be a valid URL'),
+  ],
+  validateRequest,
+  updateProfile
+);
+
+router.delete(
+  '/account',
+  authenticate,
+  [
+    body('password').notEmpty().withMessage('Password is required for account deletion'),
+  ],
+  validateRequest,
+  logout
+);
+
+// ========================
+// 2FA Routes
+// ========================
 router.post('/enable-2fa', enable2FA);
 router.post('/disable-2fa', disable2FA);
 router.post(
