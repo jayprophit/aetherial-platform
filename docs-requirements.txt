@@ -1,0 +1,9 @@
+mkdocs>=1.4.2
+mkdocs-material>=9.0.0
+mkdocs-material-extensions>=1.1.1
+mkdocs-git-revision-date-localized-plugin>=1.2.0
+mkdocs-minify-plugin>=0.6.2
+mkdocs-rss-plugin>=1.1.0
+pymdown-extensions>=9.9.0
+pygments>=2.13.0
+python-markdown-math>=0.8

@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: production
+  labels:
+    name: production
+    environment: production
+    managed-by: manus
+    app.kubernetes.io/instance: aetherial-platform
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+  labels:
+    name: monitoring
+    environment: monitoring
+    managed-by: manus
+    app.kubernetes.io/instance: aetherial-platform

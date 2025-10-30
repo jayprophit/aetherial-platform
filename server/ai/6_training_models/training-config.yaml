@@ -1,0 +1,79 @@
+# Base configuration for model training
+defaults:
+  # Model architecture
+  model_name: "aetherial/llm-base"
+  tokenizer_name: "aetherial/llm-base"
+  
+  # Training hyperparameters
+  learning_rate: 2e-5
+  weight_decay: 0.01
+  adam_epsilon: 1e-8
+  max_grad_norm: 1.0
+  num_train_epochs: 3
+  warmup_steps: 500
+  
+  # Batch sizes
+  per_device_train_batch_size: 8
+  per_device_eval_batch_size: 16
+  gradient_accumulation_steps: 1
+  
+  # Sequence length
+  max_seq_length: 512
+  doc_stride: 128
+  
+  # Logging and saving
+  logging_steps: 100
+  save_steps: 1000
+  eval_steps: 1000
+  save_total_limit: 3
+  
+  # Mixed precision training
+  fp16: true
+  fp16_opt_level: "O1"
+  
+  # Early stopping
+  early_stopping_patience: 3
+  early_stopping_threshold: 0.0
+
+# Dataset configuration
+dataset:
+  train_file: "data/train.jsonl"
+  validation_file: "data/validation.jsonl"
+  test_file: "data/test.jsonl"
+  cache_dir: ".cache/"
+  overwrite_cache: false
+  
+# Model output configuration
+output:
+  output_dir: "models/"
+  overwrite_output_dir: true
+  do_train: true
+  do_eval: true
+  do_predict: true
+  
+# Logging configuration
+logging:
+  logging_dir: "logs/"
+  log_level: "info"
+  log_level_replica: "warning"
+  logging_first_step: false
+  
+# Checkpointing
+checkpoint:
+  load_best_model_at_end: true
+  metric_for_best_model: "loss"
+  greater_is_better: false
+  
+# Distributed training
+distributed:
+  local_rank: -1
+  n_gpu: 1
+  tpu_num_cores: null
+  tpu_metrics_debug: false
+  
+# Experiment tracking
+tracking:
+  wandb_project: "aetherial-ai"
+  wandb_run_name: "llm-training"
+  wandb_watch: "all"
+  wandb_log_model: "checkpoint"

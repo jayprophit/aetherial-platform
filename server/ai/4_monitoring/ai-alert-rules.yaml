@@ -1,0 +1,47 @@
+groups:
+- name: ai-service-alerts
+  rules:
+  - alert: HighErrorRate
+    expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.1
+    for: 10m
+    labels:
+      severity: critical
+    annotations:
+      summary: High error rate on {{ $labels.instance }}
+      description: "{{ $value }}% of requests are failing on {{ $labels.instance }}"
+
+  - alert: HighModelLatency
+    expr: histogram_quantile(0.95, sum(rate(model_inference_latency_seconds_bucket[5m])) by (le, model)) > 1
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: High model latency for {{ $labels.model }}
+      description: "95th percentile latency is {{ $value }}s for model {{ $labels.model }}"
+
+  - alert: ModelOOM
+    expr: container_memory_usage_bytes{container=~"llm-service|model-serving"} / container_spec_memory_limit_bytes * 100 > 90
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: Container {{ $labels.container }} is running out of memory
+      description: "{{ $labels.container }} is using {{ $value }}% of its memory limit"
+
+  - alert: GPUMemoryPressure
+    expr: (DCGM_FI_DEV_FB_USED{instance=~".*"} / DCGM_FI_DEV_FB_TOTAL) * 100 > 90
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: High GPU memory usage on {{ $labels.instance }}
+      description: "GPU memory usage is at {{ $value }}% on {{ $labels.instance }}"
+
+  - alert: ModelServingErrors
+    expr: rate(model_inference_errors_total[5m]) > 0
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: Model serving errors detected
+      description: "{{ $value }} errors in the last 5 minutes"

@@ -1,0 +1,132 @@
+site_name: Aetherial Platform
+docs_dir: docs/site
+site_dir: site
+
+# Project information
+site_description: 'Next-generation platform for AI, blockchain, and web3 technologies'
+site_author: 'Aetherial Team'
+site_url: https://aetherial-platform.github.io/
+
+# Repository
+repo_name: 'jayprophit/aetherial-platform'
+repo_url: 'https://github.com/jayprophit/aetherial-platform'
+
+# Copyright
+copyright: 'Copyright &copy; 2025 Aetherial Platform'
+
+# Theme
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.indexes
+    - navigation.expand
+    - navigation.instant
+    - navigation.sections
+    - navigation.top
+    - search.highlight
+    - search.suggest
+    - toc.integrate
+    - content.code.annotate
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: 'indigo'
+      accent: 'blue'
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: 'blue'
+      accent: 'light blue'
+      toggle:
+        icon: material/weather-night
+        name: Switch to light mode
+
+# Extensions
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.snippets
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - admonition
+  - footnotes
+  - meta
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - pymdownx.highlight
+  - pymdownx.magiclink
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences
+  - pymdownx.tabbed
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+# Navigation
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: getting-started/installation.md
+    - Configuration: getting-started/configuration.md
+  - Architecture:
+    - Overview: architecture/overview.md
+    - System Design: architecture/system-design.md
+    - AI Architecture: architecture/ai-architecture.md
+    - Blockchain Integration: architecture/blockchain-integration.md
+  - Development:
+    - Setup: development/setup.md
+    - Guidelines: development/guidelines.md
+    - Testing: development/testing.md
+  - API Reference:
+    - REST API: api/rest.md
+    - GraphQL: api/graphql.md
+  - Deployment:
+    - Local: deployment/local.md
+    - Production: deployment/production.md
+    - Kubernetes: deployment/kubernetes.md
+  - Guides:
+    - First Steps: guides/first-steps.md
+    - Best Practices: guides/best-practices.md
+  - Roadmap: roadmap.md
+  - Contributing: contributing.md
+
+# Plugins
+plugins:
+  - search
+  - git-revision-date-localized
+  - minify:
+      minify_html: true
+      minify_js: true
+      minify_css: true
+  - rss:
+      match_path: "news/.*\\.md"
+      categories:
+        - News
+
+# Extra
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/jayprophit/aetherial-platform
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/aetherial_ai
+    - icon: fontawesome/brands/discord
+      link: https://discord.gg/aetherial
+
+# Build options
+dev_addr: '127.0.0.1:8000'

@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aetherial-api
+  namespace: production
+  labels:
+    app: aetherial
+    component: api
+    environment: production
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: aetherial
+      component: api
+  template:
+    metadata:
+      labels:
+        app: aetherial
+        component: api
+        environment: production
+    spec:
+      containers:
+      - name: api
+        image: ${REGISTRY}/${IMAGE_REPO}/aetherial-api:${VERSION}
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3000
+          name: http
+        envFrom:
+        - secretRef:
+            name: aetherial-secrets
+        env:
+        - name: NODE_ENV
+          value: production
+        - name: DATABASE_URL
+          value: postgresql://postgres:$(POSTGRES_PASSWORD)@postgres:5432/aetherial_production
+        - name: REDIS_URL
+          value: redis://:$(REDIS_PASSWORD)@redis:6379/0
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 1Gi
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: aetherial-api
+  namespace: production
+  labels:
+    app: aetherial
+    component: api
+    environment: production
+spec:
+  ports:
+  - port: 80
+    targetPort: http
+    protocol: TCP
+    name: http
+  selector:
+    app: aetherial
+    component: api
+  type: ClusterIP
