@@ -12,7 +12,7 @@ The user requested Manus to:
 
 ## GitHub Token Provided
 The user provided a GitHub personal access token (PAT) for repository access:
-- Token: `ghp_VcHpYiMrylZ5xpwuSqXhLJIrYhqb6g1z2fLy`
+- Token: `ghp_[REDACTED]`
 - **Security Note:** Manus acknowledged the token and advised caution about sharing sensitive information like personal access tokens
 
 ## Development Approach
