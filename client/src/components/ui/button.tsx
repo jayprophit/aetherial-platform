@@ -17,10 +17,14 @@ import './Button.css';
 /**
  * Button size variants
  */
-export type ButtonSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+export type ButtonSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'default' | 'icon';
 
 /**
  * Button visual variants
+ *
+ * `default` and `destructive` are compatibility aliases for `primary`
+ * and `error`. Imported pages use the shadcn naming, while the CSS and
+ * the original component use the semantic names.
  */
 export type ButtonVariant = 
   | 'primary' 
@@ -31,7 +35,57 @@ export type ButtonVariant =
   | 'info'
   | 'outline'
   | 'ghost'
-  | 'link';
+  | 'link'
+  | 'default'
+  | 'destructive';
+
+const VARIANT_CLASS: Record<ButtonVariant, string> = {
+  primary: 'primary',
+  secondary: 'secondary',
+  success: 'success',
+  warning: 'warning',
+  error: 'error',
+  info: 'info',
+  outline: 'outline',
+  ghost: 'ghost',
+  link: 'link',
+  default: 'primary',
+  destructive: 'error',
+};
+
+const SIZE_CLASS: Record<ButtonSize, { name: string; iconOnly: boolean }> = {
+  xs: { name: 'xs', iconOnly: false },
+  sm: { name: 'sm', iconOnly: false },
+  md: { name: 'md', iconOnly: false },
+  lg: { name: 'lg', iconOnly: false },
+  xl: { name: 'xl', iconOnly: false },
+  default: { name: 'md', iconOnly: false },
+  icon: { name: 'md', iconOnly: true },
+};
+
+/**
+ * Return the class string for a button variant and size.
+ *
+ * This is exported for components that render an anchor or another
+ * element with button styling, such as pagination links.
+ */
+export function buttonVariants({
+  variant = 'primary',
+  size = 'md',
+}: {
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+} = {}): string {
+  const resolvedSize = SIZE_CLASS[size];
+  return [
+    'btn',
+    `btn-${VARIANT_CLASS[variant]}`,
+    `btn-${resolvedSize.name}`,
+    resolvedSize.iconOnly && 'btn-icon-only',
+  ]
+    .filter(Boolean)
+    .join(' ');
+}
 
 /**
  * Button props interface
@@ -125,9 +179,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
     // Compute CSS classes
     const classes = [
-      'btn',
-      `btn-${variant}`,
-      `btn-${size}`,
+      buttonVariants({ variant, size }),
       fullWidth && 'btn-full-width',
       loading && 'btn-loading',
       disabled && 'btn-disabled',

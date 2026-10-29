@@ -21,7 +21,7 @@ import * as crypto from 'crypto';
  * Miner class
  */
 export class Miner {
-  private isMin ing: boolean = false;
+  private isMining: boolean = false;
   private hashRate: number = 0;
   private totalHashes: number = 0;
 
@@ -73,7 +73,7 @@ export class Miner {
   getStats(): MinerStats {
     return {
       address: this.address,
-      isM ining: this.isMining,
+      isMining: this.isMining,
       hashRate: this.hashRate,
       totalHashes: this.totalHashes,
       balance: this.blockchain.getBalance(this.address)

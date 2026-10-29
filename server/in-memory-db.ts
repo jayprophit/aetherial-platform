@@ -1,3 +1,5 @@
+import type { User } from '../drizzle/schema';
+
 interface Role {
   id: number;
   name: string;
@@ -24,7 +26,7 @@ export const dbStore = {
   permissions: [] as Permission[],
   rolePermissions: [] as RolePermission[],
   userRoles: [] as UserRole[],
-  users: [] as { id: number }[], // Simplified for this context
+  users: [] as User[],
 };
 
 // Helper functions to mimic Drizzle's API

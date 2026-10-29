@@ -37,7 +37,7 @@ export default function Messages() {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
   const [typingUsers, setTypingUsers] = useState<Set<number>>(new Set());
-  const typingTimeoutRef = useRef<NodeJS.Timeout>();
+  const typingTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   
   // WebSocket for real-time messaging
   const token = localStorage.getItem('token');
@@ -90,28 +90,8 @@ export default function Messages() {
   const fetchMessages = async () => {
     try {
       setLoading(true);
-      const data = await api.messages.getAll();
-      setMessages(data);
-      
-      const convMap = new Map<number, Conversation>();
-      data.forEach((msg: Message) => {
-        const otherId = msg.senderId === user?.id ? msg.receiverId : msg.senderId;
-        const otherName = msg.sender?.fullName || 'Unknown User';
-        const otherEmail = msg.sender?.email || '';
-        
-        if (!convMap.has(otherId)) {
-          convMap.set(otherId, {
-            userId: otherId,
-            userName: otherName,
-            userEmail: otherEmail,
-            lastMessage: msg.content,
-            lastMessageTime: msg.createdAt,
-            unreadCount: !msg.read && msg.receiverId === user?.id ? 1 : 0
-          });
-        }
-      });
-      
-      setConversations(Array.from(convMap.values()));
+      const data = await api.messages.getConversations();
+      setConversations(data);
     } catch (err) {
       setError('Failed to load messages');
       console.error('Error fetching messages:', err);
@@ -121,13 +101,10 @@ export default function Messages() {
   };
 
   const fetchConversation = async (userId: number) => {
+    if (!user) return;
     try {
-      const data = await api.messages.getAll();
-      const filtered = data.filter((msg: Message) =>
-        (msg.senderId === user?.id && msg.receiverId === userId) ||
-        (msg.senderId === userId && msg.receiverId === user?.id)
-      );
-      setMessages(filtered);
+      const data = await api.messages.getMessages(userId, user.id);
+      setMessages(data);
     } catch (err) {
       console.error('Error fetching conversation:', err);
     }
@@ -144,12 +121,12 @@ export default function Messages() {
         wsSendMessage(selectedUserId, newMessage);
       }
       
-      // Also save to database via API
-      const message = await api.messages.send({
+      // Also save to database via API. The list is refetched below,
+      // which keeps the server as the source of truth for the message.
+      await api.messages.send({
         receiverId: selectedUserId,
         content: newMessage
       });
-      setMessages([...messages, message]);
       setNewMessage('');
       
       // Stop typing indicator
@@ -157,7 +134,11 @@ export default function Messages() {
         sendTypingIndicator(selectedUserId, false);
       }
       
-      fetchMessages();
+      // Refresh both the conversation list and the open thread.
+      await Promise.all([
+        fetchMessages(),
+        fetchConversation(selectedUserId),
+      ]);
     } catch (err) {
       setError('Failed to send message');
       console.error('Error sending message:', err);

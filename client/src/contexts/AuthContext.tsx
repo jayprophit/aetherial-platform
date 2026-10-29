@@ -1,4 +1,25 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  ReactNode,
+} from "react";
+import { trpc } from "@/lib/trpc";
+import { getLoginUrl } from "@/const";
+
+/**
+ * AuthContext backed by the live tRPC session.
+ *
+ * The server authenticates with an OAuth callback and an httpOnly
+ * session cookie (`app_session_id`). The browser cannot read that
+ * cookie, so `token` is always null here; requests rely on
+ * `credentials: "include"` in the tRPC client. The REST
+ * `/api/auth/login` endpoints belong to a separate, unmounted server
+ * entry and are not used.
+ */
 
 interface User {
   id: number;
@@ -16,131 +37,127 @@ interface AuthContextType {
   token: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<{ mfaRequired: boolean; mfaToken?: string }>;
+  login: (
+    email: string,
+    password: string
+  ) => Promise<{ mfaRequired: boolean; mfaToken?: string }>;
   loginWithMfa: (mfaToken: string, mfaCode: string) => Promise<void>;
-  register: (email: string, password: string, displayName?: string) => Promise<void>;
+  register: (
+    email: string,
+    password: string,
+    displayName?: string
+  ) => Promise<void>;
   logout: () => void;
   updateUser: (userData: Partial<User>) => void;
+}
+
+interface SessionUser {
+  id: number;
+  email?: string | null;
+  username?: string | null;
+  name?: string | null;
+  displayName?: string | null;
+  avatar?: string | null;
+  bio?: string | null;
+  isVerified?: boolean | null;
+}
+
+function mapSessionUser(raw: SessionUser | null | undefined): User | null {
+  if (!raw) return null;
+  return {
+    id: raw.id,
+    email: raw.email ?? "",
+    username: raw.username ?? "",
+    displayName: raw.displayName ?? raw.name ?? raw.username ?? "",
+    avatar: raw.avatar ?? null,
+    bio: raw.bio ?? null,
+    isVerified: raw.isVerified ?? false,
+    mfaEnabled: false,
+  };
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const meQuery = trpc.auth.me.useQuery(undefined, {
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+  const utils = trpc.useUtils();
+  const logoutMutation = trpc.auth.logout.useMutation();
+
+  // A local overlay lets `updateUser` reflect a profile edit before the
+  // session query refetches. It resets when the signed-in identity
+  // changes.
+  const [overlay, setOverlay] = useState<Partial<User> | null>(null);
+  const sessionUser = useMemo(
+    () => mapSessionUser(meQuery.data),
+    [meQuery.data]
+  );
+  const userId = sessionUser?.id;
 
   useEffect(() => {
-    const loadAuth = async () => {
-      const storedToken = localStorage.getItem("token");
-      if (storedToken) {
-        setToken(storedToken);
-        try {
-          const response = await fetch("/api/auth/me", {
-            headers: {
-              Authorization: `Bearer ${storedToken}`,
-            },
-          });
-          if (response.ok) {
-            const data = await response.json();
-            setUser(data.user);
-          } else {
-            localStorage.removeItem("token");
-            setToken(null);
-          }
-        } catch (error) {
-          console.error("Failed to load user:", error);
-          localStorage.removeItem("token");
-          setToken(null);
-        }
-      }
-      setIsLoading(false);
-    };
-    loadAuth();
+    setOverlay(null);
+  }, [userId]);
+
+  const user = useMemo(
+    () => (sessionUser ? { ...sessionUser, ...overlay } : null),
+    [sessionUser, overlay]
+  );
+
+  const login = useCallback(async () => {
+    try {
+      window.location.href = getLoginUrl();
+    } catch (error) {
+      throw new Error(
+        error instanceof Error
+          ? error.message
+          : "Sign-in is not configured for this deployment."
+      );
+    }
+    // The browser is navigating to the identity provider; there is no
+    // local MFA challenge in this flow.
+    return { mfaRequired: false };
   }, []);
 
-  const login = async (email: string, password: string) => {
-    const response = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
-    });
+  const loginWithMfa = useCallback(
+    async (_mfaToken: string, _mfaCode: string) => {
+      throw new Error(
+        "MFA is managed by the identity provider; there is no local MFA challenge."
+      );
+    },
+    []
+  );
 
-    const data = await response.json();
+  const register = useCallback(
+    async (_email: string, _password: string, _displayName?: string) => {
+      await login();
+    },
+    [login]
+  );
 
-    if (!response.ok) {
-      throw new Error(data.message || "Login failed");
-    }
+  const logout = useCallback(() => {
+    void (async () => {
+      try {
+        await logoutMutation.mutateAsync();
+      } catch (error) {
+        // An already-expired session is still a successful sign-out.
+        console.warn("[AuthContext] logout request failed:", error);
+      }
+      utils.auth.me.setData(undefined, null);
+      setOverlay(null);
+    })();
+  }, [logoutMutation, utils]);
 
-    if (data.mfaRequired) {
-      return { mfaRequired: true, mfaToken: data.mfaToken };
-    } else {
-      setToken(data.token);
-      setUser(data.user);
-      localStorage.setItem("token", data.token);
-      return { mfaRequired: false };
-    }
-  };
-
-  const loginWithMfa = async (mfaToken: string, mfaCode: string) => {
-    const response = await fetch("/api/auth/verify-mfa", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ mfaToken, mfaCode }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || "MFA verification failed");
-    }
-
-    setToken(data.token);
-    setUser(data.user);
-    localStorage.setItem("token", data.token);
-  };
-
-  const register = async (email: string, password: string, displayName?: string) => {
-    const response = await fetch("/api/auth/register", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password, displayName }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || "Registration failed");
-    }
-
-    setToken(data.token);
-    setUser(data.user);
-    localStorage.setItem("token", data.token);
-  };
-
-  const logout = () => {
-    setUser(null);
-    setToken(null);
-    localStorage.removeItem("token");
-  };
-
-  const updateUser = (userData: Partial<User>) => {
-    if (user) {
-      setUser({ ...user, ...userData });
-    }
-  };
+  const updateUser = useCallback((userData: Partial<User>) => {
+    setOverlay(previous => ({ ...previous, ...userData }));
+  }, []);
 
   const value: AuthContextType = {
     user,
-    token,
-    isLoading,
-    isAuthenticated: !!user,
+    token: null,
+    isLoading: meQuery.isLoading,
+    isAuthenticated: Boolean(user),
     login,
     loginWithMfa,
     register,
@@ -158,4 +175,3 @@ export function useAuth() {
   }
   return context;
 }
-

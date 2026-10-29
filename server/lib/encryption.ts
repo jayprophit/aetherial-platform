@@ -1,10 +1,9 @@
-'''
 import CryptoJS from 'crypto-js';
 
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'a-very-secure-secret-key-that-is-at-least-32-bytes-long';
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY;
 
-if (ENCRYPTION_KEY.length < 32) {
-  throw new Error('ENCRYPTION_KEY must be at least 32 bytes long.');
+if (!ENCRYPTION_KEY || ENCRYPTION_KEY.length < 32) {
+  throw new Error('ENCRYPTION_KEY must be set to at least 32 bytes long.');
 }
 
 export class EncryptionService {
@@ -23,4 +22,3 @@ export class EncryptionService {
     return bytes.toString(CryptoJS.enc.Utf8);
   }
 }
-'''

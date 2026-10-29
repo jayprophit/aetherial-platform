@@ -42,10 +42,10 @@ router.get("/", async (req: Request, res: Response) => {
       .from(friendships)
       .innerJoin(
         users,
-        sql\`\${users.id} = CASE 
-          WHEN \${friendships.userId} = \${currentUserId} THEN \${friendships.friendId}
-          ELSE \${friendships.userId}
-        END\`
+        sql`${users.id} = CASE 
+          WHEN ${friendships.userId} = ${currentUserId} THEN ${friendships.friendId}
+          ELSE ${friendships.userId}
+        END`
       )
       .where(
         and(
@@ -61,7 +61,7 @@ router.get("/", async (req: Request, res: Response) => {
 
     // Get total count
     const totalResult = await db
-      .select({ count: sql<number>\`count(*)\` })
+      .select({ count: sql<number>`count(*)` })
       .from(friendships)
       .where(
         and(
@@ -313,15 +313,15 @@ router.get("/suggestions", async (req: Request, res: Response) => {
       .from(users)
       .where(
         and(
-          sql\`\${users.id} != \${currentUserId}\`,
-          sql\`\${users.id} NOT IN (
+          sql`${users.id} != ${currentUserId}`,
+          sql`${users.id} NOT IN (
             SELECT CASE 
-              WHEN \${friendships.userId} = \${currentUserId} THEN \${friendships.friendId}
-              ELSE \${friendships.userId}
+              WHEN ${friendships.userId} = ${currentUserId} THEN ${friendships.friendId}
+              ELSE ${friendships.userId}
             END
-            FROM \${friendships}
-            WHERE (\${friendships.userId} = \${currentUserId} OR \${friendships.friendId} = \${currentUserId})
-          )\`
+            FROM ${friendships}
+            WHERE (${friendships.userId} = ${currentUserId} OR ${friendships.friendId} = ${currentUserId})
+          )`
         )
       )
       .limit(limitNum);

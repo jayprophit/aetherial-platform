@@ -15,7 +15,7 @@ export default function MfaSettings() {
 
   useEffect(() => {
     if (user) {
-      setMfaEnabled(user.mfaEnabled);
+      setMfaEnabled(user.mfaEnabled ?? false);
     }
   }, [user]);
 

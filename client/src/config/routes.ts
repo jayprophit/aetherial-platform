@@ -215,50 +215,6 @@ export const routes: RouteConfig[] = [
   { path: '/world', name: '3D World', component: 'World', icon: '🌍' },
   { path: '/iot', name: 'IoT Dashboard', component: 'IoT', requiresAuth: true, icon: '📡' },
   { path: '/robotics', name: 'Robotics', component: 'Robotics', requiresAuth: true, icon: '🤖' },
-  { path: '*', name: 'Not Found', component: 'NotFound' }
-];
-
-/**
- * Get routes by category
- */
-export const getRoutesByCategory = (category: string): RouteConfig[] => {
-  return routes.filter(route => route.category === category);
-};
-
-/**
- * Get route by path
- */
-export const getRouteByPath = (path: string): RouteConfig | undefined => {
-  return routes.find(route => route.path === path);
-};
-
-/**
- * Check if route requires authentication
- */
-export const requiresAuth = (path: string): boolean => {
-  const route = getRouteByPath(path);
-  return route?.requiresAuth || route?.requiresAdmin || route?.requiresOwner || false;
-};
-
-/**
- * Check if route requires admin
- */
-export const requiresAdmin = (path: string): boolean => {
-  const route = getRouteByPath(path);
-  return route?.requiresAdmin || route?.requiresOwner || false;
-};
-
-/**
- * Check if route requires owner
- */
-export const requiresOwner = (path: string): boolean => {
-  const route = getRouteByPath(path);
-  return route?.requiresOwner || false;
-};
-
-export default routes;
-
-
 
   // ============================================
   // BILLING & SUBSCRIPTIONS (NEW)
@@ -320,5 +276,47 @@ export default routes;
   { path: '/help/tickets', name: 'Support Tickets', component: 'help/Tickets', requiresAuth: true, category: 'help' },
   { path: '/help/knowledge-base', name: 'Knowledge Base', component: 'help/KnowledgeBase', category: 'help' },
   { path: '/help/video-tutorials', name: 'Video Tutorials', component: 'help/VideoTutorials', category: 'help' },
+
+  // The catch-all must stay last so the routes above are reachable.
+  { path: '*', name: 'Not Found', component: 'NotFound' },
 ];
 
+/**
+ * Get routes by category
+ */
+export const getRoutesByCategory = (category: string): RouteConfig[] => {
+  return routes.filter(route => route.category === category);
+};
+
+/**
+ * Get route by path
+ */
+export const getRouteByPath = (path: string): RouteConfig | undefined => {
+  return routes.find(route => route.path === path);
+};
+
+/**
+ * Check if route requires authentication
+ */
+export const requiresAuth = (path: string): boolean => {
+  const route = getRouteByPath(path);
+  return route?.requiresAuth || route?.requiresAdmin || route?.requiresOwner || false;
+};
+
+/**
+ * Check if route requires admin
+ */
+export const requiresAdmin = (path: string): boolean => {
+  const route = getRouteByPath(path);
+  return route?.requiresAdmin || route?.requiresOwner || false;
+};
+
+/**
+ * Check if route requires owner
+ */
+export const requiresOwner = (path: string): boolean => {
+  const route = getRouteByPath(path);
+  return route?.requiresOwner || false;
+};
+
+export default routes;

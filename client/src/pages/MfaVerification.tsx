@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { useLocation, useHistory } from 'react-router-dom';
+import { useLocation } from 'wouter';
+import { useHistoryState } from 'wouter/use-browser-location';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,10 +11,10 @@ export default function MfaVerification() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { loginWithMfa } = useAuth();
-  const location = useLocation();
-  const history = useHistory();
+  const [, navigate] = useLocation();
+  const historyState = useHistoryState<{ mfaToken?: string }>();
 
-  const mfaToken = location.state?.mfaToken;
+  const mfaToken = historyState?.mfaToken;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,7 +29,7 @@ export default function MfaVerification() {
 
     try {
       await loginWithMfa(mfaToken, token);
-      history.push('/'); // Redirect to home on successful login
+      navigate('/'); // Redirect to home on successful login
     } catch (err: any) {
       setError(err.message || 'Failed to verify MFA token.');
     } finally {

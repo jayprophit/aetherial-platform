@@ -1,9 +1,13 @@
 /**
- * AETHERIAL Platform - Comprehensive Test Suite
- * GAP FILL: Complete testing coverage
+ * AETHERIAL Platform - capability checklist
+ *
+ * Every assertion in this file is `expect(true).toBe(true)`. It is a
+ * placeholder checklist, not behavioural coverage, and it must not be
+ * counted as proof that the named capabilities work. The suite runs under
+ * Vitest; the original `@jest/globals` import only worked under Jest.
  */
 
-import { describe, it, expect } from '@jest/globals';
+import { describe, it, expect } from 'vitest';
 
 describe('AETHERIAL Platform - Complete Test Suite', () => {
   describe('Health & Wellness System', () => {

@@ -39,11 +39,6 @@ exports[`renders the home page 1`] = `
             placeholder="please_login_to_post"
             rows="3"
           />
-          <p
-            class="text-red-500 text-sm mt-2"
-          >
-            Failed to load posts
-          </p>
           <div
             class="flex items-center justify-between mt-3"
           >

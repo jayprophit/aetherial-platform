@@ -358,7 +358,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({
     {
       id: 'completion',
       title: 'Complete',
-      description: 'You're ready!',
+      description: "You're ready!",
       component: <CompletionStep />
     }
   ];

@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Link, useHistory, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'wouter';
+import { useHistoryState } from 'wouter/use-browser-location';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function Login() {
-  const history = useHistory();
-  const location = useLocation();
+  const [, navigate] = useLocation();
+  const historyState = useHistoryState<{ from?: string }>();
   const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
@@ -23,10 +24,9 @@ export default function Login() {
       const { mfaRequired, mfaToken } = await login(formData.email, formData.password);
       // Redirect to home on success
       if (mfaRequired) {
-        history.push('/verify-mfa', { mfaToken });
+        navigate('/verify-mfa', { state: { mfaToken } });
       } else {
-        const from = location.state?.from || { pathname: '/' };
-        history.push(from);
+        navigate(historyState?.from ?? '/');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Invalid email or password');

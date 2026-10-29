@@ -256,7 +256,7 @@ export const aiAssistantRouter = router({
       context: AIContextSchema.default("user"),
       conversationHistory: z.array(AIMessageSchema).optional(),
       model: AIModelSchema.default("auto"),
-      metadata: z.record(z.any()).optional()
+      metadata: z.record(z.string(), z.any()).optional()
     }))
     .mutation(async ({ input, ctx }) => {
       try {
@@ -305,7 +305,7 @@ export const aiAssistantRouter = router({
   executeTask: protectedProcedure
     .input(z.object({
       taskType: AITaskTypeSchema,
-      input: z.record(z.any()),
+      input: z.record(z.string(), z.any()),
       model: AIModelSchema.default("auto")
     }))
     .mutation(async ({ input, ctx }) => {
